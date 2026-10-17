@@ -1,0 +1,470 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Key Smash Frenzy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Chakra+Petch:wght@500;700&display=swap">
+<style>
+/* Layout: rage-room canvas fills the screen, rage meter on top, docked mechanical keyboard at the bottom */
+:root{
+  --bg:#0b0a1f; --ink:#f4f1ff; --dim:#9a92c9;
+  --hot:#ff3d7f; --gold:#ffcc33; --cyan:#35e0ff;
+  --keycap:#2a2156; --keyside:#120c2c; --case:#16102f;
+  --display:"Bungee", "Impact", system-ui, sans-serif;
+  --ui:"Chakra Petch", ui-monospace, system-ui, sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--ink);font-family:var(--ui);touch-action:manipulation;user-select:none;-webkit-user-select:none}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block}
+.hud{position:fixed;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top,0px) + 10px) 16px 0;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.stats{display:flex;justify-content:space-between;gap:12px}
+.stat{display:flex;flex-direction:column;line-height:1}
+.stat b{font-family:var(--display);font-size:clamp(20px,5vw,32px);font-weight:400;font-variant-numeric:tabular-nums}
+.stat span{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.stat.r{text-align:right;align-items:flex-end}
+#smashes b{color:var(--gold)}
+#booms b{color:var(--hot)}
+.rage{position:relative;height:16px;border-radius:8px;background:rgba(255,255,255,.08);overflow:hidden}
+.rage i{position:absolute;inset:0;width:0%;border-radius:8px;background:linear-gradient(90deg,var(--cyan),var(--gold),var(--hot))}
+.rage em{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:10px;letter-spacing:.2em;font-weight:700;text-shadow:0 1px 2px #000}
+
+.dock{position:fixed;left:0;right:0;bottom:0;padding:8px 16px calc(env(safe-area-inset-bottom,0px) + 12px);display:flex;flex-direction:column;gap:8px;align-items:center}
+.switches{width:100%;max-width:820px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.switches span{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-right:2px}
+.sw{font-family:var(--ui);font-weight:700;font-size:13px;padding:5px 10px;border-radius:6px;border:2px solid var(--dim);background:transparent;color:var(--ink);cursor:pointer}
+.sw[aria-pressed="true"]{border-color:var(--cyan);background:var(--cyan);color:var(--bg)}
+.sw.mine{border-color:var(--gold);color:var(--gold)}
+.sw.mine[aria-pressed="true"]{background:var(--gold);color:var(--bg)}
+.recbtn{font-family:var(--ui);font-weight:700;font-size:13px;padding:5px 10px;border-radius:6px;border:2px dashed var(--gold);background:transparent;color:var(--gold);cursor:pointer}
+.recbtn:focus-visible,.sw:focus-visible,.recpick:focus-visible,.recclose:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.recpanel{width:100%;max-width:820px;box-sizing:border-box;padding:12px 14px;border-radius:12px;background:var(--case);border:2px solid var(--gold);font-size:14px;line-height:1.45;display:flex;flex-direction:column;gap:8px}
+.recpanel ol{margin:0;padding-left:20px;color:var(--dim)}
+.recpanel ol b{color:var(--ink)}
+.recrow{display:flex;gap:8px;flex-wrap:wrap}
+.recpick{font-family:var(--display);font-size:14px;padding:8px 14px;border-radius:8px;background:var(--gold);color:var(--bg);cursor:pointer}
+.recclose{font-family:var(--ui);font-weight:700;font-size:13px;padding:8px 12px;border-radius:8px;border:2px solid var(--dim);background:transparent;color:var(--ink);cursor:pointer}
+.recstatus{margin:0;color:var(--cyan);font-weight:700;min-height:1em}
+.kb{width:100%;max-width:820px;padding:10px;border-radius:14px;background:var(--case);box-shadow:inset 0 2px 0 rgba(255,255,255,.06),0 10px 30px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:6px}
+.row{display:flex;gap:6px;justify-content:center}
+.row:nth-child(3){padding-left:4%}
+.row:nth-child(4){padding-left:9%}
+.k{flex:1 1 0;min-width:0;max-width:70px;height:clamp(36px,7.5vw,54px);border:0;border-radius:8px;cursor:pointer;padding:0;
+  font-family:var(--display);font-size:clamp(12px,3vw,18px);color:var(--ink);background:var(--keycap);
+  box-shadow:0 5px 0 var(--keyside),inset 0 2px 0 rgba(255,255,255,.12);transition:transform .06s,box-shadow .06s,background .25s,color .25s}
+.k.space{flex:6 1 0;max-width:420px;font-size:12px;letter-spacing:.2em}
+.k.down{transform:translateY(4px) scale(.96);box-shadow:0 1px 0 var(--keyside);background:var(--glow,var(--cyan));color:var(--bg);transition:none}
+.k:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+.over{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:16px;background:radial-gradient(circle at 50% 40%,#1a1240,var(--bg) 70%);z-index:5;cursor:pointer}
+.card{max-width:460px;text-align:center;display:flex;flex-direction:column;gap:16px;align-items:center}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(44px,12vw,84px);line-height:.9;margin:0;text-wrap:balance;text-shadow:4px 4px 0 var(--hot),8px 8px 0 var(--cyan)}
+.card p{margin:0;color:var(--dim);font-size:17px;line-height:1.5}
+.go{font-family:var(--display);font-size:26px;padding:14px 36px;border:0;border-radius:8px;background:var(--hot);color:#fff;cursor:pointer;box-shadow:0 6px 0 #a3134a}
+.go:active{transform:translateY(4px);box-shadow:0 2px 0 #a3134a}
+.card p.credit{font-size:11px;color:var(--dim);opacity:.7}
+.go:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+</style>
+
+<canvas id="c"></canvas>
+<div class="hud">
+  <div class="stats">
+    <div class="stat" id="smashes"><b>0</b><span>Smashes</span></div>
+    <div class="stat" id="speed"><b>0</b><span>Keys / sec</span></div>
+    <div class="stat r" id="booms"><b>0</b><span>Kabooms</span></div>
+  </div>
+  <div class="rage" id="rage"><i></i><em>SPAM TO FILL</em></div>
+</div>
+
+<div class="dock" id="dock">
+  <div class="switches"><span>Switch</span>
+    <button class="sw" data-sw="cream" aria-pressed="true">Cream (thocky)</button>
+    <button class="sw" data-sw="holypanda" aria-pressed="false">Holy Panda</button>
+    <button class="sw" data-sw="topre" aria-pressed="false">Topre</button>
+    <button class="sw" data-sw="alpaca" aria-pressed="false">Alpaca</button>
+    <button class="sw" data-sw="buckling" aria-pressed="false">Model M (buckling spring)</button>
+    <button class="sw" data-sw="mxbrown" aria-pressed="false">MX Brown</button>
+    <button class="sw" data-sw="mxblue" aria-pressed="false">MX Blue (clicky)</button>
+    <button class="sw" data-sw="boxnavy" aria-pressed="false">Box Navy (LOUD)</button>
+    <button class="sw mine" data-sw="mine" id="sw_mine" aria-pressed="false" hidden>MY KEYBOARD</button>
+    <button class="recbtn" id="recbtn" aria-expanded="false" aria-controls="recpanel">+ Use my real keyboard</button>
+  </div>
+  <div class="recpanel" id="recpanel" hidden>
+    <b>Make it sound like YOUR keyboard</b>
+    <ol>
+      <li>Open the voice recorder (or camera) on your phone.</li>
+      <li>Put the phone right next to your keyboard, in a quiet room.</li>
+      <li>Press about 30 different keys, <b>one at a time, slowly</b> (about 2 per second). Hit some hard and some soft. Press the space bar a few times at the end.</li>
+      <li>Send the recording to this device and choose it below.</li>
+    </ol>
+    <div class="recrow">
+      <label class="recpick" for="recfile">Choose recording</label>
+      <input type="file" id="recfile" accept="audio/*,video/*,.m4a,.mp3,.wav,.mp4,.mov" hidden>
+      <button class="recclose" id="recclose">Close</button>
+    </div>
+    <p class="recstatus" id="recstatus" role="status"></p>
+  </div>
+  <div class="kb" id="kb"></div>
+</div>
+
+<div class="over" id="over">
+  <div class="card">
+    <h1>RAGE KEYS</h1>
+    <p>No rules. No losing. Mash every key as hard and fast as you want. The faster you spam, the bigger it gets. Fill the bar for a KABOOM.</p>
+    <button class="go" id="go">LET ME SMASH</button>
+    <p class="credit">Real switch recordings from kbsim by Thomas Lai (MIT License).</p>
+  </div>
+</div>
+
+<script>
+const cv=document.getElementById('c'),cx=cv.getContext('2d');
+let W=0,H=0,PH=0,DPR=1;
+const dock=document.getElementById('dock');
+function resize(){DPR=Math.min(2,window.devicePixelRatio||1);W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;cx.setTransform(DPR,0,0,DPR,0,0);PH=dock.getBoundingClientRect().top}
+addEventListener('resize',resize);
+const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+/* ---------- keyboard ---------- */
+const ROWS=['1234567890','QWERTYUIOP','ASDFGHJKL','ZXCVBNM'];
+const kb=document.getElementById('kb'),keyEl={},keyPos={};
+ROWS.forEach((r,ri)=>{const row=document.createElement('div');row.className='row';[...r].forEach((ch,ci)=>{const b=document.createElement('button');b.className='k';b.textContent=ch;b.dataset.k=ch;b.id='k_'+ch;row.appendChild(b);keyEl[ch]=b;keyPos[ch]={r:ri,c:ci}});kb.appendChild(row)});
+{const row=document.createElement('div');row.className='row';const b=document.createElement('button');b.className='k space';b.textContent='SMASH';b.dataset.k=' ';b.id='k_space';row.appendChild(b);keyEl[' ']=b;keyPos[' ']={r:4,c:4};kb.appendChild(row)}
+resize();
+
+let sw=store.get('rk_switch','cream');if(!['cream','holypanda','topre','alpaca','buckling','mxbrown','mxblue','boxnavy','mine'].includes(sw))sw='cream';let _x=0,smashes=store.get('rk_smashes',0),booms=store.get('rk_booms',0);
+let heat=0,shake=0,flash=0,hueShift=0,recent=[],last=0,started=false;
+let parts=[],rings=[],shards=[],texts=[],bolts=[];
+
+/* ---------- audio ---------- */
+let ac=null,master=null,verb=null,voices=0;
+function makeCtx(){
+  if(ac)return;
+  try{
+    ac=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});
+    // clean signal path: only a brick-wall safety limiter, so the click's sharp attack stays intact
+    const lim=ac.createDynamicsCompressor();lim.threshold.value=-2;lim.knee.value=0;lim.ratio.value=20;lim.attack.value=.001;lim.release.value=.06;
+    lim.connect(ac.destination);
+    master=ac.createGain();master.gain.value=.95;master.connect(lim);
+    // reverb only for the KABOOM effect, never on the keys
+    const len=ac.sampleRate*1.4,ir=ac.createBuffer(2,len,ac.sampleRate);
+    for(let c=0;c<2;c++){const d=ir.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3.2)}
+    const cv2=ac.createConvolver();cv2.buffer=ir;verb=ac.createGain();verb.gain.value=.12;verb.connect(cv2).connect(master);
+  }catch(e){ac=null}
+}
+function audio(){makeCtx();if(ac&&ac.state==='suspended')ac.resume();if(typeof restoreMine==='function')restoreMine()}
+const nb={};
+function nbuf(dur){const k=dur.toFixed(3);if(nb[k])return nb[k];const n=Math.max(1,ac.sampleRate*dur|0),b=ac.createBuffer(1,n,ac.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3);return nb[k]=b}
+function route(g,wet){g.connect(master);if(wet&&verb)g.connect(verb)}
+function noise(dur,vol,freq,type,q,delay,wet){if(!ac)return;voices++;const s=ac.createBufferSource();s.buffer=nbuf(dur);const f=ac.createBiquadFilter();f.type=type||'lowpass';f.frequency.value=freq;f.Q.value=q||.7;const g=ac.createGain();g.gain.value=vol;s.connect(f).connect(g);route(g,wet);s.onended=()=>voices--;s.start(ac.currentTime+(delay||0))}
+function tone(f1,f2,dur,vol,type,delay,wet){if(!ac)return;voices++;const o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime+(delay||0);o.type=type||'sine';o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(Math.max(20,f2),t+dur);g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(vol,t+.003);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);route(g,wet);o.onended=()=>voices--;o.start(t);o.stop(t+dur+.02)}
+
+/* Realistic keyboard: modal synthesis. A tiny impulse (the keycap hitting the plate)
+   rings the real resonances of keycap, plate and case, panned to where the key sits. */
+function modal(modes,vol,pan,delay,exc,tick){
+  if(!ac||voices>90)return;
+  const t=ac.currentTime+(delay||0);
+  const n=ac.createBufferSource();n.buffer=nbuf(exc||.003);
+  const out=ac.createGain();out.gain.value=vol;
+  if(ac.createStereoPanner){const p=ac.createStereoPanner();p.pan.value=pan||0;out.connect(p);route(p,true)}else route(out,true);
+  for(const m of modes){const f=ac.createBiquadFilter();f.type='bandpass';f.frequency.value=m[0];f.Q.value=m[1];const g=ac.createGain();g.gain.value=m[2]*m[1];n.connect(f).connect(g).connect(out)}
+  if(tick){const hp=ac.createBiquadFilter();hp.type='highpass';hp.frequency.value=6500;const hg=ac.createGain();hg.gain.value=tick;n.connect(hp).connect(hg).connect(out)}
+  voices++;n.onended=()=>voices--;n.start(t);
+}
+const sc=(modes,s)=>modes.map(m=>[m[0]*s,m[1],m[2]]);
+const PROF={
+  thock:{down:[[380,22,1],[690,18,.7],[1250,14,.4],[2400,10,.18],[4200,8,.08]],up:[[520,18,.8],[980,14,.5],[2100,10,.25]]},
+  click:{jacket:[[3900,30,.4],[5600,35,.25],[2700,20,.2]],down:[[520,18,.8],[1100,14,.5],[2300,10,.3]],up:[[4300,30,.35],[6000,35,.2]]},
+  type:{bar:[[1800,40,.6],[3100,45,.5],[5200,50,.4],[7400,40,.2]],platen:[[180,10,3],[420,12,1.8]],up:[[2400,30,.4],[4100,35,.3]]}
+};
+// each key gets its own slightly different pitch, like a real board (left keys sound a bit different to right)
+function keyVar(k){const p=keyPos[k]||{r:4,c:4};return{v:1+(((p.c*7+p.r*3)%9)-4)*.018+(Math.random()-.5)*.04,pan:k===' '?0:(p.c/9-.5)*.7}}
+/* ---------- REAL recorded switch sounds (kbsim by Thomas Lai, MIT License) ---------- */
+let SND=null;const packBufs={};
+// decode every switch right away (before the first press), so the very first key is already the real recording
+fetch('sounds.json').then(r=>r.json()).then(j=>{SND=j;makeCtx();restoreMine();loadPack(sw);for(const p in SND)loadPack(p)}).catch(()=>{});
+function b64(b){const s=atob(b),a=new Uint8Array(s.length);for(let i=0;i<s.length;i++)a[i]=s.charCodeAt(i);return a.buffer}
+function trimSilence(buf){
+  // cut dead air before the click so the sound lands the instant the key goes down
+  const d=buf.getChannelData(0);let peak=0;for(let i=0;i<d.length;i++)peak=Math.max(peak,Math.abs(d[i]));
+  let i=0;const th=peak*.04;while(i<d.length&&Math.abs(d[i])<th)i++;
+  i=Math.max(0,i-Math.round(buf.sampleRate*.0015));
+  if(i<buf.sampleRate*.002)return buf;
+  const out=ac.createBuffer(buf.numberOfChannels,buf.length-i,buf.sampleRate);
+  for(let c=0;c<buf.numberOfChannels;c++)out.getChannelData(c).set(buf.getChannelData(c).subarray(i));
+  return out;
+}
+function loadPack(p){
+  if(!ac||!SND||!SND[p]||packBufs[p])return;
+  const o=packBufs[p]={press:{},release:{}};
+  for(const kind of ['press','release']){const m=SND[p][kind]||{};for(const n in m){try{ac.decodeAudioData(b64(m[n]),buf=>{o[kind][n]=trimSilence(buf)},()=>{})}catch(e){}}}
+}
+const ROWNAME=['GENERIC_R1','GENERIC_R2','GENERIC_R3','GENERIC_R4'];
+function pickBuf(kind,k,snd){
+  if(sw==='mine')return pickMine(kind,k);
+  const pb=packBufs[sw];if(!pb)return null;const set=pb[kind];
+  const want=snd||(k===' '?'SPACE':null);
+  if(want&&set[want])return set[want];
+  if(kind==='release')return set.GENERIC||null;
+  const p=keyPos[k];return set[p?ROWNAME[Math.min(p.r,3)]:'GENERIC_R2']||set.GENERIC_R2||set.GENERIC_R3||null;
+}
+/* every key has its OWN fixed voice, like a real board: a slightly different pitch and
+   tone depending on where it sits on the plate (edges ring differently from the middle) */
+const voiceCache={};
+function keyVoice(k){
+  if(voiceCache[k])return voiceCache[k];
+  const p=keyPos[k]||{r:4,c:4};
+  const h1=((p.c*73+p.r*151+11)%97)/97,h2=((p.c*37+p.r*59+5)%89)/89;
+  const edge=Math.abs(p.c/9-.5)*2;               // 0 in the middle, 1 at the edge
+  return voiceCache[k]={
+    rate:.978+h1*.044,                           // about +/- 0.4 semitone between keys
+    eqF:700+h2*2600, eqG:(h1-.5)*5,              // each key's own resonance bump
+    body:-1+edge*2.5,                            // edge keys sound a bit hollower
+    pan:k===' '?0:(p.c/9-.5)*.55
+  };
+}
+const lastVel={};
+function playBuf(buf,k,vel,rel){
+  if(!ac||voices>96)return;voices++;
+  const kv=keyVoice(k);
+  const s=ac.createBufferSource();s.buffer=buf;
+  s.playbackRate.value=kv.rate*(1+(Math.random()-.5)*.01);
+  const eq=ac.createBiquadFilter();eq.type='peaking';eq.frequency.value=kv.eqF;eq.Q.value=1.6;eq.gain.value=kv.eqG;
+  const body=ac.createBiquadFilter();body.type='lowshelf';body.frequency.value=320;body.gain.value=kv.body+vel*2;
+  // a hard press is louder AND brighter; a gentle tap is softer and duller, just like real keys
+  const tone=ac.createBiquadFilter();tone.type='lowpass';tone.frequency.value=3200+vel*vel*16000;tone.Q.value=.5;
+  const g=ac.createGain();g.gain.value=(rel?.6:1)*(.35+vel*.65)*(.92+Math.random()*.08);
+  let n=s.connect(eq).connect(body).connect(tone).connect(g);
+  if(ac.createStereoPanner){const pn=ac.createStereoPanner();pn.pan.value=kv.pan;n=n.connect(pn)}
+  n.connect(master);
+  s.onended=()=>voices--;s.start();
+}
+function switchDown(k,vel,snd){
+  vel=vel==null?.6:vel;lastVel[k]=vel;
+  const buf=pickBuf('press',k,snd);if(buf){playBuf(buf,k,vel,false);return}
+  synthDown(k,.4+vel*.4);
+}
+function switchUp(k,snd){
+  k=k||'G';const vel=lastVel[k]==null?.6:lastVel[k];
+  const buf=pickBuf('release',k,snd);if(buf==='none')return;if(buf){playBuf(buf,k,vel*.9,true);return}
+  synthUp(k);
+}
+/* synthesized fallback, only used for the split second before the recordings load */
+function synthDown(k,vol){
+  const big=k===' ',{v,pan}=keyVar(k),s=big?.62:1;
+  if(true){
+    modal(sc(PROF.thock.down,v*s),vol*(big?1.2:1),pan,0,.004,.12);
+  }else if(sw==='click'){
+    modal(sc(PROF.click.jacket,v),vol*.9,pan,0,.0015,.2);
+    modal(sc(PROF.click.down,v*s),vol*.8,pan,.009+Math.random()*.003,.003,.08);
+  }else{
+    modal(sc(PROF.type.bar,v),vol,pan,0,.002,.3);
+    modal(sc(PROF.type.platen,v),vol*.9,pan,.006,.004,0);
+    if(big){[2093,4186,6280].forEach((f,i)=>tone(f,f,1.6-i*.4,.12/(i+1),'sine',.03,true))}
+  }
+  // stabilizer wire rattle on the space bar
+  if(big&&sw!=='type')modal([[3300,40,.3],[4800,40,.2],[1500,20,.3]],vol*.35,0,.014,.002,.05);
+}
+function synthUp(k){
+  const {v,pan}=keyVar(k),big=k===' ';
+  modal(sc(PROF.thock.up,v*(big?.7:1)),.28,pan,0,.002,.06);
+}
+/* ---------- YOUR keyboard: find every key press in an uploaded recording ---------- */
+function pickMine(kind,k){
+  const m=packBufs.mine;if(!m)return null;
+  const L=kind==='press'?m.press:m.release;
+  if(!L.length)return kind==='release'?'none':null;
+  if(k===' '&&kind==='press'&&m.space)return m.space;
+  const p=keyPos[k];
+  // each key always gets the same recorded press, like a real board
+  return L[p?(p.c*7+p.r*13+p.r*p.c)%L.length:L.length-1];
+}
+function sliceHits(buf){
+  const sr=buf.sampleRate,n=Math.min(buf.length,sr*120);
+  const x=new Float32Array(n);
+  for(let c=0;c<buf.numberOfChannels;c++){const d=buf.getChannelData(c);for(let i=0;i<n;i++)x[i]+=d[i]/buf.numberOfChannels}
+  // remove rumble from handling the phone
+  {const a=Math.exp(-2*Math.PI*70/sr);let px=0,py=0;for(let i=0;i<n;i++){const y=a*(py+x[i]-px);px=x[i];py=y;x[i]=y}}
+  const hop=Math.max(1,Math.round(sr*.002)),env=[];
+  for(let i=0;i<n;i+=hop){let m=0;for(let j=i;j<Math.min(n,i+hop);j++){const v=Math.abs(x[j]);if(v>m)m=v}env.push(m)}
+  const sorted=Float32Array.from(env).sort();
+  const floor=sorted[Math.floor(sorted.length*.5)]||1e-5,peak=sorted[sorted.length-1]||0;
+  const th=Math.max(floor*7,peak*.07);
+  const hits=[];let armed=true;
+  for(let i=0;i<env.length;i++){
+    if(armed&&env[i]>th&&(!hits.length||i*hop-hits[hits.length-1].t>sr*.035)){
+      let pk=0;for(let j=i;j<Math.min(env.length,i+15);j++)pk=Math.max(pk,env[j]);
+      hits.push({t:i*hop,pk});armed=false;
+    }
+    if(env[i]<th*.45)armed=true;
+  }
+  const cut=(h,next)=>{
+    const s=Math.max(0,h.t-Math.round(sr*.002));
+    let e=Math.min(n,s+Math.round(sr*.28));if(next)e=Math.min(e,next.t-Math.round(sr*.003));
+    const len=e-s;if(len<sr*.02)return null;
+    const out=ac.createBuffer(1,len,sr),d=out.getChannelData(0);let m=0;
+    for(let i=0;i<len;i++){d[i]=x[s+i];m=Math.max(m,Math.abs(d[i]))}
+    const g=m>0?.9/m:1,fi=Math.round(sr*.001),fo=Math.min(len,Math.round(sr*.02));
+    for(let i=0;i<len;i++){let w=g;if(i<fi)w*=i/fi;if(i>len-fo)w*=(len-i)/fo;d[i]*=w}
+    return out;
+  };
+  // a keystroke is a loud press, then a quieter release a moment later
+  const press=[],release=[],pressPk=[];
+  for(let i=0;i<hits.length;i++){
+    const h=hits[i],nx=hits[i+1];
+    if(nx&&nx.t-h.t<sr*.25&&nx.pk<h.pk*1.05){
+      const a=cut(h,nx),b=cut(nx,hits[i+2]);if(a){press.push(a);pressPk.push(h.pk)}if(b)release.push(b);i++;
+    }else{const a=cut(h,nx);if(a){press.push(a);pressPk.push(h.pk)}}
+  }
+  return{press:press.slice(0,48),release:release.slice(0,48)};
+}
+function installMine(r){
+  // the last few presses are the space bar (the instructions ask for that)
+  const sp=r.press.length>=8?r.press[r.press.length-1]:null;
+  const press=sp?r.press.slice(0,-3):r.press;
+  packBufs.mine={press,release:r.release,space:sp};
+  document.getElementById('sw_mine').hidden=false;
+}
+function toB64(buf){
+  const d=buf.getChannelData(0),i16=new Int16Array(d.length);
+  for(let i=0;i<d.length;i++)i16[i]=Math.max(-32767,Math.min(32767,d[i]*32767));
+  const u8=new Uint8Array(i16.buffer);let s='';for(let i=0;i<u8.length;i+=8192)s+=String.fromCharCode.apply(null,u8.subarray(i,i+8192));
+  return btoa(s);
+}
+function fromB64(s,sr){
+  const bin=atob(s),u8=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
+  const i16=new Int16Array(u8.buffer),out=ac.createBuffer(1,i16.length,sr),d=out.getChannelData(0);
+  for(let i=0;i<i16.length;i++)d[i]=i16[i]/32767;return out;
+}
+function saveMine(r,sr){try{localStorage.setItem('rk_mine',JSON.stringify({sr,press:r.press.map(toB64),release:r.release.map(toB64)}));return true}catch(e){return false}}
+let mineRestored=false;
+function restoreMine(){
+  if(mineRestored||!ac)return;mineRestored=true;
+  try{const j=JSON.parse(localStorage.getItem('rk_mine')||'null');if(j&&j.press&&j.press.length){installMine({press:j.press.map(s=>fromB64(s,j.sr)),release:j.release.map(s=>fromB64(s,j.sr))});return}}catch(e){}
+  if(sw==='mine'){sw='cream';document.querySelectorAll('.sw').forEach(x=>x.setAttribute('aria-pressed',x.dataset.sw===sw))}
+}
+const recPanel=document.getElementById('recpanel'),recBtn=document.getElementById('recbtn'),recStatus=document.getElementById('recstatus');
+function showRec(open){recPanel.hidden=!open;recBtn.setAttribute('aria-expanded',open);resize()}
+recBtn.addEventListener('click',()=>{showRec(recPanel.hidden);recBtn.blur()});
+document.getElementById('recclose').addEventListener('click',()=>showRec(false));
+document.getElementById('recfile').addEventListener('change',async e=>{
+  const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;
+  audio();if(!ac){recStatus.textContent='Sound is not available in this browser.';return}
+  recStatus.textContent='Listening to your recording...';
+  let buf;
+  try{const ab=await f.arrayBuffer();buf=await new Promise((res,rej)=>ac.decodeAudioData(ab,res,rej))}
+  catch(err){recStatus.textContent="That file couldn't be opened. Try a voice memo saved as .m4a, .mp3 or .wav.";return}
+  const r=sliceHits(buf);
+  if(r.press.length<5){recStatus.textContent=`Only found ${r.press.length} key presses. Record again with the phone closer to the keyboard, in a quiet room, pressing one key at a time.`;return}
+  installMine(r);
+  const kept=saveMine(r,buf.sampleRate);
+  sw='mine';store.set('rk_switch',sw);document.querySelectorAll('.sw').forEach(x=>x.setAttribute('aria-pressed',x.dataset.sw==='mine'));
+  recStatus.textContent=`Done! Found ${r.press.length} presses and ${r.release.length} releases from your keyboard.`+(kept?' Start smashing.':' (Too big to save, so it lasts until you close the page.)');
+  setTimeout(()=>{switchDown('G',.7);setTimeout(()=>switchUp('G'),110)},80);
+});
+
+let lastPressT=0;
+function smashSound(k,I,snd){
+  // how hard you're hitting: quick follow-up presses and fast mashing hit harder
+  const now=performance.now(),gap=now-lastPressT;lastPressT=now;
+  const quick=gap<90?1:gap<200?.6:gap<500?.3:0;
+  const vel=Math.min(1,.42+I*.4+quick*.18+(Math.random()-.5)*.12);
+  switchDown(k,vel,snd);
+}
+function kaboomSound(){
+  if(!ac)return;
+  tone(90,24,1.6,1,'sine',0,true);
+  tone(60,30,1.2,.6,'sawtooth',0,false);
+  noise(1.4,.9,1200,'lowpass',.7,0,true);
+  noise(.6,.5,6000,'highpass',.7,.02,true);
+  [0,4,7,12,16].forEach((s,i)=>tone(440*Math.pow(2,s/12),440*Math.pow(2,s/12),1.4,.06,'triangle',.08+i*.05,true));
+}
+
+/* ---------- effects ---------- */
+function keyCenter(k){const el=keyEl[k];if(!el)return{x:W/2,y:PH};const r=el.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top}}
+function hueFor(k){const p=keyPos[k]||{r:0,c:5};return (p.c*36+p.r*20+hueShift)%360}
+function burst(x,y,hue,n,pow,spread){for(let i=0;i<n;i++){const a=spread?Math.random()*6.28:-Math.PI/2+(Math.random()-.5)*2.2,s=(Math.random()*.8+.25)*pow;parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:1,dec:.8+Math.random()*.9,sz:3+Math.random()*8,hue:hue+(Math.random()*50-25),sq:Math.random()<.5,r:Math.random()*6})}}
+function say(x,y,t,col,sz){texts.push({x,y,t,col,sz,life:1})}
+
+function smash(k,snd){
+  const now=performance.now();recent.push(now);
+  const rate=recent.filter(t=>now-t<1000).length;const I=Math.min(1,rate/14);
+  smashes++;heat=Math.min(1,heat+.028+I*.012);
+  const c=keyCenter(k),hue=hueFor(k),big=k===' ';
+  smashSound(k,I,snd);
+  // keycap shard flies up and explodes
+  shards.push({k:big?'!!':k,x:c.x,y:c.y,vx:(Math.random()-.5)*120,vy:-(500+Math.random()*350+I*300),rot:0,vr:(Math.random()-.5)*10,hue,life:.35+Math.random()*.35,sz:big?44:34});
+  burst(c.x,c.y,hue,Math.round(12+I*30),300+I*400,false);
+  rings.push({x:c.x,y:c.y,r:6,life:1,hue,w:big?10:4});
+  shake=Math.min(22,shake+2+I*6+(big?8:0));
+  flash=Math.max(flash,big?.25:.06+I*.08);
+  if(I>.7&&Math.random()<.35)bolts.push({x:Math.random()*W,life:1,hue});
+  if(rate>0&&rate%15===0)say(W/2,PH*.42,['SMASH!','RAGE!','DESTROY!','UNSTOPPABLE!','MAX RAGE!'][Math.min(4,rate/15-1)],'#ff3d7f',48);
+  if(heat>=1)kaboom();
+  save();
+}
+function kaboom(){
+  heat=0;booms++;kaboomSound();flash=1;shake=40;
+  for(let i=0;i<4;i++)rings.push({x:W/2,y:PH/2,r:10+i*30,life:1,hue:(hueShift+i*40)%360,w:18,big:true});
+  for(let i=0;i<6;i++)burst(Math.random()*W,Math.random()*PH,Math.random()*360,40,700,true);
+  say(W/2,PH*.45,'KABOOM!','#ffcc33',clampN(W/8,48,96));
+  hueShift=(hueShift+90)%360;save(true);
+}
+function clampN(v,a,b){return Math.max(a,Math.min(b,v))}
+let saveT=0;function save(force){if(force||Date.now()-saveT>800){saveT=Date.now();store.set('rk_smashes',smashes);store.set('rk_booms',booms)}}
+
+/* ---------- input ---------- */
+const held=new Set();
+function norm(e){if(e.key===' ')return' ';if(e.key.length===1){const u=e.key.toUpperCase();return keyEl[u]?u:' '}return['Enter','Backspace','Shift','Tab','Control','Alt','Meta','CapsLock','Escape','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)?' ':null}
+function press(k,id,snd){
+  audio();if(!started)begin();
+  id=id||k;if(held.has(id))return;held.add(id);
+  const el=keyEl[k];if(el){el.style.setProperty('--glow',`hsl(${hueFor(k)} 95% 62%)`);el.classList.add('down')}
+  smash(k,snd);
+}
+function release(k,id,snd){id=id||k;if(!held.has(id))return;held.delete(id);switchUp(k,snd);const el=keyEl[k];if(el&&![...held].some(h=>h===k||h.startsWith(k+':')))el.classList.remove('down')}
+addEventListener('keydown',e=>{if(e.metaKey||e.ctrlKey)return;const k=norm(e);if(k===null)return;e.preventDefault();if(e.repeat)return;press(k,e.code||k,sndName(e))});
+addEventListener('keyup',e=>{const k=norm(e);if(k===null)return;release(k,e.code||k,sndName(e))});
+function sndName(e){return e.key==='Enter'?'ENTER':e.key==='Backspace'?'BACKSPACE':e.key===' '?'SPACE':null}
+addEventListener('blur',()=>{held.clear();Object.values(keyEl).forEach(el=>el.classList.remove('down'))});
+kb.addEventListener('pointerdown',e=>{const b=e.target.closest('.k');if(!b)return;e.preventDefault();press(b.dataset.k,b.dataset.k+':'+e.pointerId)});
+const up=e=>{const b=e.target.closest&&e.target.closest('.k');if(b)release(b.dataset.k,b.dataset.k+':'+e.pointerId)};
+kb.addEventListener('pointerup',up);kb.addEventListener('pointercancel',up);kb.addEventListener('pointerleave',up,true);
+cv.addEventListener('pointerdown',e=>{audio();if(!started)begin();const ks=Object.keys(keyEl).filter(k=>k!==' ');press(ks[Math.random()*ks.length|0],'tap:'+e.pointerId);burst(e.clientX,e.clientY,Math.random()*360,25,450,true);rings.push({x:e.clientX,y:e.clientY,r:6,life:1,hue:hueShift,w:5})});
+cv.addEventListener('pointerup',e=>{for(const id of [...held])if(id.startsWith('tap:')||id.endsWith(':'+e.pointerId)){held.delete(id);switchUp()}Object.values(keyEl).forEach(el=>el.classList.remove('down'))});
+document.querySelectorAll('.sw').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.sw===sw);b.addEventListener('click',()=>{audio();sw=b.dataset.sw;store.set('rk_switch',sw);loadPack(sw);document.querySelectorAll('.sw').forEach(x=>x.setAttribute('aria-pressed',x===b));setTimeout(()=>{switchDown('G',.7);setTimeout(()=>switchUp('G'),110)},60);b.blur()})});
+function begin(){started=true;audio();resize();document.getElementById('over').hidden=true}
+document.getElementById('over').addEventListener('pointerdown',e=>{e.preventDefault();begin()});
+
+/* ---------- draw ---------- */
+const stars=Array.from({length:80},()=>({x:Math.random(),y:Math.random(),z:Math.random()}));
+function rr(x,y,w,h,r){cx.beginPath();cx.moveTo(x+r,y);cx.arcTo(x+w,y,x+w,y+h,r);cx.arcTo(x+w,y+h,x,y+h,r);cx.arcTo(x,y+h,x,y,r);cx.arcTo(x,y,x+w,y,r);cx.closePath()}
+const $s=document.querySelector('#smashes b'),$sp=document.querySelector('#speed b'),$b=document.querySelector('#booms b'),$r=document.getElementById('rage');
+function frame(ts){
+  const dt=Math.min(.05,(ts-last)/1000||0);last=ts;const now=performance.now();
+  recent=recent.filter(t=>now-t<1000);const rate=recent.length,I=Math.min(1,rate/14);
+  heat=Math.max(0,heat-dt*.12);shake*=.86;flash*=.88;
+  // background heats up with your spam speed
+  const bh=(250-I*230+360)%360;
+  const g=cx.createRadialGradient(W/2,PH*.6,10,W/2,PH*.6,Math.max(W,H));
+  g.addColorStop(0,`hsl(${bh} ${50+I*30}% ${12+I*10}%)`);g.addColorStop(1,'#07061a');
+  cx.fillStyle=g;cx.fillRect(0,0,W,H);
+  cx.save();cx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);
+  for(const s of stars){s.y-=dt*(.02+I*.5)*(s.z+.3);if(s.y<0){s.y=1;s.x=Math.random()}const len=1+I*s.z*40;cx.fillStyle=`rgba(220,210,255,${.2+s.z*.5})`;cx.fillRect(s.x*W,s.y*H,1+s.z*2,len)}
+  for(let i=bolts.length-1;i>=0;i--){const b=bolts[i];b.life-=dt*4;if(b.life<=0){bolts.splice(i,1);continue}cx.strokeStyle=`hsla(${b.hue} 100% 75% / ${b.life})`;cx.lineWidth=3;cx.beginPath();let x=b.x,y=0;cx.moveTo(x,y);while(y<PH){y+=20+Math.random()*30;x+=(Math.random()-.5)*50;cx.lineTo(x,y)}cx.stroke()}
+  for(let i=rings.length-1;i>=0;i--){const r=rings[i];r.life-=dt*(r.big?.8:2.2);r.r+=dt*(r.big?Math.max(W,H)*1.2:500);if(r.life<=0){rings.splice(i,1);continue}cx.strokeStyle=`hsla(${r.hue} 100% 65% / ${r.life})`;cx.lineWidth=r.w*r.life;cx.beginPath();cx.arc(r.x,r.y,r.r,0,6.28);cx.stroke()}
+  for(let i=shards.length-1;i>=0;i--){const s=shards[i];s.life-=dt;s.vy+=900*dt;s.x+=s.vx*dt;s.y+=s.vy*dt;s.rot+=s.vr*dt;
+    if(s.life<=0||s.y<60){shards.splice(i,1);burst(s.x,s.y,s.hue,26,380,true);rings.push({x:s.x,y:s.y,r:4,life:1,hue:s.hue,w:4});continue}
+    cx.save();cx.translate(s.x,s.y);cx.rotate(s.rot);cx.shadowColor=`hsl(${s.hue} 100% 60%)`;cx.shadowBlur=20;rr(-s.sz/2,-s.sz/2,s.sz,s.sz,8);cx.fillStyle=`hsl(${s.hue} 90% 62%)`;cx.fill();cx.shadowBlur=0;cx.fillStyle='#140b2e';cx.font=`${s.sz*.5}px Bungee, Impact, sans-serif`;cx.textAlign='center';cx.textBaseline='middle';cx.fillText(s.k,0,1);cx.restore()}
+  cx.globalCompositeOperation='lighter';
+  for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.life-=dt*p.dec;if(p.life<=0){parts.splice(i,1);continue}p.vy+=500*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.985;p.r+=dt*8;const z=p.sz*p.life;cx.fillStyle=`hsla(${p.hue} 100% 62% / ${p.life})`;if(p.sq){cx.save();cx.translate(p.x,p.y);cx.rotate(p.r);cx.fillRect(-z/2,-z/2,z,z);cx.restore()}else{cx.beginPath();cx.arc(p.x,p.y,z/2,0,6.28);cx.fill()}}
+  if(parts.length>1400)parts.splice(0,parts.length-1400);
+  cx.globalCompositeOperation='source-over';
+  cx.textAlign='center';cx.textBaseline='middle';
+  for(let i=texts.length-1;i>=0;i--){const x=texts[i];x.life-=dt*.9;x.y-=dt*40;if(x.life<=0){texts.splice(i,1);continue}const sc=1+(1-x.life)*.4;cx.font=`${x.sz*sc}px Bungee, Impact, sans-serif`;cx.globalAlpha=Math.min(1,x.life*2);cx.lineWidth=6;cx.strokeStyle='#07061a';cx.strokeText(x.t,x.x,x.y);cx.fillStyle=x.col;cx.fillText(x.t,x.x,x.y);cx.globalAlpha=1}
+  cx.restore();
+  if(flash>.02){cx.fillStyle=`rgba(255,255,255,${flash*.4})`;cx.fillRect(0,0,W,H)}
+  $s.textContent=smashes;$sp.textContent=rate;$b.textContent=booms;
+  $r.firstElementChild.style.width=(heat*100)+'%';$r.lastElementChild.textContent=heat>.85?'ALMOST... KEEP GOING!':heat>.01?'RAGE':'SPAM TO FILL';
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+
+</body></html>

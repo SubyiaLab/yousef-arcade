@@ -1,0 +1,233 @@
+[
+ {
+  "slug": "megalodon",
+  "name": "Megalodon",
+  "artifact": "https://claude.ai/code/artifact/a1c1219e-1243-4e15-aeab-496a0fa61016",
+  "genre": "Action",
+  "blurb": "Grow from shark pup to Megalodon. Reef, kelp, shipwreck, a Kraken boss and Shark-Man.",
+  "colorA": "#0b6fa4",
+  "colorB": "#06264d",
+  "pattern": "waves",
+  "updated": "2026-10-17"
+ },
+ {
+  "slug": "smash-city-ultra",
+  "name": "Smash City Ultra",
+  "artifact": "https://claude.ai/code/artifact/c8d7beaf-c157-4ee0-a037-e8b097fa8c20",
+  "genre": "Sandbox",
+  "blurb": "A huge city and a pile of weapons. Knock it all down.",
+  "colorA": "#ff7a1a",
+  "colorB": "#5a1020",
+  "pattern": "stripes",
+  "updated": "2026-10-16"
+ },
+ {
+  "slug": "gulp-city",
+  "name": "Gulp City",
+  "artifact": "https://claude.ai/code/artifact/bfc587e3-e594-4be7-8eb5-9c30d40ff6bd",
+  "genre": "Action",
+  "blurb": "You are a black hole. Swallow the city and beat the rival holes.",
+  "colorA": "#7b4dff",
+  "colorB": "#120830",
+  "pattern": "rays",
+  "updated": "2026-10-16"
+ },
+ {
+  "slug": "twisted-wizard",
+  "name": "Twisted Wizard",
+  "artifact": "https://claude.ai/code/artifact/d3ce5582-d187-4593-84c0-dbc1277c69bf",
+  "genre": "Adventure",
+  "blurb": "RPG with dungeons, bosses, roles and a new spell every level.",
+  "colorA": "#9b3dd6",
+  "colorB": "#1f0d4a",
+  "pattern": "dots",
+  "updated": "2026-10-16"
+ },
+ {
+  "slug": "sky-smash-remastered",
+  "name": "Sky Smash Remastered",
+  "artifact": "https://claude.ai/code/artifact/32882f4c-bd75-4c9f-aae7-f64c8a7707e1",
+  "genre": "Sandbox",
+  "blurb": "Yousef's first game. Rob a bank, drive cars, escape in a Focke-Wulf 190.",
+  "colorA": "#4aa8ff",
+  "colorB": "#1d2b6b",
+  "pattern": "stripes",
+  "updated": "2026-10-16"
+ },
+ {
+  "slug": "rule-breaker",
+  "name": "Rule Breaker",
+  "artifact": "https://claude.ai/code/artifact/496bd32f-867b-460a-97fa-44fe1b20666e",
+  "genre": "Puzzle",
+  "blurb": "Push keyboard-key rule blocks around to change how the level works.",
+  "colorA": "#ffd23f",
+  "colorB": "#8a4b00",
+  "pattern": "grid",
+  "updated": "2026-10-16"
+ },
+ {
+  "slug": "titan-smash",
+  "name": "Titan Smash",
+  "artifact": "https://claude.ai/code/artifact/3fcfc175-2c37-4dc8-b0b9-62bbc69e501b",
+  "genre": "Action",
+  "blurb": "Giant-sized smashing. Stomp, punch and wreck everything.",
+  "colorA": "#e63946",
+  "colorB": "#2b0a14",
+  "pattern": "rays",
+  "updated": "2026-10-16"
+ },
+ {
+  "slug": "sunfire-rift",
+  "name": "Sunfire Rift",
+  "artifact": "https://claude.ai/code/artifact/f05c929a-1c45-4bc4-9ade-5f5b56b0fd40",
+  "genre": "Racing",
+  "blurb": "Jet flying sim with lasers, night mode, a boss fight and a canyon level.",
+  "colorA": "#ff9e2c",
+  "colorB": "#5b1a5e",
+  "pattern": "rays",
+  "updated": "2026-10-16"
+ },
+ {
+  "slug": "claude-fc-26",
+  "name": "Claude FC 26",
+  "artifact": "https://claude.ai/code/artifact/706ea56e-93ad-4425-aa0d-c625166b6e3a",
+  "genre": "Sports",
+  "blurb": "Football World Cup with imaginary countries. Kuwait is rated 99.",
+  "colorA": "#1fa34a",
+  "colorB": "#0a3d22",
+  "pattern": "stripes",
+  "updated": "2026-10-15"
+ },
+ {
+  "slug": "crusher-island",
+  "name": "Crusher Island",
+  "artifact": "https://claude.ai/code/artifact/b1e187e3-2eac-4db6-9d31-79b99f133481",
+  "genre": "Racing",
+  "blurb": "Monster truck stunts on a tropical island, with MAX graphics.",
+  "colorA": "#ff6b35",
+  "colorB": "#3b2a12",
+  "pattern": "dots",
+  "updated": "2026-10-15"
+ },
+ {
+  "slug": "pew-pew-city",
+  "name": "Pew Pew City",
+  "artifact": "https://claude.ai/code/artifact/97d5bd19-28e5-48cd-853b-51789ace7975",
+  "genre": "Sandbox",
+  "blurb": "Open city. Cars, shooting, do anything.",
+  "colorA": "#00b4d8",
+  "colorB": "#22104a",
+  "pattern": "grid",
+  "updated": "2026-10-15"
+ },
+ {
+  "slug": "iron-squad",
+  "name": "Iron Squad",
+  "artifact": "https://claude.ai/code/artifact/b36b91ae-5b35-4e26-bd54-2efe73b73b33",
+  "genre": "Shooter",
+  "blurb": "Desert wave-survival FPS. Rifle, shotgun and sniper.",
+  "colorA": "#c9a227",
+  "colorB": "#3a2e14",
+  "pattern": "stripes",
+  "updated": "2026-10-15"
+ },
+ {
+  "slug": "coral-coast-rally",
+  "name": "Coral Coast Rally",
+  "artifact": "https://claude.ai/code/artifact/fa733363-dc1e-4e62-a31f-8ce96acef1dd",
+  "genre": "Racing",
+  "blurb": "Rally racing around a tropical island.",
+  "colorA": "#20c9b5",
+  "colorB": "#0d4a6b",
+  "pattern": "waves",
+  "updated": "2026-10-15"
+ },
+ {
+  "slug": "blitz-duels",
+  "name": "Blitz Duels",
+  "artifact": "https://claude.ai/code/artifact/09a299af-7d05-40a5-a35b-b0539bbc0cf9",
+  "genre": "Shooter",
+  "blurb": "Fast 1v1 arena duels, Rivals-style.",
+  "colorA": "#ff3d7f",
+  "colorB": "#2a0f3d",
+  "pattern": "rays",
+  "updated": "2026-10-15"
+ },
+ {
+  "slug": "neon-sprint",
+  "name": "Neon Sprint",
+  "artifact": "https://claude.ai/code/artifact/868777d1-0909-4233-b4cf-caa50687889c",
+  "genre": "Racing",
+  "blurb": "Endless runner through a neon city. Dodge, jump, keep going.",
+  "colorA": "#ff4fd8",
+  "colorB": "#1a0e5e",
+  "pattern": "grid",
+  "updated": "2026-10-14"
+ },
+ {
+  "slug": "hyperdrift",
+  "name": "Hyperdrift",
+  "artifact": "https://claude.ai/code/artifact/40636405-8181-4b7a-b941-157a85adcdb7",
+  "genre": "Racing",
+  "blurb": "Slide through corners at top speed.",
+  "colorA": "#5ee7ff",
+  "colorB": "#14205e",
+  "pattern": "stripes",
+  "updated": "2026-10-14"
+ },
+ {
+  "slug": "the-ugly-truth",
+  "name": "The Ugly Truth",
+  "artifact": "https://claude.ai/code/artifact/77e8cc5c-0b50-45c0-baed-e40667b2c9ce",
+  "genre": "Adventure",
+  "blurb": "Ricky Fisher looks perfect but is secretly a troublemaker. Escape detention.",
+  "colorA": "#f2c14e",
+  "colorB": "#5c2e1a",
+  "pattern": "dots",
+  "updated": "2026-10-13"
+ },
+ {
+  "slug": "brickverse",
+  "name": "Brickverse",
+  "artifact": "https://claude.ai/code/artifact/799bf5ae-b789-4284-980b-f7fb0b530f25",
+  "genre": "Sandbox",
+  "blurb": "Many games in one world, with avatar customization.",
+  "colorA": "#ef476f",
+  "colorB": "#3d1f6b",
+  "pattern": "grid",
+  "updated": "2026-10-12"
+ },
+ {
+  "slug": "sky-smash-cosmos",
+  "name": "Sky Smash Cosmos",
+  "artifact": "https://claude.ai/code/artifact/f1287e44-0b6d-47e0-a460-a598a301ae66",
+  "genre": "Sandbox",
+  "blurb": "Space sandbox. Do anything to Earth, stars, planets and exoplanets.",
+  "colorA": "#3a0ca3",
+  "colorB": "#05021a",
+  "pattern": "dots",
+  "updated": "2026-10-12"
+ },
+ {
+  "slug": "key-smash-frenzy",
+  "name": "Key Smash Frenzy",
+  "artifact": "https://claude.ai/code/artifact/48620d4a-99ba-4515-bb52-8d3898c8ba0a",
+  "genre": "Puzzle",
+  "blurb": "Smash floating keys, hear great clicky sounds, farm keys in the lobby.",
+  "colorA": "#8ac926",
+  "colorB": "#1b4332",
+  "pattern": "grid",
+  "updated": "2026-10-10"
+ },
+ {
+  "slug": "breaking-bones",
+  "name": "Breaking Bones",
+  "artifact": "https://claude.ai/code/artifact/a3a3e209-b816-480f-a8c1-18f6588f004e",
+  "genre": "Action",
+  "blurb": "Jump off a higher mountain every level with new gear.",
+  "colorA": "#adb5bd",
+  "colorB": "#343a40",
+  "pattern": "stripes",
+  "updated": "2026-10-08"
+ }
+]

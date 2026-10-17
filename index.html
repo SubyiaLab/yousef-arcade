@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Yousef Arcade">
+<meta name="theme-color" content="#120f2e">
+<title>Yousef Arcade</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23120f2e'/%3E%3Ctext x='32' y='46' font-family='Arial Black' font-size='38' text-anchor='middle' fill='%23ffd23f'%3EY%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Rubik:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: arcade cabinet marquee on top, then a shelf of game cartridges in a responsive grid. Single committed dark look. */
+:root{
+  --bg:#120f2e; --panel:#1d1947; --panel-2:#272160; --line:#3a3380;
+  --fg:#f3f0ff; --muted:#a9a3d6;
+  --marquee:#ffd23f; --coral:#ff5d73; --cyan:#3ee0d0;
+  --display:"Bungee","Arial Black",Impact,sans-serif;
+  --body:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg);margin:0}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.5;
+  background:
+    radial-gradient(1200px 500px at 50% -200px,#2c2475 0%,transparent 70%),
+    repeating-linear-gradient(0deg,transparent 0 3px,rgba(255,255,255,.015) 3px 4px),
+    var(--bg);
+  min-height:100%;
+}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 56px}
+
+/* Marquee */
+.marquee{position:relative;border:3px solid var(--marquee);border-radius:18px;padding:22px 22px 20px;
+  background:linear-gradient(180deg,#2a2268,#1a1645);
+  box-shadow:0 0 0 6px var(--bg),0 0 0 8px #4a3fa0,0 0 40px rgba(255,210,63,.18) inset}
+.bulbs{position:absolute;inset:7px;border-radius:12px;pointer-events:none;
+  background:radial-gradient(circle,var(--marquee) 2.5px,transparent 3.5px) 0 0/22px 22px;
+  -webkit-mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);
+  mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);padding:4px;opacity:.55}
+.mq-top{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between}
+.p1{font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--cyan);text-transform:uppercase}
+.p1 b{color:var(--marquee)}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(40px,9vw,92px);line-height:.95;margin:10px 0 6px;
+  color:var(--marquee);text-shadow:4px 4px 0 var(--coral),8px 8px 0 #000;letter-spacing:.01em;text-wrap:balance}
+.tag{margin:0;color:var(--muted);max-width:60ch}
+.stats{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.stat{font-family:var(--mono);font-size:13px;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-variant-numeric:tabular-nums}
+.stat b{color:var(--marquee)}
+
+/* Controls */
+.controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:28px 0 18px}
+.search{flex:1 1 220px;min-width:0;position:relative}
+.search input{width:100%;font:inherit;font-size:17px;color:var(--fg);background:var(--panel);border:2px solid var(--line);
+  border-radius:14px;padding:12px 14px 12px 42px;outline:none}
+.search input:focus{border-color:var(--cyan)}
+.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;stroke:var(--muted)}
+.btn{font-family:var(--display);font-size:16px;border:0;border-radius:14px;padding:13px 18px;cursor:pointer;
+  background:var(--coral);color:#fff;box-shadow:0 5px 0 #a8273c;transition:transform .08s,box-shadow .08s}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 #a8273c}
+.btn:focus-visible,.chip:focus-visible,.card:focus-visible,.fav:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.chip{font:500 15px var(--body);color:var(--muted);background:transparent;border:2px solid var(--line);border-radius:999px;padding:8px 14px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--marquee);border-color:var(--marquee);color:#1a1645}
+.chip .n{font-family:var(--mono);font-size:12px;opacity:.7;margin-left:4px}
+
+/* Featured */
+.label{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);margin:0 0 10px}
+
+/* Grid of cartridges */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px}
+.card{position:relative;display:flex;flex-direction:column;text-decoration:none;color:inherit;
+  background:var(--panel);border:2px solid var(--line);border-radius:16px;overflow:hidden;
+  transition:transform .15s,border-color .15s}
+.card:hover{transform:translateY(-4px);border-color:var(--marquee)}
+.art{position:relative;aspect-ratio:16/10;max-width:100%;overflow:hidden;
+  background:linear-gradient(135deg,var(--a),var(--b))}
+.art::before{content:"";position:absolute;inset:0;background:var(--pat);opacity:.35}
+.art::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(0,0,0,.55))}
+.art .t{position:absolute;left:14px;right:14px;bottom:12px;z-index:1;font-family:var(--display);font-size:24px;line-height:1.05;
+  color:#fff;text-shadow:3px 3px 0 rgba(0,0,0,.45);text-wrap:balance}
+.badge{position:absolute;top:10px;left:10px;z-index:1;font:700 11px var(--mono);letter-spacing:.12em;padding:4px 8px;border-radius:6px;background:var(--marquee);color:#1a1645}
+.body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px;flex:1}
+.meta{display:flex;justify-content:space-between;gap:8px;align-items:center;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.genre{color:var(--cyan);text-transform:uppercase;letter-spacing:.1em}
+.blurb{margin:0;font-size:14.5px;color:#d8d3f5}
+.play{margin-top:auto;font-family:var(--display);font-size:14px;color:var(--marquee)}
+.fav{position:absolute;top:8px;right:8px;z-index:2;width:40px;height:40px;border-radius:50%;border:0;cursor:pointer;
+  background:rgba(0,0,0,.4);display:grid;place-items:center}
+.fav svg{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:2}
+.fav[aria-pressed="true"] svg{fill:var(--marquee);stroke:var(--marquee)}
+.empty{padding:40px 16px;text-align:center;color:var(--muted);border:2px dashed var(--line);border-radius:16px}
+footer{margin-top:40px;font-family:var(--mono);font-size:12px;color:var(--muted);text-align:center}
+@media (prefers-reduced-motion:reduce){.card,.btn{transition:none}.card:hover{transform:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="marquee">
+    <div class="bulbs" aria-hidden="true"></div>
+    <div class="mq-top">
+      <span class="p1">Player 1: <b>Yousef</b></span>
+      <span class="p1">Insert coin · Tap a game</span>
+    </div>
+    <h1>Yousef Arcade</h1>
+    <p class="tag">Every game Yousef has designed, in one place. Pick one and play.</p>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <div class="controls">
+    <label class="search" for="q">
+      <svg viewBox="0 0 24 24" stroke-width="2.5" fill="none" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+      <input id="q" type="search" placeholder="Find a game…" autocomplete="off" aria-label="Find a game">
+    </label>
+    <button class="btn" id="surprise" type="button">Surprise me</button>
+  </div>
+  <div class="chips" id="chips" role="group" aria-label="Filter by type"></div>
+
+  <p class="label" id="count"></p>
+  <div class="grid" id="grid"></div>
+
+  <footer>Yousef Arcade · made by Yousef with Claude</footer>
+</div>
+
+<script>
+const P={
+  stripes:"repeating-linear-gradient(45deg,#fff 0 6px,transparent 6px 22px)",
+  dots:"radial-gradient(circle,#fff 2px,transparent 3px) 0 0/18px 18px",
+  grid:"linear-gradient(#fff 1px,transparent 1px) 0 0/24px 24px,linear-gradient(90deg,#fff 1px,transparent 1px) 0 0/24px 24px",
+  waves:"repeating-radial-gradient(circle at 50% 120%,#fff 0 2px,transparent 2px 18px)",
+  rays:"repeating-conic-gradient(from 0deg at 50% 110%,#fff 0 4deg,transparent 4deg 16deg)"
+};
+let GAMES=[];
+const GENRES=["All","Favorites","Action","Shooter","Sandbox","Racing","Sports","Adventure","Puzzle"];
+let favs=[];try{favs=JSON.parse(localStorage.getItem("ya-favs")||"[]")}catch(e){favs=[]}
+let filter="All";try{filter=localStorage.getItem("ya-filter")||"All"}catch(e){}
+if(!GENRES.includes(filter))filter="All";
+const q=document.getElementById("q"),grid=document.getElementById("grid"),chips=document.getElementById("chips");
+let newest="";
+
+function ago(d){const days=Math.round((Date.now()-new Date(d+"T12:00:00Z"))/864e5);
+  return days<=0?"Updated today":days===1?"Updated yesterday":`Updated ${days} days ago`}
+function saveFavs(){try{localStorage.setItem("ya-favs",JSON.stringify(favs))}catch(e){}}
+
+function drawStats(){document.getElementById("stats").innerHTML=
+  `<span class="stat"><b>${GAMES.length}</b> games made</span>`+
+  `<span class="stat"><b>${new Set(GAMES.map(g=>g.g)).size}</b> game types</span>`+
+  `<span class="stat">Plays on <b>iPad</b></span>`;}
+
+function drawChips(){
+  chips.innerHTML=GENRES.map(x=>{
+    const n=x==="All"?GAMES.length:x==="Favorites"?favs.length:GAMES.filter(g=>g.g===x).length;
+    return `<button class="chip" type="button" data-g="${x}" aria-pressed="${x===filter}">${x}<span class="n">${n}</span></button>`}).join("");
+}
+function draw(){
+  const s=q.value.trim().toLowerCase();
+  const list=GAMES.filter(g=>(filter==="All"||(filter==="Favorites"?favs.includes(g.id):g.g===filter))&&
+    (!s||(g.n+" "+g.d+" "+g.g).toLowerCase().includes(s)));
+  document.getElementById("count").textContent=`${list.length} ${list.length===1?"game":"games"}${filter!=="All"?" · "+filter:""}`;
+  grid.innerHTML=list.length?list.map(g=>`
+    <a class="card" href="games/${g.id}/" style="--a:${g.a};--b:${g.b};--pat:${P[g.p]}">
+      <div class="art">${g.u===newest?'<span class="badge">NEW</span>':""}<span class="t">${g.n}</span></div>
+      <button class="fav" type="button" data-id="${g.id}" aria-pressed="${favs.includes(g.id)}" aria-label="Favorite ${g.n}">
+        <svg viewBox="0 0 24 24"><path d="M12 3l2.8 5.8 6.2.9-4.5 4.4 1 6.2L12 17.4 6.5 20.3l1-6.2L3 9.7l6.2-.9z"/></svg></button>
+      <div class="body">
+        <div class="meta"><span class="genre">${g.g}</span><span>${ago(g.u)}</span></div>
+        <p class="blurb">${g.d}</p>
+        <span class="play">Play ▸</span>
+      </div>
+    </a>`).join(""):`<div class="empty">${filter==="Favorites"&&!s?"No favorites yet. Tap the star on a game to add it here.":"No game matches that. Try another word."}</div>`;
+}
+chips.addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;filter=b.dataset.g;
+  try{localStorage.setItem("ya-filter",filter)}catch(err){}drawChips();draw()});
+grid.addEventListener("click",e=>{const f=e.target.closest(".fav");if(!f)return;e.preventDefault();e.stopPropagation();
+  const id=f.dataset.id;favs=favs.includes(id)?favs.filter(x=>x!==id):[...favs,id];saveFavs();drawChips();draw()});
+q.addEventListener("input",draw);
+document.getElementById("surprise").addEventListener("click",()=>{
+  const cards=[...grid.querySelectorAll(".card")];const pool=cards.length?cards:[];
+  if(!pool.length)return;const c=pool[Math.floor(Math.random()*pool.length)];
+  c.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth",block:"center"});
+  c.focus({preventScroll:true});c.animate?.([{boxShadow:"0 0 0 0 #ffd23f"},{boxShadow:"0 0 0 10px transparent"}],{duration:700,iterations:3});
+});
+fetch("games.json",{cache:"no-cache"}).then(r=>r.json()).then(list=>{
+  GAMES=list.filter(g=>!g.hidden).map(g=>({n:g.name,id:g.slug,g:g.genre,d:g.blurb,a:g.colorA,b:g.colorB,p:g.pattern,u:g.updated}))
+    .sort((x,y)=>y.u.localeCompare(x.u));
+  newest=GAMES.map(g=>g.u).sort().pop()||"";
+  drawStats();drawChips();draw();
+}).catch(()=>{grid.innerHTML='<div class="empty">Could not load the game list. Refresh the page.</div>'});
+</script>
+</body>
+</html>

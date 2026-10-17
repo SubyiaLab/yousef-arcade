@@ -1,0 +1,3049 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Rule Breaker</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Fredoka:wght@500;600&display=swap">
+<style>
+/* Layout: one full-screen keyboard on a desk mat. The level is the keyboard plate inside a
+   colored case, and every button is a keycap. One bright look on purpose: the player has said
+   dark game screens are hard to see, so there is no dark theme. */
+:root {
+  color-scheme: light;
+  --mat: #e7edf9;          /* desk mat */
+  --mat-line: #d5def1;     /* cutting-mat grid */
+  --ink: #1c2442;          /* text */
+  --ink-soft: #56617f;
+  --card: #ffffff;
+  --cap-top: #ffffff;      /* plain keycap */
+  --cap-top2: #eef1f8;
+  --cap-side: #d3d9e8;
+  --cap-side2: #aeb8cf;
+  --accent: #ff6a1a;       /* BOT orange */
+  --accent-side: #d94f00;
+  --gold: #ffd23f;
+  --gold-side: #e0a800;
+  --pink: #ff4f97;
+  --pink-side: #d92f76;
+  --focus: #2d6bff;
+  --font-display: "Bungee", "Arial Black", Impact, system-ui, sans-serif;
+  --font-ui: "Fredoka", "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+}
+
+[hidden] { display: none !important; }
+html { box-sizing: border-box; height: 100%; background: var(--mat); }
+*, *::before, *::after { box-sizing: inherit; }
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+  background-color: var(--mat);
+  background-image:
+    linear-gradient(var(--mat-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--mat-line) 1px, transparent 1px);
+  background-size: 28px 28px;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 16px;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.screen {
+  height: 100%;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* ---------- Keycaps (every button) ---------- */
+.key {
+  --top: var(--cap-top);
+  --top2: var(--cap-top2);
+  --side: var(--cap-side);
+  --side2: var(--cap-side2);
+  --label: var(--ink);
+  --lift: 6px;
+  appearance: none;
+  border: 0;
+  margin: 0 0 var(--lift);
+  padding: 0;
+  font: inherit;
+  color: var(--label);
+  cursor: pointer;
+  position: relative;
+  display: inline-block;
+  min-width: 48px;
+  min-height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--side), var(--side2));
+  box-shadow: 0 var(--lift) 0 var(--side2), 0 calc(var(--lift) + 6px) 14px rgba(28, 36, 66, 0.22);
+  transform: translateY(0);
+  transition: transform 0.05s ease-out, box-shadow 0.05s ease-out;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.key > .face {
+  position: absolute;
+  inset: 4px 6px 9px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, var(--top), var(--top2));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), inset 0 -2px 4px rgba(28, 36, 66, 0.07);
+  display: grid;
+  place-items: center;
+  text-align: center;
+  line-height: 1.05;
+  pointer-events: none;
+}
+.key > .face.inline { grid-auto-flow: column; gap: 2px; }
+.key:active, .key.is-down {
+  transform: translateY(calc(var(--lift) - 1px));
+  box-shadow: 0 1px 0 var(--side2), 0 3px 6px rgba(28, 36, 66, 0.2);
+}
+.key:focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; }
+.key[disabled] { cursor: default; opacity: 0.55; }
+
+.key--accent { --top: #ff9a52; --top2: var(--accent); --side: #ff7f33; --side2: var(--accent-side); --label: #fff; }
+.key--gold { --top: #ffe27a; --top2: var(--gold); --side: #ffcf30; --side2: var(--gold-side); --label: #3d2a00; }
+.key--pink { --top: #ff7fb3; --top2: var(--pink); --side: #ff5c9e; --side2: var(--pink-side); --label: #fff; }
+.key--mod { --top: #e3e8f2; --top2: #cfd6e5; --side: #bcc5d9; --side2: #97a2bd; }
+
+.label-big { font-family: var(--font-display); font-size: 22px; letter-spacing: 0.02em; }
+.label-small { font-family: var(--font-display); font-size: 13px; letter-spacing: 0.06em; }
+.sub { display: block; font-family: var(--font-ui); font-weight: 600; font-size: 11px; letter-spacing: 0.02em; color: inherit; opacity: 0.75; margin-top: 2px; }
+
+/* ---------- Title screen ---------- */
+#title {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-block: 20px 28px;
+}
+.title-inner {
+  max-width: 980px;
+  margin: 0 auto;
+  display: grid;
+  gap: 22px;
+  justify-items: center;
+}
+.title-word {
+  display: flex;
+  gap: clamp(4px, 1.2vw, 10px);
+  justify-content: center;
+  flex-wrap: nowrap;
+}
+.title-word .key {
+  width: clamp(38px, 8.6vw, 82px);
+  height: clamp(42px, 9.2vw, 88px);
+  --lift: clamp(4px, 0.9vw, 8px);
+}
+.title-word .key .face { font-family: var(--font-display); font-size: clamp(20px, 5vw, 46px); }
+.title-row { display: grid; gap: clamp(6px, 1.4vw, 12px); justify-items: center; }
+.title-word.break .key { --top: #ff9a52; --top2: var(--accent); --side: #ff7f33; --side2: var(--accent-side); --label: #fff; }
+.title-word .key.hop { animation: hop 0.32s ease-out; }
+@keyframes hop { 40% { transform: translateY(-10px) rotate(-3deg); } }
+
+.tagline {
+  margin: 0;
+  font-size: clamp(17px, 2.4vw, 22px);
+  font-weight: 600;
+  text-align: center;
+  color: var(--ink-soft);
+  text-wrap: balance;
+}
+.tagline b { color: var(--ink); }
+
+.levels-head {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.levels-head h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 18px;
+  letter-spacing: 0.08em;
+}
+.levels-head p { margin: 0; color: var(--ink-soft); font-weight: 500; }
+.level-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px 12px;
+}
+@media (max-width: 640px) {
+  .level-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.level-grid .key { width: 100%; height: 92px; }
+.level-grid .key .face { padding: 6px 8px; align-content: center; gap: 2px; }
+.lv-num { font-family: var(--font-display); font-size: 28px; line-height: 1; }
+.lv-name { font-weight: 600; font-size: 14px; line-height: 1.1; text-wrap: balance; }
+.lv-done { position: absolute; z-index: 1; top: 8px; right: 12px; font-family: var(--font-display); font-size: 11px; letter-spacing: 0.06em; color: #8a5a00; }
+.level-grid .key.done { --top: #fff4c2; --top2: #ffe27a; --side: #ffcf30; --side2: var(--gold-side); --label: #3d2a00; }
+.level-grid .key.space { grid-column: 1 / -1; height: 74px; --top: #ffd9ef; --top2: #ffb3dc; --side: #ff8cc6; --side2: #e0559f; }
+.level-grid .key.space .face { grid-auto-flow: column; gap: 14px; }
+
+.title-foot {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px 20px;
+  flex-wrap: wrap;
+}
+.howto {
+  margin: 0;
+  color: var(--ink-soft);
+  font-weight: 500;
+  line-height: 1.5;
+  max-width: 62ch;
+}
+.howto kbd {
+  font-family: var(--font-display);
+  font-size: 11px;
+  padding: 2px 6px 3px;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 2px 0 var(--cap-side2);
+  color: var(--ink);
+}
+
+/* ---------- Game screen ---------- */
+#game {
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+  grid-template-areas: "bar" "rules" "coach" "play";
+  gap: 8px;
+  padding-block: 10px 12px;
+}
+.bar {
+  grid-area: bar;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.bar .key { height: 44px; min-width: 52px; --lift: 5px; }
+.bar .key .face { padding: 0 10px; }
+.bar .key.wide { min-width: 108px; }
+.lvl {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  justify-content: center;
+}
+.lvl-num {
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.lvl-name {
+  font-family: var(--font-display);
+  font-size: clamp(16px, 2.6vw, 24px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.moves {
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.rules {
+  grid-area: rules;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-block: 2px 4px;
+}
+.rules::-webkit-scrollbar { display: none; }
+.rules-label {
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+  flex: none;
+}
+.rule {
+  flex: none;
+  display: inline-flex;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: 0 1px 0 rgba(28, 36, 66, 0.08);
+}
+.rule.new { animation: pop 0.45s ease-out; }
+@keyframes pop { 30% { transform: scale(1.14); } }
+.chip {
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  padding: 5px 6px 6px;
+  border-radius: 6px;
+  color: var(--chip-ink, var(--ink));
+  background: var(--chip, #fff);
+  box-shadow: 0 2px 0 var(--chip-side, var(--cap-side2));
+}
+.rules-empty { color: var(--ink-soft); font-weight: 600; font-size: 14px; white-space: nowrap; }
+
+.play {
+  grid-area: play;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: "pad board act";
+  align-items: end;
+  gap: 14px;
+}
+.board-wrap {
+  grid-area: board;
+  position: relative;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  align-self: stretch;
+}
+#board {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+
+.pad {
+  grid-area: pad;
+  display: grid;
+  grid-template-columns: repeat(3, 66px);
+  grid-template-rows: repeat(2, 70px);
+  gap: 6px;
+  padding-bottom: 6px;
+}
+.pad .key { width: 66px; height: 64px; }
+.pad .key svg { width: 26px; height: 26px; }
+.pad .up { grid-column: 2; grid-row: 1; }
+.pad .left { grid-column: 1; grid-row: 2; }
+.pad .down { grid-column: 2; grid-row: 2; }
+.pad .right { grid-column: 3; grid-row: 2; }
+
+.act {
+  grid-area: act;
+  display: grid;
+  gap: 8px;
+  padding-bottom: 6px;
+}
+.act .key { width: 132px; height: 64px; }
+.act .hotkey { display: block; font-family: var(--font-ui); font-weight: 600; font-size: 11px; opacity: 0.7; margin-top: 3px; }
+.key.pulse { animation: pulse 1.1s ease-in-out infinite; }
+@keyframes pulse { 50% { box-shadow: 0 6px 0 var(--side2), 0 0 0 7px rgba(255, 79, 151, 0.35), 0 12px 16px rgba(28, 36, 66, 0.25); } }
+
+/* Portrait and narrow screens: board on top, controls underneath. */
+@media (max-aspect-ratio: 5/4) {
+  .play {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-areas: "board board" "pad act";
+    align-items: end;
+  }
+  .act { justify-self: end; grid-template-columns: repeat(2, auto); }
+  .play.stacked { grid-template-rows: auto auto; align-content: center; row-gap: 20px; }
+  .play.stacked .board-wrap { align-self: start; }
+}
+@media (max-width: 520px) {
+  .pad { grid-template-columns: repeat(3, 56px); grid-template-rows: repeat(2, 60px); gap: 5px; }
+  .pad .key { width: 56px; height: 54px; }
+  .act { grid-template-columns: 1fr; gap: 6px; }
+  .act .key { width: 104px; height: 54px; }
+  .bar .key.wide { min-width: 52px; }
+  .bar .key .wide-text { display: none; }
+  .lvl-num { display: none; }
+}
+@media (max-height: 520px) and (min-aspect-ratio: 5/4) {
+  .pad { grid-template-columns: repeat(3, 52px); grid-template-rows: repeat(2, 54px); gap: 4px; }
+  .pad .key { width: 52px; height: 48px; }
+  .act .key { width: 104px; height: 48px; }
+  .bar .key { height: 38px; }
+}
+
+/* ---------- Cards on top of the board ---------- */
+.card-layer {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  pointer-events: none;
+}
+.card {
+  pointer-events: auto;
+  width: min(440px, 100%);
+  max-height: 100%;
+  overflow: auto;
+  background: var(--card);
+  border-radius: 22px;
+  padding: 22px 22px 18px;
+  box-shadow: 0 10px 0 rgba(28, 36, 66, 0.12), 0 22px 44px rgba(28, 36, 66, 0.28);
+  text-align: center;
+  display: grid;
+  gap: 12px;
+  animation: card-in 0.28s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+@keyframes card-in { from { transform: scale(0.88); } }
+.card h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(22px, 4vw, 30px);
+  line-height: 1.05;
+  text-wrap: balance;
+}
+.card .eyebrow {
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--ink-soft);
+}
+.card p {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.4;
+  text-wrap: pretty;
+}
+.card .stat { font-weight: 600; color: var(--ink-soft); font-size: 16px; }
+.card .row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 4px; }
+.card .row .key { height: 56px; min-width: 172px; }
+.card .row .key .face { padding: 0 14px; white-space: nowrap; }
+.card.win { background: linear-gradient(180deg, #fffbe8, #ffffff 55%); }
+.card.win h3 { color: #d97a00; }
+.card.oops { background: linear-gradient(180deg, #fff0f6, #ffffff 60%); }
+
+.toast {
+  position: absolute;
+  left: 50%;
+  top: 10px;
+  transform: translateX(-50%);
+  max-width: calc(100% - 24px);
+  background: var(--ink);
+  color: #fff;
+  font-weight: 600;
+  font-size: 16px;
+  padding: 10px 16px;
+  border-radius: 14px;
+  box-shadow: 0 8px 20px rgba(28, 36, 66, 0.3);
+  text-align: center;
+  pointer-events: none;
+  animation: card-in 0.25s ease-out;
+}
+
+.toast--rule {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--card);
+  color: var(--ink);
+  padding: 8px 10px 8px 14px;
+  white-space: nowrap;
+}
+.toast--rule .rule { background: transparent; box-shadow: none; padding: 0; }
+.toast-label {
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: #d97a00;
+}
+.toast--broken .toast-label { color: #cf2c2c; }
+.toast--broken .rule { opacity: 0.55; }
+
+/* ---------- How to play ---------- */
+.howto-slot { width: 100%; }
+.howto-key { width: 100%; height: 84px; }
+.howto-key .face { grid-auto-flow: column; gap: 18px; padding: 0 16px; }
+.howto-key .lv-num { font-size: clamp(20px, 3.4vw, 30px); }
+.howto-key .lv-name { font-size: 16px; }
+
+.coach {
+  grid-area: coach;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  background: var(--card);
+  border: 3px solid var(--gold);
+  border-radius: 20px;
+  padding: 10px 12px 10px 12px;
+  box-shadow: 0 5px 0 rgba(224, 168, 0, 0.35), 0 12px 26px rgba(28, 36, 66, 0.14);
+}
+.coach-bot { width: 54px; height: 54px; flex: none; }
+.coach.bump .coach-bot { animation: talk 0.55s ease-out; }
+@keyframes talk {
+  30% { transform: translateY(-7px) rotate(-7deg); }
+  65% { transform: translateY(0) rotate(5deg); }
+}
+.coach-body { flex: 1; min-width: 0; display: grid; gap: 4px; align-content: center; min-height: 86px; }
+.coach-top { display: flex; align-items: center; gap: 10px; }
+.coach-step {
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+}
+.coach-dots { display: inline-flex; gap: 5px; }
+.coach-dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--cap-side); }
+.coach-dots i.on { background: var(--accent); }
+.coach-text {
+  margin: 0;
+  font-size: clamp(17px, 2.2vw, 21px);
+  font-weight: 600;
+  line-height: 1.38;
+  text-wrap: pretty;
+}
+.coach-text .chip, .card .chip, .tip .chip { vertical-align: 2px; margin: 0 1px; }
+.coach-actions { display: flex; gap: 8px; align-items: center; flex: none; }
+.coach-actions .key { height: 50px; min-width: 92px; }
+@media (max-width: 640px) {
+  .coach { flex-wrap: wrap; }
+  .coach-body { min-height: 0; }
+  .coach-bot { width: 40px; height: 40px; }
+  .coach-actions { width: 100%; justify-content: flex-end; }
+}
+
+.tip {
+  position: absolute;
+  z-index: 5;
+  width: max-content;
+  max-width: min(300px, calc(100% - 16px));
+  background: var(--ink);
+  color: #fff;
+  border-radius: 14px;
+  padding: 10px 12px 11px;
+  box-shadow: 0 10px 24px rgba(28, 36, 66, 0.32);
+  transform: translate(-50%, -100%);
+  pointer-events: none;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.35;
+  animation: card-in 0.18s ease-out;
+}
+.tip.below { transform: translate(-50%, 0); }
+.tip p { margin: 0; }
+.tip-head { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-weight: 600; }
+.tip-state { margin-top: 4px !important; font-size: 13px; opacity: 0.78; }
+
+@media (prefers-reduced-motion: reduce) {
+  .card, .toast, .rule.new, .title-word .key.hop, .key.pulse, .coach.bump .coach-bot, .tip { animation: none; }
+  .key { transition: none; }
+}
+
+</style>
+
+<section id="title" class="screen" aria-label="Rule Breaker">
+  <div class="title-inner">
+    <div class="title-row" id="titleRows" aria-label="Rule Breaker"></div>
+    <p class="tagline">Push the keys. <b>Change the rules.</b> Break the game.</p>
+    <div class="howto-slot" id="howtoSlot"></div>
+    <div class="levels-head">
+      <h2>LEVELS</h2>
+      <p id="progress">0 of 10 cleared</p>
+    </div>
+    <div class="level-grid" id="levelGrid"></div>
+    <div class="title-foot">
+      <p class="howto">Move with the arrow keys, WASD, a swipe on the board, or the arrow keycaps. <kbd>Z</kbd> undoes a move. <kbd>R</kbd> restarts. <kbd>H</kbd> shows a hint.</p>
+      <button class="key key--mod" id="titleSound" style="width:150px;height:48px"><span class="face label-small">SOUND: ON</span></button>
+    </div>
+  </div>
+</section>
+
+<section id="game" class="screen" hidden aria-label="Playing">
+  <header class="bar">
+    <button class="key key--mod wide" id="btnLevels" aria-label="Back to the level list">
+      <span class="face label-small inline"><span aria-hidden="true">&#9664;</span><span class="wide-text">&nbsp;LEVELS</span></span>
+    </button>
+    <div class="lvl">
+      <span class="lvl-num" id="lvlNum">LEVEL 1</span>
+      <span class="lvl-name" id="lvlName">Hello, BOT</span>
+    </div>
+    <span class="moves" id="moves">0 MOVES</span>
+    <button class="key key--gold" id="btnHint" aria-label="Show a hint"><span class="face label-small">HINT</span></button>
+    <button class="key key--mod" id="btnSound" aria-label="Sound is on. Turn sound off">
+      <span class="face">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+          <path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/>
+          <path class="wave" d="M16 8.6a5 5 0 0 1 0 6.8M18.6 6a8.6 8.6 0 0 1 0 12" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <path class="mute" d="M16.5 9.5l5 5m0-5l-5 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="display:none"/>
+        </svg>
+      </span>
+    </button>
+  </header>
+
+  <div class="rules" id="rulesBar" aria-live="polite"></div>
+
+  <div class="coach" id="coach" hidden>
+    <svg class="coach-bot" viewBox="0 0 48 48" aria-hidden="true">
+      <line x1="24" y1="5" x2="24" y2="12" stroke="#d14f00" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="24" cy="5" r="4" fill="#ffd23f"/>
+      <rect x="6" y="11" width="36" height="27" rx="9" fill="#ff7a1a" stroke="#cf4c00" stroke-width="2.5"/>
+      <rect x="12" y="16" width="24" height="14" rx="5" fill="#25336a"/>
+      <rect x="16.5" y="19" width="4" height="7" rx="2" fill="#62f3ff"/>
+      <rect x="27.5" y="19" width="4" height="7" rx="2" fill="#62f3ff"/>
+      <rect x="12" y="39" width="9" height="6" rx="2" fill="#2b3150"/>
+      <rect x="27" y="39" width="9" height="6" rx="2" fill="#2b3150"/>
+    </svg>
+    <div class="coach-body">
+      <div class="coach-top"><span class="coach-step" id="coachStep">LESSON 1 OF 4</span><span class="coach-dots" id="coachDots"></span></div>
+      <p class="coach-text" id="coachText" aria-live="polite"></p>
+    </div>
+    <div class="coach-actions">
+      <button class="key key--accent" id="coachNext"><span class="face label-small">NEXT</span></button>
+      <button class="key key--mod" id="coachSkip" aria-label="Skip the lessons"><span class="face label-small">SKIP</span></button>
+    </div>
+  </div>
+
+  <div class="play">
+    <div class="pad" id="pad" aria-label="Arrow keys">
+      <button class="key up" data-dir="up" aria-label="Move up"><span class="face"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5l7.5 8.5h-4.8v6.5H9.3V13H4.5z" fill="currentColor"/></svg></span></button>
+      <button class="key left" data-dir="left" aria-label="Move left"><span class="face"><svg viewBox="0 0 24 24" aria-hidden="true" style="transform:rotate(-90deg)"><path d="M12 4.5l7.5 8.5h-4.8v6.5H9.3V13H4.5z" fill="currentColor"/></svg></span></button>
+      <button class="key down" data-dir="down" aria-label="Move down"><span class="face"><svg viewBox="0 0 24 24" aria-hidden="true" style="transform:rotate(180deg)"><path d="M12 4.5l7.5 8.5h-4.8v6.5H9.3V13H4.5z" fill="currentColor"/></svg></span></button>
+      <button class="key right" data-dir="right" aria-label="Move right"><span class="face"><svg viewBox="0 0 24 24" aria-hidden="true" style="transform:rotate(90deg)"><path d="M12 4.5l7.5 8.5h-4.8v6.5H9.3V13H4.5z" fill="currentColor"/></svg></span></button>
+    </div>
+
+    <div class="board-wrap" id="boardWrap">
+      <canvas id="board" role="img" aria-label="The game board. Push word keys to change the rules."></canvas>
+      <div class="card-layer" id="cardLayer"></div>
+    </div>
+
+    <div class="act">
+      <button class="key key--pink" id="btnUndo" aria-label="Undo (Z)"><span class="face label-small">UNDO<span class="hotkey">Z</span></span></button>
+      <button class="key key--mod" id="btnRestart" aria-label="Restart (R)"><span class="face label-small">RESTART<span class="hotkey">R</span></span></button>
+    </div>
+  </div>
+</section>
+
+<script>
+// Rule Breaker — game rules engine (no DOM). Used by the game and by the level checker.
+(function (root) {
+  'use strict';
+
+  // Every word key and what kind of key it is.
+  const WORDS = {
+    bot: 'noun', wall: 'noun', star: 'noun', box: 'noun', lava: 'noun', water: 'noun',
+    is: 'is',
+    me: 'prop', win: 'prop', stop: 'prop', push: 'prop', zap: 'prop', sink: 'prop'
+  };
+  const NOUNS = ['bot', 'wall', 'star', 'box', 'lava', 'water'];
+  const WORD_LIST = Object.keys(WORDS);
+
+  // Map characters used in level drawings.
+  const LEGEND = {
+    '.': null,
+    b: { kind: 'obj', type: 'bot' },
+    w: { kind: 'obj', type: 'wall' },
+    s: { kind: 'obj', type: 'star' },
+    x: { kind: 'obj', type: 'box' },
+    l: { kind: 'obj', type: 'lava' },
+    '~': { kind: 'obj', type: 'water' },
+    B: { kind: 'text', word: 'bot' },
+    W: { kind: 'text', word: 'wall' },
+    S: { kind: 'text', word: 'star' },
+    X: { kind: 'text', word: 'box' },
+    L: { kind: 'text', word: 'lava' },
+    O: { kind: 'text', word: 'water' },
+    '=': { kind: 'text', word: 'is' },
+    M: { kind: 'text', word: 'me' },
+    V: { kind: 'text', word: 'win' },
+    T: { kind: 'text', word: 'stop' },
+    P: { kind: 'text', word: 'push' },
+    Z: { kind: 'text', word: 'zap' },
+    K: { kind: 'text', word: 'sink' }
+  };
+
+  const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
+  const MAX_THINGS = 400;
+
+  function load(level) {
+    const rows = level.map;
+    const H = rows.length;
+    const W = rows[0].length;
+    const objs = [];
+    let id = 1;
+    const layers = [rows].concat(level.under ? [level.under] : []);
+    for (const layer of layers) {
+      for (let y = 0; y < H; y++) {
+        if (layer[y].length !== W) throw new Error('Row ' + y + ' has the wrong width in ' + level.name);
+        for (let x = 0; x < W; x++) {
+          const d = LEGEND[layer[y][x]];
+          if (d === undefined) throw new Error('Unknown map character "' + layer[y][x] + '" in ' + level.name);
+          if (d) objs.push({ id: id++, kind: d.kind, type: d.type || null, word: d.word || null, x, y });
+        }
+      }
+    }
+    return { W, H, objs, nextId: id };
+  }
+
+  // Find every rule: three keys in a row (left to right, or top to bottom): THING = THING/POWER
+  function parseRules(objs, W, H) {
+    const grid = new Array(W * H).fill(null);
+    for (const o of objs) if (o.kind === 'text') grid[o.y * W + o.x] = o;
+    const rules = [];
+    const active = new Set();
+    const add = (a, b, c) => {
+      const kc = WORDS[c.word];
+      if (b.word !== 'is' || (kc !== 'noun' && kc !== 'prop')) return;
+      rules.push([a.word, c.word, [a.id, b.id, c.id]]);
+      active.add(a.id); active.add(b.id); active.add(c.id);
+    };
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const a = grid[y * W + x];
+        if (!a || WORDS[a.word] !== 'noun') continue;
+        if (x + 2 < W) {
+          const b = grid[y * W + x + 1], c = grid[y * W + x + 2];
+          if (b && c) add(a, b, c);
+        }
+        if (y + 2 < H) {
+          const b = grid[(y + 1) * W + x], c = grid[(y + 2) * W + x];
+          if (b && c) add(a, b, c);
+        }
+      }
+    }
+    return { rules, active };
+  }
+
+  function propMap(rules) {
+    const m = {};
+    for (const [s, o] of rules) {
+      if (WORDS[o] === 'prop') (m[s] || (m[s] = new Set())).add(o);
+    }
+    return m;
+  }
+
+  function has(pm, o, p) {
+    if (o.kind === 'text') return p === 'push';
+    const s = pm[o.type];
+    return !!(s && s.has(p));
+  }
+
+  function ruleStrings(rules) {
+    const out = new Set();
+    for (const [s, o] of rules) out.add(s + '=' + o);
+    return out;
+  }
+
+  // One turn: everything that is ME tries to move one step in `dir`.
+  function step(st, dir) {
+    const D = DIRS[dir];
+    const dx = D[0], dy = D[1];
+    const W = st.W, H = st.H;
+    let nextId = st.nextId;
+    let objs = st.objs.map(o => ({ id: o.id, kind: o.kind, type: o.type, word: o.word, x: o.x, y: o.y }));
+    const ev = {
+      noMe: false, blocked: false, changed: false,
+      moved: [], pushed: [], formed: [], broken: [],
+      transformed: [], sunk: [], zapped: [], won: false, winAt: null, meLeft: 0
+    };
+
+    const before = parseRules(objs, W, H);
+    let pm = propMap(before.rules);
+
+    const movers = objs.filter(o => o.kind === 'obj' && has(pm, o, 'me'));
+    if (!movers.length) { ev.noMe = true; return { state: st, ev }; }
+
+    const cells = new Map();
+    const key = (x, y) => y * W + x;
+    const EMPTY = [];
+    for (const o of objs) {
+      const k = key(o.x, o.y);
+      let a = cells.get(k);
+      if (!a) cells.set(k, (a = []));
+      a.push(o);
+    }
+    const at = (x, y) => cells.get(key(x, y)) || EMPTY;
+    const place = (o, nx, ny) => {
+      const a = cells.get(key(o.x, o.y));
+      a.splice(a.indexOf(o), 1);
+      o.x = nx; o.y = ny;
+      const k = key(nx, ny);
+      let b = cells.get(k);
+      if (!b) cells.set(k, (b = []));
+      b.push(o);
+    };
+    const isPush = o => o.kind === 'text' || has(pm, o, 'push');
+    const isStop = o => o.kind === 'obj' && has(pm, o, 'stop') && !has(pm, o, 'push');
+
+    const canEnter = (x, y) => {
+      if (x < 0 || y < 0 || x >= W || y >= H) return false;
+      let pushHere = false;
+      for (const o of at(x, y)) {
+        if (isStop(o)) return false;
+        if (isPush(o)) pushHere = true;
+      }
+      return pushHere ? canEnter(x + dx, y + dy) : true;
+    };
+    const done = new Set();
+    const pushFrom = (x, y) => {
+      const ps = at(x, y).filter(isPush);
+      if (!ps.length) return;
+      pushFrom(x + dx, y + dy);
+      for (const o of ps) { place(o, x + dx, y + dy); ev.pushed.push(o.id); done.add(o.id); }
+    };
+
+    // Things furthest along the direction move first, so a line of ME moves together.
+    movers.sort((a, b) => (b.x * dx + b.y * dy) - (a.x * dx + a.y * dy));
+    for (const m of movers) {
+      if (done.has(m.id)) continue;
+      const nx = m.x + dx, ny = m.y + dy;
+      if (canEnter(nx, ny)) {
+        pushFrom(nx, ny);
+        place(m, nx, ny);
+        done.add(m.id);
+        ev.moved.push(m.id);
+      }
+    }
+    if (!ev.moved.length) { ev.blocked = true; return { state: st, ev }; }
+    ev.changed = true;
+
+    // Rules may have changed: re-read them.
+    let after = parseRules(objs, W, H);
+
+    // THING = OTHER THING turns things into other things.
+    const protect = new Set();
+    for (const [s, o] of after.rules) if (s === o) protect.add(s);
+    const tmap = {};
+    for (const [s, o] of after.rules) {
+      if (WORDS[o] !== 'noun' || s === o || protect.has(s)) continue;
+      const list = tmap[s] || (tmap[s] = []);
+      if (list.indexOf(o) < 0) list.push(o);
+    }
+    if (Object.keys(tmap).length) {
+      const out = [];
+      for (const o of objs) {
+        let targets = o.kind === 'obj' ? tmap[o.type] : null;
+        if (!targets) { out.push(o); continue; }
+        // One thing turning into two things can snowball; stop copying past a safe size.
+        if (targets.length > 1 && objs.length + out.length > MAX_THINGS) targets = targets.slice(0, 1);
+        const toIds = [];
+        for (const t of targets) {
+          const n = { id: nextId++, kind: 'obj', type: t, word: null, x: o.x, y: o.y };
+          out.push(n);
+          toIds.push(n.id);
+        }
+        ev.transformed.push({ fromId: o.id, from: o.type, to: targets.slice(), toIds, x: o.x, y: o.y });
+      }
+      objs = out;
+    }
+    pm = propMap(after.rules);
+
+    // SINK: a sinking thing and anything sharing its square disappear together.
+    const byCell = new Map();
+    for (const o of objs) {
+      const k = key(o.x, o.y);
+      let a = byCell.get(k);
+      if (!a) byCell.set(k, (a = []));
+      a.push(o);
+    }
+    const gone = new Set();
+    let lostText = false;
+    for (const list of byCell.values()) {
+      if (list.length < 2) continue;
+      if (!list.some(o => has(pm, o, 'sink'))) continue;
+      ev.sunk.push({ x: list[0].x, y: list[0].y, ids: list.map(o => o.id), types: list.map(o => o.type || o.word) });
+      for (const o of list) { gone.add(o.id); if (o.kind === 'text') lostText = true; }
+    }
+    if (gone.size) objs = objs.filter(o => !gone.has(o.id));
+    if (lostText) { after = parseRules(objs, W, H); pm = propMap(after.rules); }
+
+    // ZAP: anything that is ME and touches something ZAP is destroyed.
+    const zapCells = new Set();
+    for (const o of objs) if (has(pm, o, 'zap')) zapCells.add(key(o.x, o.y));
+    if (zapCells.size) {
+      const keep = [];
+      for (const o of objs) {
+        if (o.kind === 'obj' && has(pm, o, 'me') && zapCells.has(key(o.x, o.y))) {
+          ev.zapped.push({ id: o.id, type: o.type, x: o.x, y: o.y });
+        } else keep.push(o);
+      }
+      objs = keep;
+    }
+
+    // WIN: something that is ME shares a square with something that is WIN (or is WIN itself).
+    const winCells = new Set();
+    for (const o of objs) if (has(pm, o, 'win')) winCells.add(key(o.x, o.y));
+    for (const o of objs) {
+      if (o.kind === 'obj' && has(pm, o, 'me')) {
+        ev.meLeft++;
+        if (!ev.won && winCells.has(key(o.x, o.y))) { ev.won = true; ev.winAt = { x: o.x, y: o.y }; }
+      }
+    }
+
+    const r0 = ruleStrings(before.rules), r1 = ruleStrings(after.rules);
+    for (const r of r1) if (!r0.has(r)) ev.formed.push(r);
+    for (const r of r0) if (!r1.has(r)) ev.broken.push(r);
+
+    return { state: { W, H, objs, nextId }, ev };
+  }
+
+  function rulesOf(st) { return parseRules(st.objs, st.W, st.H); }
+
+  function meCount(st) {
+    const pm = propMap(rulesOf(st).rules);
+    let n = 0;
+    for (const o of st.objs) if (o.kind === 'obj' && has(pm, o, 'me')) n++;
+    return n;
+  }
+
+  // A compact fingerprint of a position (ids ignored), used by the level checker.
+  function stateKey(st) {
+    const codes = new Int32Array(st.objs.length);
+    for (let i = 0; i < st.objs.length; i++) {
+      const o = st.objs[i];
+      const t = o.kind === 'text' ? 20 + WORD_LIST.indexOf(o.word) : NOUNS.indexOf(o.type);
+      codes[i] = t * 65536 + o.y * 256 + o.x;
+    }
+    codes.sort();
+    let h1 = 0x811c9dc5, h2 = 0x01000193 ^ codes.length;
+    for (let i = 0; i < codes.length; i++) {
+      const c = codes[i];
+      h1 = Math.imul(h1 ^ c, 16777619) >>> 0;
+      h2 = Math.imul(h2 ^ ((c * 2654435761) >>> 0), 2246822519) >>> 0;
+      h2 = ((h2 << 13) | (h2 >>> 19)) >>> 0;
+    }
+    return h1 * 1048576 + (h2 & 0xfffff);
+  }
+
+  const api = { WORDS, NOUNS, LEGEND, DIRS, load, parseRules, propMap, has, step, rulesOf, meCount, stateKey, ruleStrings };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else root.RB_ENGINE = api;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+// Rule Breaker — levels.
+// Map key:  . empty   b bot   w wall   s star   x box   l lava   ~ water
+// Word keys: B BOT  W WALL  S STAR  X BOX  L LAVA  O WATER  = (equals)
+//            M ME  V WIN  T STOP  P PUSH  Z ZAP  K SINK
+(function (root) {
+  'use strict';
+  const LEVELS = [
+    {
+      name: 'Hello, BOT',
+      intro: 'You are the BOT. Touch the STAR to win! Swipe, tap the arrow keys, or use your keyboard.',
+      hint: 'Walk to the right. Boxes can be pushed, or you can go around them.',
+      map: [
+        '.............',
+        '.B=M.....S=V.',
+        '.............',
+        'wwwwwwwwwwwww',
+        '......x......',
+        '.b...x....s..',
+        '........x....',
+        'wwwwwwwwwwwww',
+        '.W=T.....X=P.'
+      ]
+    },
+    {
+      name: 'Missing Key',
+      intro: 'The keys make the rules. Three keys in a row make a rule: THING = POWER. One rule here is missing a key.',
+      hint: 'Push the WIN key until it sits right after STAR =. Then touch the star.',
+      map: [
+        '.............',
+        '.B=M.........',
+        '.............',
+        '.S=..........',
+        '.............',
+        '........V....',
+        '.............',
+        '.b.........s.',
+        '.............'
+      ]
+    },
+    {
+      name: 'Wall Breaker',
+      intro: 'Rules can be broken! Push one key out of line and that rule stops working.',
+      hint: 'Push STOP (or WALL, or =) up or down. Then walk right through the walls.',
+      map: [
+        '.............',
+        '.wwwwwww.....',
+        '.w.....w.....',
+        '.w.W=T.w..s..',
+        '.w.....w.....',
+        '.w.b...w.....',
+        '.wwwwwww.....',
+        '.............',
+        'B=M.....S=V..'
+      ]
+    },
+    {
+      name: 'Swap It',
+      intro: 'No star in here. But who says only stars can WIN?',
+      hint: 'Get above WIN and push it down into the spot where STOP is. WALL = WIN! Then touch any wall.',
+      map: [
+        '.............',
+        '..wwwwwwwww..',
+        '..w.......w..',
+        '..w...V...w..',
+        '..w.......w..',
+        '..w.W=T...w..',
+        '..w.b.....w..',
+        '..wwwwwwwww..',
+        'B=M..........'
+      ]
+    },
+    {
+      name: 'Body Swap',
+      intro: 'You are locked in a cage. Rules on the edge of the board are stuck there forever. So... what if you were not the BOT?',
+      hint: 'Push the BOX key into the spot where BOT is, so the rule says BOX = ME. Then drive the box to the star.',
+      map: [
+        'W=T..........',
+        '.............',
+        '.wwwwww......',
+        '.w....w..x...',
+        '.w.X..w......',
+        '.wB=M.w......',
+        '.w.b..w....s.',
+        '.wwwwww......',
+        'X=P.....S=V..'
+      ]
+    },
+    {
+      name: 'Hot Lava',
+      intro: 'LAVA = ZAP: if ME touches lava, ME gets zapped! Look closely: one key is part of two rules.',
+      hint: 'Push ZAP (or LAVA) up or down. Do not push the = key sideways, because it is also part of BOT = ME.',
+      map: [
+        'S=V....ll....',
+        '.......ll....',
+        '...B...ll....',
+        '..L=Z..ll..s.',
+        '...M...ll....',
+        '.b.....ll....',
+        '.......ll....',
+        '.......ll....',
+        '.......ll....'
+      ]
+    },
+    {
+      name: 'Splash',
+      intro: 'WATER = SINK: anything that goes into the water sinks, and that water square disappears too.',
+      hint: 'Push two boxes into the water in the same row. That makes a dry path across.',
+      map: [
+        'B=M....~~O=K.',
+        '.......~~....',
+        '..x....~~....',
+        '.......~~....',
+        '.b..x..~~..s.',
+        '.......~~....',
+        '..x....~~....',
+        '.......~~....',
+        'X=P....~~S=V.'
+      ]
+    },
+    {
+      name: 'Magic Change',
+      intro: 'THING = OTHER THING changes things! The real star is locked away. Can you make a new one?',
+      hint: 'Push the STAR key into the spot where PUSH is, so the rule says BOX = STAR.',
+      map: [
+        'S=V....wwwww.',
+        '.......wwsww.',
+        '.......wwwww.',
+        '.............',
+        '.b....X=P....',
+        '.............',
+        '...x.....S...',
+        '.............',
+        'W=T.......B=M'
+      ]
+    },
+    {
+      name: 'Wall Ferry',
+      intro: 'No boxes this time. You will need two tricks at once.',
+      hint: 'Push PUSH down into the spot where STOP is: WALL = PUSH. Then push two walls into the water in the same row.',
+      map: [
+        'B=M....~~O=K.',
+        '.......~~....',
+        '....b..~~....',
+        'wwPw...~~....',
+        'W=Tw...~~..s.',
+        'ww.w...~~....',
+        '..w....~~....',
+        '....ww.~~....',
+        '.......~~S=V.'
+      ]
+    },
+    {
+      name: 'Rule Breaker',
+      intro: 'The last level. The star is locked, lava zaps, and walls stop. Time to break the biggest rule.',
+      hint: 'Build BOT = WIN going down from the BOT key, and keep BOT = ME. You will be ME and WIN at the same time!',
+      map: [
+        'S=V...wwwww.L',
+        '......wwsww.=',
+        '......wwwww.Z',
+        '.............',
+        '..B=M........',
+        '.............',
+        '.b......=..V.',
+        '....lll......',
+        'W=T.lll......'
+      ]
+    },
+    {
+      name: 'Sandbox',
+      sandbox: true,
+      intro: 'No puzzle here. Lots of keys. Turn walls into stars, become the lava, sink everything. Go wild!',
+      hint: 'Ideas: WALL = STAR. LAVA = ME. BOX = WATER. BOT = WIN.',
+      map: [
+        'B=M.....W=T......',
+        '.................',
+        '..wwww.....~~~...',
+        '..w..w..x..~~~.s.',
+        '..w.bw.....~~~...',
+        '..w..w..x........',
+        '..ww.w.......lll.',
+        '.............lll.',
+        'X=P....L=Z.......',
+        '....=....=....=..',
+        'O=K...S=V..W.X.S.',
+        '.B.L.M.P.T.Z.K.V.'
+      ]
+    }
+  ];
+  if (typeof module !== 'undefined' && module.exports) module.exports = LEVELS;
+  else root.RB_LEVELS = LEVELS;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+// Rule Breaker — the guided "How to play" lessons.
+// Each lesson is a tiny board plus steps. A step shows coach text and waits for one thing:
+//   next: true           -> the NEXT button (or any move)
+//   until: { moves: n }  -> n moves
+//   until: { formed: r } -> rule r exists (like 'star=win')
+//   until: { broken: r } -> rule r is gone
+//   until: 'win'         -> winning the board
+// focus: what to circle — 'thing:bot', 'word:win', 'rule:bot=me', 'cell:3,2'
+// Words in [brackets] inside text are drawn as little keycaps.
+(function (root) {
+  'use strict';
+  const TUTORIAL = [
+    {
+      name: 'You are the robot',
+      map: [
+        'B=M......',
+        '.........',
+        '.........',
+        '..b...s..',
+        '.........',
+        '.........',
+        'S=V......'
+      ],
+      steps: [
+        { text: 'Hi! This little robot is YOU.', focus: ['thing:bot'], dim: true, next: true },
+        { text: 'These 3 keys make a rule: [bot][is][me]. It means the robot is you. Keys that glow are rules that are working right now.', focus: ['rule:bot=me'], dim: true, next: true },
+        { text: 'Move around! Tap the arrow keys, or swipe on the board. Make 3 moves.', pad: true, until: { moves: 3 } },
+        { text: 'This rule says [star][is][win]. So touch the star to win!', focus: ['rule:star=win', 'thing:star'], until: 'win' }
+      ],
+      done: 'You won! In this game, the keys decide everything.'
+    },
+    {
+      name: 'Fix a rule',
+      map: [
+        'B=M......',
+        '.........',
+        '.S=......',
+        '.........',
+        '...V.....',
+        '.b.....s.',
+        '.........'
+      ],
+      steps: [
+        { text: 'Uh oh! This rule is broken: [star][is] ... and then nothing! The [win] key fell off.', focus: ['cell:1,2', 'cell:2,2', 'cell:3,2'], ghost: { x: 3, y: 2, word: 'win' }, dim: true, next: true },
+        { text: 'You can PUSH keys! Walk under the [win] key, then push it UP into the empty spot.', focus: ['word:win'], ghost: { x: 3, y: 2, word: 'win' }, arrow: { from: 'word:win', to: [3, 2] }, until: { formed: 'star=win' },
+          retry: 'Oops! The [win] key left the empty spot. Push it back in. Follow the pink arrow, or tap RESTART.' },
+        { text: 'You fixed it! [star][is][win] works again. Now go touch the star!', focus: ['thing:star'], until: 'win' }
+      ],
+      done: 'Pushing keys changes the rules. That is the whole trick!'
+    },
+    {
+      name: 'Break a rule',
+      map: [
+        'B=M......',
+        '.........',
+        '.wwwww...',
+        '.w.b.w...',
+        '.wW=Tw.s.',
+        '.w...w...',
+        '.wwwww...',
+        'S=V......'
+      ],
+      steps: [
+        { text: 'You are trapped! The rule [wall][is][stop] means walls stop you.', focus: ['rule:wall=stop'], dim: true, next: true },
+        { text: 'Break the rule! Push the [stop] key out of the line. Stand on top of it, then push DOWN.', focus: ['word:stop'], arrow: { from: 'word:stop', dir: 'down' }, until: { broken: 'wall=stop' },
+          retry: 'The rule is back together, so the walls stop you again. Push a key out of the line to break it!' },
+        { text: 'Rule broken! The walls look like ghosts now, so they cannot stop you. Walk right through them to the star!', focus: ['thing:star'], until: 'win' }
+      ],
+      done: 'If a rule is in your way, break it!'
+    },
+    {
+      name: 'Make your own rule',
+      map: [
+        'B=M......',
+        '.........',
+        '..W=.....',
+        '.........',
+        '....V....',
+        '.b.......',
+        '.....www.',
+        '.........'
+      ],
+      steps: [
+        { text: 'No star here! But YOU get to choose what wins. This rule is missing its last key: [wall][is] ...', focus: ['cell:2,2', 'cell:3,2', 'cell:4,2'], ghost: { x: 4, y: 2, word: 'win' }, dim: true, next: true },
+        { text: 'Push the [win] key UP into the gap to make [wall][is][win].', focus: ['word:win'], ghost: { x: 4, y: 2, word: 'win' }, arrow: { from: 'word:win', to: [4, 2] }, until: { formed: 'wall=win' },
+          retry: 'Oops! The [win] key left the gap. Push it back in to make [wall][is][win]. Follow the pink arrow, or tap RESTART.' },
+        { text: 'Now walls are WIN, so they sparkle! Touch a wall to win.', focus: ['thing:wall'], until: 'win' }
+      ],
+      done: 'You made a brand-new rule. Anything can be WIN!'
+    }
+  ];
+  if (typeof module !== 'undefined' && module.exports) module.exports = TUTORIAL;
+  else root.RB_TUTORIAL = TUTORIAL;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+// Rule Breaker — drawing, sound, controls and screens.
+(function () {
+  'use strict';
+  const E = window.RB_ENGINE;
+  const LEVELS = window.RB_LEVELS;
+  const PUZZLES = LEVELS.filter(l => !l.sandbox).length;
+  const reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const $ = id => document.getElementById(id);
+  const DISPLAY = '"Bungee", "Arial Black", Impact, system-ui, sans-serif';
+
+  // ---------- Saved progress (this browser only) ----------
+  const SAVE_KEY = 'rule-breaker-save-v1';
+  const save = { done: {}, best: {}, sound: true };
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (raw) { const s = JSON.parse(raw); if (s && typeof s === 'object') Object.assign(save, s); }
+  } catch (e) { /* storage blocked: play without saving */ }
+  function persist() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) { /* ignore */ } }
+
+  // ---------- Sound (all made with Web Audio, no files) ----------
+  const Snd = (function () {
+    let ac = null, out = null, noiseBuf = null;
+    let on = save.sound !== false;
+    function init() {
+      if (ac) { if (ac.state !== 'running') ac.resume().catch(() => {}); return; }
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      try { ac = new AC(); } catch (e) { ac = null; return; }
+      const comp = ac.createDynamicsCompressor();
+      comp.threshold.value = -16; comp.knee.value = 12; comp.ratio.value = 4;
+      comp.attack.value = 0.003; comp.release.value = 0.2;
+      out = ac.createGain();
+      out.gain.value = on ? 0.85 : 0;
+      out.connect(comp); comp.connect(ac.destination);
+      const len = Math.floor(ac.sampleRate * 2);
+      noiseBuf = ac.createBuffer(1, len, ac.sampleRate);
+      const d = noiseBuf.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+      try { // iPad: a silent blip unlocks audio
+        const b = ac.createBuffer(1, 1, 22050), src = ac.createBufferSource();
+        src.buffer = b; src.connect(ac.destination); src.start(0);
+      } catch (e) { /* ignore */ }
+      if (ac.state !== 'running') ac.resume().catch(() => {});
+    }
+    const live = () => !!(ac && on && ac.state === 'running');
+    const rnd = (a, b) => a + Math.random() * (b - a);
+    function env(t, peak, attack, decay) {
+      const gn = ac.createGain();
+      gn.gain.setValueAtTime(0.0001, t);
+      gn.gain.exponentialRampToValueAtTime(Math.max(0.0002, peak), t + attack);
+      gn.gain.exponentialRampToValueAtTime(0.0001, t + attack + decay);
+      return gn;
+    }
+    function noise(t, len, type, f0, f1, q, peak, attack, decay) {
+      const src = ac.createBufferSource();
+      src.buffer = noiseBuf;
+      const f = ac.createBiquadFilter();
+      f.type = type; f.Q.value = q;
+      f.frequency.setValueAtTime(f0, t);
+      if (f1) f.frequency.exponentialRampToValueAtTime(f1, t + attack + decay);
+      const gn = env(t, peak, attack, decay);
+      src.connect(f); f.connect(gn); gn.connect(out);
+      src.start(t, Math.random() * (noiseBuf.duration - len - 0.05), len);
+    }
+    function tone(t, type, f0, f1, peak, attack, decay) {
+      const o = ac.createOscillator();
+      o.type = type;
+      o.frequency.setValueAtTime(f0, t);
+      if (f1) o.frequency.exponentialRampToValueAtTime(f1, t + attack + decay);
+      const gn = env(t, peak, attack, decay);
+      o.connect(gn); gn.connect(out);
+      o.start(t); o.stop(t + attack + decay + 0.05);
+    }
+    let foot = 0;
+    return {
+      init,
+      get on() { return on; },
+      set(v) {
+        on = v;
+        if (out && ac) out.gain.setValueAtTime(v ? 0.85 : 0, ac.currentTime);
+      },
+      // A mechanical keyboard key: click, clack, thock, then the key springing back up.
+      key(str) {
+        if (!live()) return;
+        str = str || 1;
+        const t = ac.currentTime + 0.002, p = rnd(0.9, 1.1);
+        noise(t, 0.03, 'highpass', 2300 * p, 0, 0.7, 0.42 * str, 0.001, 0.018);
+        noise(t, 0.08, 'bandpass', 1050 * p, 0, 1.1, 0.62 * str, 0.002, 0.045);
+        tone(t, 'sine', 245 * p, 105 * p, 0.42 * str, 0.002, 0.08);
+        const t2 = t + rnd(0.07, 0.095);
+        noise(t2, 0.03, 'bandpass', 2900 * p, 0, 1.4, 0.15 * str, 0.001, 0.02);
+      },
+      step() {
+        if (!live()) return;
+        const t = ac.currentTime + 0.002;
+        foot ^= 1;
+        const f = foot ? 520 : 465;
+        tone(t, 'square', f, f * 0.8, 0.045, 0.002, 0.05);
+        tone(t, 'sine', f / 2, f * 0.38, 0.09, 0.002, 0.06);
+      },
+      thud() {
+        if (!live()) return;
+        const t = ac.currentTime + 0.002;
+        noise(t, 0.2, 'lowpass', 760, 200, 0.8, 0.5, 0.003, 0.13);
+        tone(t, 'sine', 135, 68, 0.34, 0.003, 0.12);
+      },
+      bonk() {
+        if (!live()) return;
+        const t = ac.currentTime + 0.002;
+        tone(t, 'triangle', 190, 118, 0.17, 0.003, 0.12);
+        noise(t, 0.08, 'lowpass', 420, 0, 0.7, 0.1, 0.002, 0.06);
+      },
+      ruleOn() {
+        if (!live()) return;
+        const t = ac.currentTime + 0.01;
+        [659.3, 880, 1174.7, 1568].forEach((f, i) => tone(t + i * 0.06, 'triangle', f, 0, 0.16, 0.004, 0.17));
+        tone(t + 0.2, 'sine', 2637, 0, 0.05, 0.003, 0.25);
+        tone(t + 0.26, 'sine', 3136, 0, 0.04, 0.003, 0.25);
+      },
+      ruleOff() {
+        if (!live()) return;
+        const t = ac.currentTime + 0.01;
+        [784, 587.3, 440].forEach((f, i) => tone(t + i * 0.07, 'triangle', f, f * 0.97, 0.12, 0.004, 0.15));
+      },
+      boom() {
+        if (!live()) return;
+        const t = ac.currentTime + 0.005;
+        noise(t, 1.0, 'lowpass', 3600, 130, 0.7, 0.95, 0.005, 0.9);
+        tone(t, 'sine', 115, 36, 0.85, 0.004, 0.7);
+        for (let i = 0; i < 7; i++) noise(t + rnd(0.04, 0.5), 0.04, 'highpass', 3000, 0, 0.7, 0.14, 0.001, 0.03);
+      },
+      splash() {
+        if (!live()) return;
+        const t = ac.currentTime + 0.005;
+        noise(t, 0.5, 'bandpass', 1700, 420, 0.9, 0.55, 0.01, 0.42);
+        for (let i = 0; i < 5; i++) {
+          const f = rnd(340, 620);
+          tone(t + rnd(0.08, 0.45), 'sine', f, f * 2.3, 0.07, 0.004, 0.06);
+        }
+      },
+      poof() {
+        if (!live()) return;
+        const t = ac.currentTime + 0.005;
+        noise(t, 0.35, 'highpass', 900, 5200, 0.7, 0.24, 0.02, 0.26);
+        tone(t, 'sine', 600, 1500, 0.12, 0.01, 0.22);
+      },
+      win() {
+        if (!live()) return;
+        const t = ac.currentTime + 0.02;
+        [523.3, 659.3, 784, 1046.5].forEach((f, i) => {
+          tone(t + i * 0.11, 'triangle', f, 0, 0.22, 0.005, 0.24);
+          tone(t + i * 0.11, 'square', f, 0, 0.04, 0.005, 0.12);
+        });
+        [1046.5, 1318.5, 1568].forEach(f => tone(t + 0.5, 'triangle', f, 0, 0.14, 0.01, 0.95));
+        for (let i = 0; i < 8; i++) tone(t + 0.45 + i * 0.07, 'sine', rnd(2200, 4200), 0, 0.035, 0.003, 0.12);
+      },
+      undo() {
+        if (!live()) return;
+        const t = ac.currentTime + 0.002;
+        tone(t, 'sine', 760, 420, 0.1, 0.004, 0.08);
+      }
+    };
+  })();
+  ['pointerdown', 'touchend', 'keydown', 'click'].forEach(type => {
+    document.addEventListener(type, () => Snd.init(), { passive: true, capture: true });
+  });
+
+  // ---------- Colors ----------
+  const NOUN_INK = { bot: '#e85a00', wall: '#4b5bb0', star: '#b87400', box: '#8f5a2a', lava: '#e5401a', water: '#1673d6' };
+  const WORD_STYLE = {
+    is: { label: '=', cap: '#e8ecf5', cap2: '#d3d9e7', side: '#bcc5d9', side2: '#97a2bd', ink: '#1c2442' },
+    me: { label: 'ME', cap: '#ff86b8', cap2: '#ff4f97', side: '#ff5c9e', side2: '#d92f76', ink: '#ffffff' },
+    win: { label: 'WIN', cap: '#ffe680', cap2: '#ffd23f', side: '#ffcf30', side2: '#dba200', ink: '#4a3300' },
+    stop: { label: 'STOP', cap: '#ff8080', cap2: '#ff4b4b', side: '#ff5c5c', side2: '#cf2c2c', ink: '#ffffff' },
+    push: { label: 'PUSH', cap: '#62dcaa', cap2: '#2fc28a', side: '#36c792', side2: '#1c9468', ink: '#ffffff' },
+    zap: { label: 'ZAP', cap: '#bda2ff', cap2: '#9a6bff', side: '#a37aff', side2: '#6f42dc', ink: '#ffffff' },
+    sink: { label: 'SINK', cap: '#7cbdff', cap2: '#3d9bff', side: '#4ea3ff', side2: '#1f74d2', ink: '#ffffff' }
+  };
+  for (const n of Object.keys(NOUN_INK)) {
+    WORD_STYLE[n] = { label: n.toUpperCase(), cap: '#ffffff', cap2: '#eef1f8', side: '#d3d9e8', side2: '#aeb8cf', ink: NOUN_INK[n] };
+  }
+  const THING_COLOR = { bot: '#ff7a1a', wall: '#6f7ec4', star: '#ffc21a', box: '#c98544', lava: '#ff6a00', water: '#3d9bff' };
+  const CASES = ['#3d6bff', '#ff7b29', '#e8417c', '#19b58a', '#8a5cf6', '#0f9fb0', '#f2a900', '#d046c8', '#5fb52a', '#ef3b3b', 'rainbow'];
+
+  function shade(hex, amt) {
+    const n = parseInt(hex.slice(1), 16);
+    let r = (n >> 16) & 255, gg = (n >> 8) & 255, b = n & 255;
+    const f = amt < 0 ? 0 : 255, p = Math.abs(amt);
+    r = Math.round((f - r) * p + r); gg = Math.round((f - gg) * p + gg); b = Math.round((f - b) * p + b);
+    return '#' + ((1 << 24) + (r << 16) + (gg << 8) + b).toString(16).slice(1);
+  }
+
+  // ---------- Canvas + board geometry ----------
+  const cvs = $('board');
+  const mainCtx = cvs.getContext('2d');
+  let g = mainCtx; // the drawing helpers draw on whichever context `g` points at
+  const wrap = $('boardWrap');
+  let cssW = 0, cssH = 0, dpr = 1, tile = 32, ox = 0, oy = 0, fr = 12;
+  let bgCanvas = null, bgDirty = true;
+
+  // Portrait: size the board box to the board, then centre board + controls together.
+  const playEl = document.querySelector('.play');
+  function fitBoardBox() {
+    const stacked = !!(window.matchMedia && window.matchMedia('(max-aspect-ratio: 5/4)').matches);
+    if (!stacked || !game) { wrap.style.height = ''; playEl.classList.remove('stacked'); return; }
+    playEl.classList.add('stacked');
+    const pr = playEl.getBoundingClientRect();
+    const ctrl = Math.max($('pad').getBoundingClientRect().height, document.querySelector('.act').getBoundingClientRect().height);
+    const avail = Math.max(120, pr.height - ctrl - 20);
+    const frU = 0.42;
+    const natural = pr.width * (game.st.H + frU * 2) / (game.st.W + frU * 2);
+    const h = Math.floor(Math.min(natural, avail)) + 'px';
+    if (wrap.style.height !== h) wrap.style.height = h;
+  }
+  function resize() {
+    fitBoardBox();
+    const r = wrap.getBoundingClientRect();
+    cssW = Math.max(1, r.width); cssH = Math.max(1, r.height);
+    dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+    cvs.width = Math.round(cssW * dpr);
+    cvs.height = Math.round(cssH * dpr);
+    layoutBoard();
+  }
+  function layoutBoard() {
+    if (!game) return;
+    const st = game.st;
+    const frU = 0.42;
+    tile = Math.max(8, Math.floor(Math.min(cssW / (st.W + frU * 2), cssH / (st.H + frU * 2))));
+    fr = Math.max(6, Math.round(tile * frU));
+    ox = Math.round((cssW - st.W * tile) / 2);
+    oy = Math.round((cssH - st.H * tile) / 2);
+    bgDirty = true;
+    fontCache.clear();
+  }
+
+  function rr(x, y, w, h, r, append) {
+    const a = Array.isArray(r) ? r : [r, r, r, r];
+    const m = Math.min(w, h) / 2;
+    const tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+    if (!append) g.beginPath();
+    g.moveTo(x + tl, y);
+    g.lineTo(x + w - tr, y);
+    if (tr) g.arcTo(x + w, y, x + w, y + tr, tr);
+    g.lineTo(x + w, y + h - br);
+    if (br) g.arcTo(x + w, y + h, x + w - br, y + h, br);
+    g.lineTo(x + bl, y + h);
+    if (bl) g.arcTo(x, y + h, x, y + h - bl, bl);
+    g.lineTo(x, y + tl);
+    if (tl) g.arcTo(x, y, x + tl, y, tl);
+    g.closePath();
+  }
+  function circle(x, y, r) { g.beginPath(); g.arc(x, y, Math.max(0.1, r), 0, Math.PI * 2); g.fill(); }
+  const easeOutBack = k => { const c1 = 1.9, c3 = c1 + 1; return 1 + c3 * Math.pow(k - 1, 3) + c1 * Math.pow(k - 1, 2); };
+  const hash = (a, b, c) => { const s = Math.sin(a * 127.1 + b * 311.7 + c * 74.7) * 43758.5453; return s - Math.floor(s); };
+
+  // Background (case + plate) is drawn once per layout into its own canvas.
+  function paintBackground() {
+    if (!bgCanvas) bgCanvas = document.createElement('canvas');
+    bgCanvas.width = cvs.width; bgCanvas.height = cvs.height;
+    const b = bgCanvas.getContext('2d');
+    g = b; // point the shared helpers (rr, circle) at the background canvas
+    b.setTransform(dpr, 0, 0, dpr, 0, 0);
+    b.clearRect(0, 0, cssW, cssH);
+    const st = game.st, s = tile, bw = st.W * s, bh = st.H * s;
+    const x = ox - fr, y = oy - fr, w = bw + fr * 2, h = bh + fr * 2;
+    const caseCol = game.caseColor || CASES[0];
+    // shadow under the keyboard
+    b.save();
+    b.shadowColor = 'rgba(28, 36, 66, 0.3)'; b.shadowBlur = s * 0.55; b.shadowOffsetY = s * 0.2;
+    rr(x, y, w, h, fr * 0.9);
+    b.fillStyle = caseCol === 'rainbow' ? '#8a5cf6' : shade(caseCol, -0.25);
+    b.fill();
+    b.restore();
+    // case body
+    rr(x, y, w, h - fr * 0.16, fr * 0.9);
+    let body;
+    if (caseCol === 'rainbow') {
+      body = b.createLinearGradient(x, y, x + w, y + h);
+      ['#ff4f6d', '#ff9f1a', '#ffd23f', '#36c792', '#3d9bff', '#9a6bff'].forEach((c, i, arr) => body.addColorStop(i / (arr.length - 1), c));
+    } else {
+      body = b.createLinearGradient(x, y, x, y + h);
+      body.addColorStop(0, shade(caseCol, 0.18));
+      body.addColorStop(1, caseCol);
+    }
+    b.fillStyle = body; b.fill();
+    b.lineWidth = Math.max(1, s * 0.03);
+    b.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+    rr(x + 1.5, y + 1.5, w - 3, h - fr * 0.16 - 3, fr * 0.86);
+    b.stroke();
+    // little screws in the corners
+    b.fillStyle = 'rgba(255, 255, 255, 0.45)';
+    const sc = Math.max(1.5, fr * 0.11);
+    [[x + fr * 0.5, y + fr * 0.5], [x + w - fr * 0.5, y + fr * 0.5], [x + fr * 0.5, y + h - fr * 0.6], [x + w - fr * 0.5, y + h - fr * 0.6]].forEach(p => { b.beginPath(); b.arc(p[0], p[1], sc, 0, Math.PI * 2); b.fill(); });
+    // brand plate on the bottom edge
+    if (fr >= 14) {
+      b.font = Math.round(fr * 0.4) + 'px ' + DISPLAY;
+      b.textAlign = 'center'; b.textBaseline = 'middle';
+      b.fillStyle = 'rgba(255, 255, 255, 0.6)';
+      b.fillText('RULE  BREAKER', x + w / 2, oy + bh + fr * 0.44);
+    }
+    // the plate the keys sit on
+    rr(ox, oy, bw, bh, s * 0.12);
+    b.fillStyle = '#f6f8fd'; b.fill();
+    b.save();
+    b.clip();
+    b.fillStyle = '#e9edf7';
+    for (let yy = 0; yy < st.H; yy++) {
+      for (let xx = 0; xx < st.W; xx++) {
+        rr(ox + xx * s + s * 0.09, oy + yy * s + s * 0.09, s * 0.82, s * 0.82, s * 0.13);
+        b.fill();
+      }
+    }
+    b.lineWidth = s * 0.12;
+    b.strokeStyle = 'rgba(28, 36, 66, 0.1)';
+    rr(ox, oy, bw, bh, s * 0.12);
+    b.stroke();
+    b.restore();
+    g = mainCtx;
+    bgDirty = false;
+  }
+
+  // ---------- Game state ----------
+  let screen = 'title';
+  let game = null;
+  const vis = new Map();
+  let ruleInfo = { rules: [], active: new Set() };
+  let props = {};
+  let occ = {};
+  let shake = 0, flash = 0;
+  const fontCache = new Map();
+
+  function computeDerived() {
+    const st = game.st;
+    ruleInfo = E.rulesOf(st);
+    props = E.propMap(ruleInfo.rules);
+    occ = {};
+    for (const n of E.NOUNS) occ[n] = new Uint8Array(st.W * st.H);
+    for (const o of st.objs) if (o.kind === 'obj') occ[o.type][o.y * st.W + o.x] = 1;
+  }
+  const hasP = (o, p) => E.has(props, o, p);
+  function occAt(type, x, y) {
+    const st = game.st;
+    if (x < 0 || y < 0 || x >= st.W || y >= st.H) return false;
+    return occ[type][y * st.W + x] === 1;
+  }
+  function findObj(id) { for (const o of game.st.objs) if (o.id === id) return o; return null; }
+
+  function syncVis(now, opts) {
+    opts = opts || {};
+    const seen = new Set();
+    for (const o of game.st.objs) {
+      seen.add(o.id);
+      let v = vis.get(o.id);
+      if (!v) {
+        v = { x: o.x, y: o.y, fx: o.x, fy: o.y, tx: o.x, ty: o.y, t0: 0, dur: 1, born: -1e9, press: -1e9, squash: -1e9, look: [0, 1], nudge: null, blink: Math.random() * 4000 };
+        if (opts.build) v.born = now + (o.x + o.y) * 22;
+        else if (opts.pop !== false) v.born = now;
+        vis.set(o.id, v);
+      } else if (v.tx !== o.x || v.ty !== o.y) {
+        v.fx = v.x; v.fy = v.y; v.tx = o.x; v.ty = o.y; v.t0 = now; v.dur = opts.dur || 125;
+      }
+    }
+    for (const id of Array.from(vis.keys())) if (!seen.has(id)) vis.delete(id);
+  }
+  function updateVis(now) {
+    for (const v of vis.values()) {
+      const k = Math.min(1, Math.max(0, (now - v.t0) / v.dur));
+      const e = 1 - Math.pow(1 - k, 3);
+      v.x = v.fx + (v.tx - v.fx) * e;
+      v.y = v.fy + (v.ty - v.fy) * e;
+    }
+  }
+  function popScale(v, now) {
+    const k = (now - v.born) / 380;
+    if (k < 0) return 0;
+    if (k >= 1) return 1;
+    return Math.max(0, easeOutBack(k));
+  }
+  function nudgeOffset(v, now) {
+    if (!v.nudge) return [0, 0];
+    const k = (now - v.nudge.t) / 160;
+    if (k < 0 || k >= 1) return [0, 0];
+    const a = Math.sin(k * Math.PI) * 0.09;
+    return [v.nudge.dx * a, v.nudge.dy * a];
+  }
+
+  // ---------- Particles ----------
+  const P = [];
+  function emit(p) { P.push(p); if (P.length > 1200) P.splice(0, P.length - 1200); }
+  const R = (a, b) => a + Math.random() * (b - a);
+  function dust(x, y, dx, dy, n) {
+    if (reduceMotion) return;
+    for (let i = 0; i < n; i++) {
+      emit({ kind: 'smoke', x: x + 0.5 + R(-0.15, 0.15), y: y + 0.82 + R(-0.05, 0.05), vx: -dx * R(0.3, 0.9) + R(-0.4, 0.4), vy: -dy * R(0.3, 0.9) - R(0, 0.3), drag: 0.9, life: R(0.25, 0.45), max: 0.45, size: R(0.06, 0.11), color: 'rgba(160, 170, 200, 1)' });
+    }
+  }
+  function sparkle(x, y, n, colors) {
+    colors = colors || ['#ffd23f', '#ffffff', '#ff86b8', '#7cbdff'];
+    for (let i = 0; i < n; i++) {
+      const a = R(0, Math.PI * 2), sp = R(1.2, 3.4);
+      emit({ kind: 'spark', x: x + 0.5, y: y + 0.5, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, drag: 0.88, life: R(0.35, 0.7), max: 0.7, size: R(0.04, 0.08), color: colors[i % colors.length] });
+    }
+  }
+  function poof(x, y, color) {
+    for (let i = 0; i < 14; i++) {
+      const a = R(0, Math.PI * 2), sp = R(0.6, 2);
+      emit({ kind: 'smoke', x: x + 0.5, y: y + 0.5, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, drag: 0.86, life: R(0.4, 0.7), max: 0.7, size: R(0.14, 0.24), color: 'rgba(255,255,255,1)' });
+    }
+    sparkle(x, y, 12, [color, '#ffffff', '#ffd23f']);
+    emit({ kind: 'ring', x: x + 0.5, y: y + 0.5, vx: 0, vy: 0, life: 0.45, max: 0.45, size: 0.75, color: color });
+  }
+  function explode(x, y, color) {
+    const cx = x + 0.5, cy = y + 0.5;
+    const n = reduceMotion ? 10 : 34;
+    for (let i = 0; i < n; i++) {
+      const a = R(0, Math.PI * 2), sp = R(1.5, 6);
+      emit({ kind: 'fire', x: cx, y: cy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 1, drag: 0.88, life: R(0.4, 0.85), max: 0.85, size: R(0.16, 0.3), color: ['#fff3a6', '#ffd23f', '#ff9f1a', '#ff5a1a', '#e5401a'][i % 5] });
+    }
+    for (let i = 0; i < (reduceMotion ? 4 : 16); i++) {
+      const a = R(0, Math.PI * 2), sp = R(0.4, 1.8);
+      emit({ kind: 'smoke', x: cx, y: cy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 0.8, drag: 0.92, life: R(0.8, 1.5), max: 1.5, size: R(0.2, 0.34), color: 'rgba(130, 130, 150, 1)' });
+    }
+    for (let i = 0; i < (reduceMotion ? 4 : 14); i++) {
+      const a = R(-Math.PI, 0), sp = R(2.5, 6);
+      emit({ kind: 'chunk', x: cx, y: cy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, ay: 14, drag: 0.98, life: R(0.7, 1.2), max: 1.2, size: R(0.07, 0.13), rot: R(0, 6), vr: R(-12, 12), color: i % 3 ? color : '#2b3150' });
+    }
+    emit({ kind: 'ring', x: cx, y: cy, vx: 0, vy: 0, life: 0.5, max: 0.5, size: 1.6, color: '#ff9f1a' });
+    if (!reduceMotion) { shake = Math.max(shake, tile * 0.28); flash = 0.35; }
+  }
+  function splash(x, y) {
+    const cx = x + 0.5, cy = y + 0.5;
+    for (let i = 0; i < (reduceMotion ? 8 : 26); i++) {
+      const a = R(-Math.PI * 0.95, -Math.PI * 0.05), sp = R(2, 5.5);
+      emit({ kind: 'drop', x: cx + R(-0.2, 0.2), y: cy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, ay: 16, drag: 0.98, life: R(0.5, 0.9), max: 0.9, size: R(0.05, 0.1), color: i % 3 ? '#5cb6ff' : '#ffffff' });
+    }
+    emit({ kind: 'ring', x: cx, y: cy, vx: 0, vy: 0, life: 0.55, max: 0.55, size: 1.1, color: '#3d9bff' });
+    if (!reduceMotion) shake = Math.max(shake, tile * 0.1);
+  }
+  function confetti(x, y) {
+    const cols = ['#ff4f97', '#ffd23f', '#3d9bff', '#2fc28a', '#9a6bff', '#ff7a1a'];
+    const n = reduceMotion ? 30 : 120;
+    for (let i = 0; i < n; i++) {
+      const a = R(-Math.PI * 0.92, -Math.PI * 0.08), sp = R(4, 11);
+      emit({ kind: 'confetti', x: x + 0.5, y: y + 0.5, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, ay: 9, drag: 0.94, life: R(1.4, 2.4), max: 2.4, size: R(0.08, 0.14), rot: R(0, 6), vr: R(-10, 10), color: cols[i % cols.length] });
+    }
+    sparkle(x, y, 24, ['#ffd23f', '#ffffff', '#fff3a6']);
+    emit({ kind: 'ring', x: x + 0.5, y: y + 0.5, vx: 0, vy: 0, life: 0.6, max: 0.6, size: 2.2, color: '#ffd23f' });
+  }
+  function updateParticles(dt) {
+    for (let i = P.length - 1; i >= 0; i--) {
+      const p = P[i];
+      p.life -= dt;
+      if (p.life <= 0) { P.splice(i, 1); continue; }
+      if (p.ay) p.vy += p.ay * dt;
+      if (p.drag) { const d = Math.pow(p.drag, dt * 60); p.vx *= d; p.vy *= d; }
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      if (p.vr) p.rot += p.vr * dt;
+    }
+  }
+  const PASS = ['smoke', 'ring', 'drop', 'fire', 'chunk', 'confetti', 'spark'];
+  function drawParticles() {
+    for (const kind of PASS) drawParticleKind(kind);
+    g.globalAlpha = 1;
+  }
+  function drawParticleKind(kind) {
+    for (const p of P) {
+      if (p.kind !== kind) continue;
+      const a = Math.max(0, Math.min(1, p.life / p.max));
+      const x = ox + p.x * tile, y = oy + p.y * tile, sz = p.size * tile;
+      g.globalAlpha = 1;
+      if (p.kind === 'spark') {
+        g.globalAlpha = a;
+        g.fillStyle = p.color;
+        const r = sz * (0.5 + 0.5 * a);
+        g.beginPath();
+        g.moveTo(x, y - r * 2); g.lineTo(x + r * 0.6, y); g.lineTo(x, y + r * 2); g.lineTo(x - r * 0.6, y); g.closePath();
+        g.moveTo(x - r * 2, y); g.lineTo(x, y + r * 0.6); g.lineTo(x + r * 2, y); g.lineTo(x, y - r * 0.6); g.closePath();
+        g.fill();
+      } else if (p.kind === 'smoke') {
+        g.globalAlpha = a * 0.55;
+        g.fillStyle = p.color;
+        circle(x, y, sz * (1.7 - a * 0.7));
+      } else if (p.kind === 'fire') {
+        g.globalAlpha = Math.min(1, a * 1.4);
+        g.fillStyle = p.color;
+        circle(x, y, sz * (0.4 + a * 0.8));
+      } else if (p.kind === 'drop') {
+        g.globalAlpha = Math.min(1, a * 1.5);
+        g.fillStyle = p.color;
+        circle(x, y, sz);
+      } else if (p.kind === 'chunk' || p.kind === 'confetti') {
+        g.globalAlpha = Math.min(1, a * 2);
+        g.fillStyle = p.color;
+        g.save();
+        g.translate(x, y);
+        g.rotate(p.rot);
+        if (p.kind === 'confetti') g.scale(1, Math.cos(p.rot * 1.7));
+        g.fillRect(-sz / 2, -sz * 0.32, sz, sz * 0.64);
+        g.restore();
+      } else if (p.kind === 'ring') {
+        g.globalAlpha = a * 0.8;
+        g.strokeStyle = p.color;
+        g.lineWidth = Math.max(1.5, tile * 0.07 * a);
+        g.beginPath();
+        g.arc(x, y, sz * (1 - a) + tile * 0.1, 0, Math.PI * 2);
+        g.stroke();
+      }
+    }
+    g.globalAlpha = 1;
+  }
+
+  // ---------- Drawing the things ----------
+  function cornerRadii(type, o, r) {
+    const n = (dx, dy) => occAt(type, o.x + dx, o.y + dy);
+    const up = n(0, -1), dn = n(0, 1), lf = n(-1, 0), rt = n(1, 0);
+    return { radii: [!up && !lf ? r : 0, !up && !rt ? r : 0, !dn && !rt ? r : 0, !dn && !lf ? r : 0], up, dn, lf, rt };
+  }
+
+  // Water and lava are painted as whole pools, so neighbouring squares read as one surface.
+  function drawLiquids(type, items, now) {
+    if (!items.length) return;
+    const s = tile;
+    const water = type === 'water';
+    const live = water ? hasP(items[0].o, 'sink') : hasP(items[0].o, 'zap');
+    g.save();
+    g.beginPath();
+    for (const it of items) {
+      const c = cornerRadii(type, it.o, s * 0.3);
+      it.c = c;
+      const w = s * it.sc;
+      const x = ox + it.v.x * s + (s - w) / 2, y = oy + it.v.y * s + (s - w) / 2;
+      if (it.sc < 1) { rr(x, y, w, w, s * 0.22, true); continue; }
+      const e = 0.6;
+      rr(x - (c.lf ? e : 0), y - (c.up ? e : 0), w + (c.lf ? e : 0) + (c.rt ? e : 0), w + (c.up ? e : 0) + (c.dn ? e : 0), c.radii, true);
+    }
+    g.fillStyle = water ? (live ? '#3d9cf2' : '#9fd5ff') : (live ? '#ff6a10' : '#8e7781');
+    g.fill();
+    g.clip();
+    for (const it of items) {
+      const o = it.o, x = ox + it.v.x * s, y = oy + it.v.y * s;
+      if (water) {
+        const hx = hash(o.x, o.y, 3), hy = hash(o.y, o.x, 5);
+        const px = x + s * (0.2 + 0.6 * hx) + Math.sin(now * 0.0011 + hx * 6) * s * 0.1;
+        const py = y + s * (0.2 + 0.6 * hy);
+        const gl = g.createRadialGradient(px, py, 0, px, py, s * 0.55);
+        gl.addColorStop(0, live ? 'rgba(140, 210, 255, 0.55)' : 'rgba(228, 245, 255, 0.65)');
+        gl.addColorStop(1, 'rgba(140, 210, 255, 0)');
+        g.fillStyle = gl;
+        g.fillRect(x - s * 0.6, y - s * 0.6, s * 2.2, s * 2.2);
+      } else if (live) {
+        for (let i = 0; i < 2; i++) {
+          const hx = hash(o.x, o.y, i + 11), hy = hash(o.y, o.x, i + 13);
+          const px = x + s * (0.15 + 0.7 * hx), py = y + s * (0.15 + 0.7 * hy);
+          const r = s * (0.5 + 0.14 * Math.sin(now * 0.002 + hx * 9));
+          const gl = g.createRadialGradient(px, py, 0, px, py, r);
+          gl.addColorStop(0, 'rgba(255, 216, 70, 0.9)');
+          gl.addColorStop(0.55, 'rgba(255, 160, 30, 0.45)');
+          gl.addColorStop(1, 'rgba(255, 120, 20, 0)');
+          g.fillStyle = gl;
+          g.fillRect(px - r, py - r, r * 2, r * 2);
+        }
+      }
+    }
+    for (const it of items) {
+      const o = it.o, c = it.c, x = ox + it.v.x * s, y = oy + it.v.y * s;
+      if (water) {
+        g.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+        g.lineWidth = Math.max(1.2, s * 0.045);
+        g.lineCap = 'round';
+        for (let i = 0; i < 2; i++) {
+          const by = y + s * (0.3 + i * 0.38);
+          g.beginPath();
+          for (let k = 0; k <= 8; k++) {
+            const px = x + (k / 8) * s;
+            const wy = by + Math.sin(((o.x + k / 8) * 2.2) + now * 0.0024 + i * 1.9) * s * 0.05;
+            if (k) g.lineTo(px, wy); else g.moveTo(px, wy);
+          }
+          g.stroke();
+        }
+      } else if (live) {
+        for (let i = 0; i < 2; i++) {
+          const hx = hash(o.x + i, o.y, 21), hy = hash(o.y, o.x + i, 23), hp = hash(o.x, o.y + i, 25);
+          const r = s * (0.04 + 0.05 * (0.5 + 0.5 * Math.sin(now * 0.004 + hp * 6.28)));
+          g.fillStyle = 'rgba(255, 244, 170, 0.95)';
+          circle(x + s * (0.2 + 0.6 * hx), y + s * (0.22 + 0.56 * hy), r);
+        }
+      } else {
+        g.strokeStyle = 'rgba(255, 140, 60, 0.75)';
+        g.lineWidth = Math.max(1, s * 0.035);
+        const h1 = hash(o.x, o.y, 1), h2 = hash(o.x, o.y, 2);
+        g.beginPath();
+        g.moveTo(x + s * 0.15, y + s * (0.3 + 0.3 * h1));
+        g.lineTo(x + s * 0.5, y + s * (0.45 + 0.2 * h2));
+        g.lineTo(x + s * 0.85, y + s * (0.25 + 0.4 * h1));
+        g.moveTo(x + s * 0.5, y + s * (0.45 + 0.2 * h2));
+        g.lineTo(x + s * (0.4 + 0.2 * h2), y + s * 0.9);
+        g.stroke();
+      }
+      if (it.sc < 1) continue;
+      if (!c.up) { g.fillStyle = water ? 'rgba(255, 255, 255, 0.4)' : (live ? 'rgba(255, 245, 190, 0.55)' : 'rgba(255, 255, 255, 0.25)'); g.fillRect(x, y, s, s * 0.08); }
+      if (!c.dn) { g.fillStyle = water ? 'rgba(20, 80, 170, 0.22)' : (live ? 'rgba(190, 40, 0, 0.3)' : 'rgba(40, 20, 30, 0.2)'); g.fillRect(x, y + s * 0.86, s, s * 0.14); }
+    }
+    g.restore();
+  }
+
+  function drawWall(o, v, ghost) {
+    const s = tile, x = ox + v.x * s, y = oy + v.y * s;
+    const c = cornerRadii('wall', o, s * 0.2);
+    g.save();
+    if (ghost) g.globalAlpha = 0.32;
+    rr(x - (c.lf ? 0.5 : 0), y - (c.up ? 0.5 : 0), s + (c.lf ? 0.5 : 0) + (c.rt ? 0.5 : 0), s + (c.up ? 0.5 : 0) + (c.dn ? 0.5 : 0), c.radii);
+    g.fillStyle = '#7c8ad0';
+    g.fill();
+    g.clip();
+    g.strokeStyle = 'rgba(38, 50, 120, 0.3)';
+    g.lineWidth = Math.max(1, s * 0.035);
+    const off = (o.y % 2) ? 0.25 : 0.75;
+    const off2 = (off + 0.5) % 1;
+    g.beginPath();
+    g.moveTo(x, y + s * 0.5); g.lineTo(x + s, y + s * 0.5);
+    g.moveTo(x + s * off, y); g.lineTo(x + s * off, y + s * 0.5);
+    g.moveTo(x + s * off2, y + s * 0.5); g.lineTo(x + s * off2, y + s);
+    g.stroke();
+    if (!c.up) { g.fillStyle = 'rgba(255, 255, 255, 0.38)'; g.fillRect(x, y, s, s * 0.09); }
+    if (!c.dn) { g.fillStyle = 'rgba(30, 40, 100, 0.3)'; g.fillRect(x, y + s * 0.88, s, s * 0.12); }
+    g.restore();
+    if (ghost) {
+      g.save();
+      g.setLineDash([s * 0.12, s * 0.09]);
+      g.strokeStyle = 'rgba(75, 91, 176, 0.75)';
+      g.lineWidth = Math.max(1, s * 0.035);
+      rr(x + s * 0.06, y + s * 0.06, s * 0.88, s * 0.88, s * 0.14);
+      g.stroke();
+      g.restore();
+    }
+  }
+
+  function drawBox(o, v, ghost, sc) {
+    const s = tile, cx = ox + (v.x + 0.5) * s, cy = oy + (v.y + 0.5) * s;
+    const w = s * 0.8 * sc;
+    const x = cx - w / 2, y = cy - w / 2;
+    g.save();
+    if (ghost) g.globalAlpha = 0.38;
+    g.fillStyle = 'rgba(28, 36, 66, 0.16)';
+    rr(x + s * 0.03, y + s * 0.07, w, w, s * 0.1);
+    g.fill();
+    rr(x, y, w, w, s * 0.1);
+    const grd = g.createLinearGradient(0, y, 0, y + w);
+    grd.addColorStop(0, '#ecb574');
+    grd.addColorStop(1, '#c98544');
+    g.fillStyle = grd;
+    g.fill();
+    g.lineWidth = Math.max(1.2, s * 0.05);
+    g.strokeStyle = '#8f5a2a';
+    g.stroke();
+    const inset = w * 0.14;
+    g.lineWidth = Math.max(1, s * 0.035);
+    g.strokeStyle = 'rgba(143, 90, 42, 0.8)';
+    rr(x + inset, y + inset, w - inset * 2, w - inset * 2, s * 0.05);
+    g.stroke();
+    g.lineWidth = Math.max(1.5, s * 0.07);
+    g.strokeStyle = '#b06f35';
+    g.beginPath();
+    g.moveTo(x + inset * 1.2, y + w - inset * 1.2);
+    g.lineTo(x + w - inset * 1.2, y + inset * 1.2);
+    g.stroke();
+    g.fillStyle = '#6b4220';
+    [[x + inset * 0.55, y + inset * 0.55], [x + w - inset * 0.55, y + inset * 0.55], [x + inset * 0.55, y + w - inset * 0.55], [x + w - inset * 0.55, y + w - inset * 0.55]].forEach(p => circle(p[0], p[1], Math.max(0.8, s * 0.025)));
+    g.restore();
+  }
+
+  function starPath(cx, cy, R1, R2, rot) {
+    g.beginPath();
+    for (let i = 0; i < 10; i++) {
+      const a = rot - Math.PI / 2 + i * Math.PI / 5;
+      const rad = i % 2 ? R2 : R1;
+      const px = cx + Math.cos(a) * rad, py = cy + Math.sin(a) * rad;
+      if (i) g.lineTo(px, py); else g.moveTo(px, py);
+    }
+    g.closePath();
+  }
+  function drawStar(o, v, now, sc) {
+    const s = tile, cx = ox + (v.x + 0.5) * s, cy = oy + (v.y + 0.5) * s;
+    const isWin = hasP(o, 'win');
+    const pulse = 0.5 + 0.5 * Math.sin(now * 0.004 + o.id);
+    const gl = g.createRadialGradient(cx, cy, s * 0.05, cx, cy, s * 0.66);
+    gl.addColorStop(0, 'rgba(255, 214, 70, ' + (isWin ? 0.55 + 0.3 * pulse : 0.22) + ')');
+    gl.addColorStop(1, 'rgba(255, 214, 70, 0)');
+    g.fillStyle = gl;
+    g.fillRect(cx - s * 0.7, cy - s * 0.7, s * 1.4, s * 1.4);
+    const rot = Math.sin(now * 0.0017 + o.id) * 0.2;
+    const R1 = s * (0.37 + (isWin ? 0.025 * pulse : 0)) * sc;
+    starPath(cx, cy + s * 0.02, R1, R1 * 0.48, rot);
+    const f = g.createLinearGradient(cx, cy - R1, cx, cy + R1);
+    f.addColorStop(0, '#fff3a6'); f.addColorStop(0.45, '#ffd23f'); f.addColorStop(1, '#ff9f1a');
+    g.fillStyle = f;
+    g.fill();
+    g.lineJoin = 'round';
+    g.lineWidth = Math.max(1.5, s * 0.045);
+    g.strokeStyle = '#df7a00';
+    g.stroke();
+    g.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    g.beginPath();
+    g.ellipse(cx - R1 * 0.22, cy - R1 * 0.28, R1 * 0.16, R1 * 0.08, -0.6, 0, Math.PI * 2);
+    g.fill();
+  }
+
+  function drawBot(o, v, now, sc) {
+    const s = tile;
+    const nd = nudgeOffset(v, now);
+    const cx = ox + (v.x + 0.5 + nd[0]) * s, cy = oy + (v.y + 0.5 + nd[1]) * s;
+    const t = (now - v.squash) / 170;
+    let sx = 1, sy = 1;
+    if (t >= 0 && t < 1) { const k = Math.sin(t * Math.PI); sx = 1 + 0.12 * k; sy = 1 - 0.12 * k; }
+    const bob = Math.sin(now * 0.004 + o.id) * s * 0.015;
+    g.save();
+    g.translate(cx, cy + s * 0.05 + bob);
+    g.scale(sx * sc, sy * sc);
+    g.fillStyle = 'rgba(28, 36, 66, 0.18)';
+    g.beginPath();
+    g.ellipse(0, s * 0.36, s * 0.3, s * 0.07, 0, 0, Math.PI * 2);
+    g.fill();
+    // feet
+    g.fillStyle = '#2b3150';
+    rr(-s * 0.26, s * 0.24, s * 0.18, s * 0.12, s * 0.04); g.fill();
+    rr(s * 0.08, s * 0.24, s * 0.18, s * 0.12, s * 0.04); g.fill();
+    // antenna
+    const lx = v.look[0] * s * 0.03;
+    g.strokeStyle = '#d14f00';
+    g.lineWidth = Math.max(1.5, s * 0.04);
+    g.beginPath(); g.moveTo(0, -s * 0.22); g.lineTo(lx, -s * 0.36); g.stroke();
+    const glow = 0.6 + 0.4 * Math.sin(now * 0.006 + o.id);
+    g.fillStyle = 'rgba(255, 210, 63, ' + (0.35 * glow) + ')';
+    circle(lx, -s * 0.38, s * 0.1);
+    g.fillStyle = '#ffd23f';
+    circle(lx, -s * 0.38, s * 0.055);
+    // body
+    const bw = s * 0.7, bh = s * 0.52;
+    rr(-bw / 2, -s * 0.24, bw, bh, s * 0.15);
+    const grd = g.createLinearGradient(0, -s * 0.24, 0, -s * 0.24 + bh);
+    grd.addColorStop(0, '#ffab5c');
+    grd.addColorStop(1, '#ff6a1a');
+    g.fillStyle = grd;
+    g.fill();
+    g.lineWidth = Math.max(1.2, s * 0.035);
+    g.strokeStyle = '#cf4c00';
+    g.stroke();
+    g.fillStyle = 'rgba(255, 255, 255, 0.45)';
+    rr(-bw / 2 + s * 0.06, -s * 0.21, bw * 0.4, s * 0.05, s * 0.025); g.fill();
+    // face screen
+    const fw = bw * 0.74, fh = bh * 0.52;
+    const fx = -fw / 2, fy = -s * 0.15;
+    rr(fx, fy, fw, fh, s * 0.08);
+    g.fillStyle = '#25336a';
+    g.fill();
+    // eyes
+    const ex = v.look[0] * s * 0.045, ey = v.look[1] * s * 0.03;
+    const bt = (now + v.blink) % 3600;
+    const eh = bt < 120 ? 0.18 : 1;
+    g.fillStyle = '#62f3ff';
+    const ew = s * 0.08, eH = s * 0.12 * eh;
+    rr(-s * 0.13 - ew / 2 + ex, fy + fh / 2 - eH / 2 + ey, ew, eH, ew * 0.45); g.fill();
+    rr(s * 0.13 - ew / 2 + ex, fy + fh / 2 - eH / 2 + ey, ew, eH, ew * 0.45); g.fill();
+    // belly light
+    g.fillStyle = '#ffe066';
+    circle(0, s * 0.17, s * 0.035);
+    g.restore();
+  }
+
+  function legendSize(label, maxW, maxH) {
+    const k = label + '|' + Math.round(maxW) + '|' + Math.round(maxH);
+    let f = fontCache.get(k);
+    if (f) return f;
+    g.font = '100px ' + DISPLAY;
+    const m = g.measureText(label).width || 100;
+    f = Math.max(5, Math.min(maxH, (100 * maxW) / m));
+    fontCache.set(k, f);
+    return f;
+  }
+  function drawKey(o, v, now, active, sc) {
+    const st = WORD_STYLE[o.word];
+    const s = tile;
+    const cx = ox + (v.x + 0.5) * s, cy = oy + (v.y + 0.5) * s;
+    const pt = (now - v.press) / 150;
+    const press = pt >= 0 && pt < 1 ? Math.sin(pt * Math.PI) : 0;
+    const w = s * 0.88 * sc, h = s * 0.88 * sc;
+    const x = cx - w / 2, y = cy - h / 2;
+    const rad = s * 0.17 * sc;
+    if (active) {
+      g.save();
+      const hue = (now * 0.08 + (o.x + o.y) * 32) % 360;
+      g.shadowColor = 'hsla(' + hue + ', 100%, 58%, 0.95)';
+      g.shadowBlur = s * 0.42;
+      rr(x, y, w, h, rad);
+      g.fillStyle = st.side;
+      g.fill();
+      g.restore();
+    } else {
+      g.fillStyle = 'rgba(28, 36, 66, 0.16)';
+      rr(x + s * 0.02, y + s * 0.07, w, h, rad);
+      g.fill();
+    }
+    // skirt
+    rr(x, y + press * s * 0.03, w, h - press * s * 0.03, rad);
+    const sk = g.createLinearGradient(0, y, 0, y + h);
+    sk.addColorStop(0, st.side);
+    sk.addColorStop(1, st.side2);
+    g.fillStyle = sk;
+    g.fill();
+    // top face
+    const tw = w * 0.8, th = h * 0.68;
+    const tx = cx - tw / 2, ty = y + h * 0.06 + press * s * 0.06;
+    rr(tx, ty, tw, th, rad * 0.75);
+    const tf = g.createLinearGradient(0, ty, 0, ty + th);
+    tf.addColorStop(0, st.cap);
+    tf.addColorStop(1, st.cap2);
+    g.fillStyle = tf;
+    g.fill();
+    g.lineWidth = Math.max(1, s * 0.02);
+    g.strokeStyle = 'rgba(255, 255, 255, 0.75)';
+    g.stroke();
+    // legend
+    const size = legendSize(st.label, tw * 0.84, th * 0.6) * (o.word === 'is' ? 1 : 1);
+    g.font = size + 'px ' + DISPLAY;
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.fillStyle = st.ink;
+    g.globalAlpha = active ? 1 : 0.88;
+    g.fillText(st.label, cx, ty + th * 0.53);
+    g.globalAlpha = 1;
+  }
+
+  function drawMeMarker(v, now) {
+    const s = tile, cx = ox + (v.x + 0.5) * s, top = oy + v.y * s;
+    const b = Math.sin(now * 0.006) * s * 0.035;
+    const yy = top + s * 0.02 + b;
+    const w = s * 0.12;
+    g.beginPath();
+    g.moveTo(cx - w, yy - w * 0.95);
+    g.lineTo(cx + w, yy - w * 0.95);
+    g.lineTo(cx, yy + w * 0.2);
+    g.closePath();
+    g.fillStyle = '#ff4f97';
+    g.fill();
+    g.lineJoin = 'round';
+    g.lineWidth = Math.max(1.5, s * 0.03);
+    g.strokeStyle = '#ffffff';
+    g.stroke();
+  }
+
+  const LAYER = { water: 0, lava: 0, star: 1, wall: 2, box: 3, bot: 4 };
+  let ambientT = 0;
+  function render(now) {
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.clearRect(0, 0, cvs.width, cvs.height);
+    if (!game) return;
+    if (bgDirty) paintBackground();
+    let sx = 0, sy = 0;
+    if (shake > 0.3) { sx = R(-1, 1) * shake; sy = R(-1, 1) * shake; }
+    g.setTransform(1, 0, 0, 1, sx * dpr, sy * dpr);
+    g.drawImage(bgCanvas, 0, 0);
+    g.setTransform(dpr, 0, 0, dpr, sx * dpr, sy * dpr);
+
+    const pools = { water: [], lava: [] };
+    const objs = [];
+    for (const o of game.st.objs) {
+      const v = vis.get(o.id);
+      if (!v) continue;
+      const sc = popScale(v, now);
+      if (sc <= 0.01) continue;
+      if (o.kind === 'obj' && pools[o.type]) pools[o.type].push({ o, v, sc });
+      else objs.push(o);
+    }
+    drawLiquids('water', pools.water, now);
+    drawLiquids('lava', pools.lava, now);
+    objs.sort((a, b) => {
+      const la = a.kind === 'text' ? 5 : LAYER[a.type];
+      const lb = b.kind === 'text' ? 5 : LAYER[b.type];
+      return la - lb || a.y - b.y;
+    });
+    for (const o of objs) {
+      const v = vis.get(o.id);
+      const sc = popScale(v, now);
+      if (o.kind === 'text') { drawKey(o, v, now, ruleInfo.active.has(o.id), sc); continue; }
+      const solid = hasP(o, 'stop') || hasP(o, 'push');
+      g.save();
+      if (sc < 1) {
+        const cx = ox + (v.x + 0.5) * tile, cy = oy + (v.y + 0.5) * tile;
+        g.translate(cx, cy); g.scale(sc, sc); g.translate(-cx, -cy);
+      }
+      if (o.type === 'wall') drawWall(o, v, !solid);
+      else if (o.type === 'box') drawBox(o, v, !solid, 1);
+      else if (o.type === 'star') drawStar(o, v, now, 1);
+      else if (o.type === 'bot') drawBot(o, v, now, 1);
+      g.restore();
+    }
+    // ME markers, and a gold outline on anything (other than a star) that is WIN
+    const pulse = 0.55 + 0.45 * Math.sin(now * 0.006);
+    for (const o of game.st.objs) {
+      if (o.kind !== 'obj') continue;
+      const v = vis.get(o.id);
+      if (!v || popScale(v, now) < 0.9) continue;
+      if (o.type !== 'star' && hasP(o, 'win')) {
+        g.save();
+        g.globalAlpha = pulse;
+        g.strokeStyle = '#ffc21a';
+        g.lineWidth = Math.max(2, tile * 0.06);
+        g.shadowColor = 'rgba(255, 194, 26, 0.9)';
+        g.shadowBlur = tile * 0.25;
+        rr(ox + v.x * tile + tile * 0.08, oy + v.y * tile + tile * 0.08, tile * 0.84, tile * 0.84, tile * 0.16);
+        g.stroke();
+        g.restore();
+      }
+      if (hasP(o, 'me')) drawMeMarker(v, now);
+    }
+    if (tut) drawTutorial(now);
+    drawParticles();
+    if (flash > 0.01) {
+      g.setTransform(1, 0, 0, 1, 0, 0);
+      g.fillStyle = 'rgba(255, 250, 230, ' + flash + ')';
+      g.fillRect(0, 0, cvs.width, cvs.height);
+    }
+  }
+
+  // Little ambient effects that show what each thing can do right now.
+  function ambient(dt) {
+    if (!game || reduceMotion) return;
+    ambientT += dt;
+    if (ambientT < 0.12) return;
+    ambientT = 0;
+    const list = game.st.objs;
+    for (const o of list) {
+      if (o.kind !== 'obj') continue;
+      if (o.type !== 'star' && hasP(o, 'win') && Math.random() < 0.18) {
+        emit({ kind: 'spark', x: o.x + R(0.15, 0.85), y: o.y + R(0.15, 0.85), vx: 0, vy: -0.4, drag: 0.95, life: 0.6, max: 0.6, size: R(0.04, 0.07), color: Math.random() < 0.5 ? '#ffd23f' : '#ffffff' });
+      }
+      if (o.type !== 'lava' && hasP(o, 'zap') && Math.random() < 0.2) {
+        emit({ kind: 'spark', x: o.x + R(0.1, 0.9), y: o.y + R(0.1, 0.9), vx: R(-1, 1), vy: R(-1, 1), drag: 0.85, life: 0.3, max: 0.3, size: R(0.04, 0.06), color: Math.random() < 0.5 ? '#9a6bff' : '#ffe066' });
+      }
+      if (o.type !== 'water' && hasP(o, 'sink') && Math.random() < 0.15) {
+        emit({ kind: 'drop', x: o.x + R(0.2, 0.8), y: o.y + R(0.4, 0.9), vx: 0, vy: -0.8, drag: 0.95, life: 0.5, max: 0.5, size: R(0.03, 0.05), color: '#7cbdff' });
+      }
+    }
+  }
+
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.05, Math.max(0, (now - last) / 1000));
+    last = now;
+    if (screen === 'game' && game) {
+      updateVis(now);
+      updateParticles(dt);
+      ambient(dt);
+      shake *= Math.pow(0.0008, dt);
+      flash *= Math.pow(0.002, dt);
+      render(now);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  // ---------- HUD ----------
+  function el(tag, cls, text) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function chip(word) {
+    const st = WORD_STYLE[word];
+    const c = el('span', 'chip', st.label);
+    c.style.setProperty('--chip', st.cap2);
+    c.style.setProperty('--chip-side', st.side2);
+    c.style.setProperty('--chip-ink', st.ink);
+    return c;
+  }
+  function updateHud(freshRules) {
+    const bar = $('rulesBar');
+    bar.textContent = '';
+    bar.append(el('span', 'rules-label', 'RULES'));
+    const seen = new Set();
+    for (const [s, o] of ruleInfo.rules) {
+      const k = s + '=' + o;
+      if (seen.has(k)) continue;
+      seen.add(k);
+      const r = el('span', 'rule' + (freshRules && freshRules.indexOf(k) >= 0 ? ' new' : ''));
+      r.setAttribute('role', 'img');
+      r.setAttribute('aria-label', s + ' is ' + o);
+      r.append(chip(s), chip('is'), chip(o));
+      bar.append(r);
+    }
+    if (!seen.size) bar.append(el('span', 'rules-empty', 'No rules at all right now!'));
+    $('moves').textContent = game.moves + (game.moves === 1 ? ' MOVE' : ' MOVES');
+  }
+
+  // ---------- Cards ----------
+  let cardKind = null;
+  let cardPrimary = null;
+  function closeCards() {
+    $('cardLayer').textContent = '';
+    cardKind = null;
+    cardPrimary = null;
+    $('btnUndo').classList.remove('pulse');
+  }
+  function keyButton(label, cls, onPress) {
+    const b = el('button', 'key ' + (cls || ''));
+    const f = el('span', 'face label-small', label);
+    b.append(f);
+    b.addEventListener('click', e => { e.preventDefault(); onPress(); });
+    b.addEventListener('pointerdown', () => Snd.key(0.8));
+    return b;
+  }
+  function showCard(kind, parts) {
+    closeCards();
+    cardKind = kind;
+    const layer = $('cardLayer');
+    const card = el('div', 'card ' + (parts.cls || ''));
+    card.setAttribute('role', 'dialog');
+    card.setAttribute('aria-label', parts.title);
+    if (parts.eyebrow) card.append(el('div', 'eyebrow', parts.eyebrow));
+    card.append(el('h3', null, parts.title));
+    (parts.lines || []).forEach(t => {
+      const line = el('p', t.cls || null, t.rich ? null : t.text);
+      if (t.rich) line.append(richText(t.rich));
+      card.append(line);
+    });
+    const row = el('div', 'row');
+    (parts.buttons || []).forEach((b, i) => {
+      const btn = keyButton(b.label, b.cls, b.on);
+      if (i === 0) cardPrimary = b.on;
+      row.append(btn);
+    });
+    card.append(row);
+    layer.append(card);
+  }
+  function showIntro() {
+    const lv = game.level;
+    const offerLessons = game.index === 0 && !save.tutorial;
+    showCard('intro', {
+      eyebrow: lv.sandbox ? 'BONUS' : 'LEVEL ' + (game.index + 1) + ' OF ' + PUZZLES,
+      title: lv.name.toUpperCase(),
+      lines: [{ text: lv.intro }].concat(offerLessons ? [{ text: 'New here? The robot can show you how to play first.', cls: 'stat' }] : []),
+      buttons: offerLessons
+        ? [{ label: 'SHOW ME HOW', cls: 'key--accent', on: () => openTutorial(0) }, { label: "I'LL TRY IT", cls: 'key--mod', on: closeCards }]
+        : [{ label: "LET'S GO", cls: 'key--accent', on: closeCards }]
+    });
+  }
+  function showHint() {
+    if (!game || tut) return;
+    showCard('hint', {
+      eyebrow: 'HINT',
+      title: game.level.name.toUpperCase(),
+      lines: [{ text: game.level.hint }],
+      buttons: [{ label: 'GOT IT', cls: 'key--gold', on: closeCards }, { label: 'HOW TO PLAY', cls: 'key--mod', on: () => openTutorial(0) }]
+    });
+  }
+  function showNoMe() {
+    if (!game || game.won) return;
+    showCard('nome', {
+      cls: 'oops',
+      eyebrow: 'UH OH',
+      title: 'NOTHING IS ME!',
+      lines: [{ text: 'No rule says something = ME, so nothing can move. Undo your last move, or start over.' }],
+      buttons: [{ label: 'UNDO', cls: 'key--pink', on: undo }, { label: 'RESTART', cls: 'key--mod', on: restart }]
+    });
+    $('btnUndo').classList.add('pulse');
+  }
+  const CHEERS = ['LEVEL CLEAR!', 'RULES BROKEN!', 'NICE HACK!', 'YOU DID IT!', 'TOO EASY!'];
+  function showWin() {
+    const i = game.index, lv = game.level;
+    if (lv.sandbox) {
+      showCard('win', {
+        cls: 'win', eyebrow: 'SANDBOX', title: 'YOU WON THE SANDBOX!',
+        lines: [{ text: 'Want to keep breaking stuff?' }],
+        buttons: [{ label: 'KEEP PLAYING', cls: 'key--accent', on: () => { undo(); } }, { label: 'LEVELS', cls: 'key--mod', on: showTitle }]
+      });
+      return;
+    }
+    const best = save.best[i];
+    const lines = [{ text: 'Done in ' + game.moves + ' moves.' + (best && best < game.moves ? ' Your best is ' + best + '.' : ''), cls: 'stat' }];
+    if (i === PUZZLES - 1) {
+      showCard('win', {
+        cls: 'win', eyebrow: 'ALL ' + PUZZLES + ' LEVELS CLEARED', title: 'YOU ARE THE RULE BREAKER!',
+        lines: lines.concat([{ text: 'Now try the Sandbox: tons of keys and no puzzle. Break everything.' }]),
+        buttons: [{ label: 'SANDBOX', cls: 'key--accent', on: () => openLevel(PUZZLES) }, { label: 'LEVELS', cls: 'key--mod', on: showTitle }]
+      });
+      return;
+    }
+    showCard('win', {
+      cls: 'win', eyebrow: 'LEVEL ' + (i + 1) + ' CLEARED', title: CHEERS[i % CHEERS.length],
+      lines,
+      buttons: [{ label: 'NEXT LEVEL', cls: 'key--accent', on: () => openLevel(i + 1) }, { label: 'PLAY AGAIN', cls: 'key--mod', on: () => openLevel(i) }]
+    });
+  }
+  let toastTimer = null;
+  function showToast(t, ms) {
+    const old = wrap.querySelector('.toast');
+    if (old) old.remove();
+    t.setAttribute('role', 'status');
+    wrap.append(t);
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.remove(), ms || 1600);
+  }
+  function toast(text) { showToast(el('div', 'toast', text)); }
+  // "NEW RULE: WALL = WIN" (or "RULE BROKEN: ...") right after a move changes the rules.
+  function ruleToast(formed, broken) {
+    const list = formed.length ? formed : broken;
+    if (!list.length) return;
+    const t = el('div', 'toast toast--rule' + (formed.length ? '' : ' toast--broken'));
+    t.append(el('span', 'toast-label', formed.length ? 'NEW RULE' : 'RULE BROKEN'));
+    list.slice(0, 2).forEach(r => {
+      const parts = r.split('=');
+      const box = el('span', 'rule');
+      box.append(chip(parts[0]), chip('is'), chip(parts[1]));
+      t.append(box);
+    });
+    showToast(t, 1800);
+  }
+
+  // ---------- Playing ----------
+  function startBoard(lv, opts, restore) {
+    const st0 = E.load(lv);
+    game = {
+      index: opts.index, level: lv, caseColor: opts.caseColor, tutorial: !!opts.tutorial,
+      st: restore ? restore.st : st0,
+      history: restore && restore.history ? restore.history : [],
+      moves: restore ? restore.moves || 0 : 0, won: false
+    };
+    vis.clear();
+    P.length = 0;
+    shake = 0; flash = 0;
+    computeDerived();
+    $('coach').hidden = !opts.tutorial;
+    $('btnHint').hidden = !!opts.tutorial;
+    showScreen('game');
+    $('lvlNum').textContent = opts.label;
+    $('lvlName').textContent = lv.name;
+    resize();
+    syncVis(performance.now(), { build: true });
+    updateHud();
+    closeCards();
+    hideTip();
+  }
+  function openLevel(i, restore) {
+    tut = null;
+    setPadPulse(false);
+    const lv = LEVELS[i];
+    startBoard(lv, { index: i, caseColor: CASES[i % CASES.length], label: lv.sandbox ? 'BONUS' : 'LEVEL ' + (i + 1) }, restore);
+    if (!restore && lv.intro) showIntro();
+  }
+
+  // ---------- How to play (guided lessons) ----------
+  const TUT = window.RB_TUTORIAL || [];
+  const TUT_CASES = ['#19b58a', '#3d6bff', '#ff7b29', '#8a5cf6'];
+  let tut = null; // { lesson, step, enteredAt: [history length when each step began] }
+
+  function openTutorial(lesson, opts) {
+    const L = TUT[lesson];
+    startBoard(L, { index: -1, caseColor: TUT_CASES[lesson % TUT_CASES.length], tutorial: true, label: 'HOW TO PLAY' });
+    tut = { lesson, step: 0, enteredAt: [0], retry: false };
+    if (opts && opts.skipTalk) {
+      while (tut.step < L.steps.length - 1 && L.steps[tut.step].next) { tut.step++; tut.enteredAt[tut.step] = 0; }
+    }
+    renderCoach(true);
+  }
+  function hasRule(r) { return ruleInfo.rules.some(x => x[0] + '=' + x[1] === r); }
+  function stepDone(step) {
+    const u = step.until;
+    if (!u || u === 'win') return false;
+    if (u.moves) return game.history.length - tut.enteredAt[tut.step] >= u.moves;
+    if (u.formed) return hasRule(u.formed);
+    if (u.broken) return !hasRule(u.broken);
+    return false;
+  }
+  function goStep(n, enteredAt) {
+    tut.step = n;
+    tut.enteredAt[n] = enteredAt;
+    tut.retry = false;
+  }
+  // If the player un-does what a finished step asked for (pushed the key too far), go back to it.
+  function regressSteps(fromMove) {
+    const steps = TUT[tut.lesson].steps;
+    while (tut.step > 0) {
+      const prev = steps[tut.step - 1];
+      const u = prev.until;
+      if (!u || u === 'win' || u.moves || stepDone(prev)) break;
+      tut.step--;
+      if (fromMove) tut.retry = true;
+    }
+  }
+  // Skip ahead over any step the player has already done.
+  function settleSteps() {
+    const steps = TUT[tut.lesson].steps;
+    for (let guard = 0; guard < 10; guard++) {
+      const step = steps[tut.step];
+      if (step.next || tut.step >= steps.length - 1 || !stepDone(step)) break;
+      goStep(tut.step + 1, game.history.length);
+    }
+  }
+  function nextStep() {
+    if (!tut) return;
+    const steps = TUT[tut.lesson].steps;
+    if (tut.step < steps.length - 1) goStep(tut.step + 1, game.history.length);
+    settleSteps();
+    renderCoach(true);
+  }
+  function tutAfterMove() {
+    if (!tut || game.won) return;
+    const before = tut.step;
+    const steps = TUT[tut.lesson].steps;
+    // moving during a "look at this" step counts as NEXT, and the move counts for the next step
+    if (steps[tut.step].next && tut.step < steps.length - 1) goStep(tut.step + 1, game.history.length - 1);
+    settleSteps();
+    regressSteps(true);
+    renderCoach(tut.step !== before);
+  }
+  function tutAfterUndo() {
+    if (!tut) return;
+    const before = tut.step;
+    while (tut.step > 0 && game.history.length < tut.enteredAt[tut.step]) tut.step--;
+    tut.retry = false;
+    settleSteps();
+    regressSteps(false);
+    renderCoach(tut.step !== before);
+  }
+  function setPadPulse(on) {
+    document.querySelectorAll('.pad .key').forEach(b => b.classList.toggle('pulse', on));
+  }
+  function richText(text) {
+    const frag = document.createDocumentFragment();
+    text.split(/\[(\w+)\]/).forEach((part, i) => {
+      if (i % 2 && WORD_STYLE[part]) frag.append(chip(part));
+      else if (part) frag.append(document.createTextNode(part));
+    });
+    return frag;
+  }
+  function renderCoach(changed) {
+    if (!tut) return;
+    const L = TUT[tut.lesson];
+    const step = L.steps[tut.step];
+    $('coachStep').textContent = 'LESSON ' + (tut.lesson + 1) + ' OF ' + TUT.length;
+    const dots = $('coachDots');
+    dots.textContent = '';
+    L.steps.forEach((s, i) => dots.append(el('i', i <= tut.step ? 'on' : null)));
+    const text = $('coachText');
+    text.textContent = '';
+    text.append(richText((tut.retry && step.retry) || step.text));
+    $('coachNext').hidden = !step.next;
+    setPadPulse(!!step.pad);
+    if (changed) {
+      const c = $('coach');
+      c.classList.remove('bump');
+      void c.offsetWidth;
+      c.classList.add('bump');
+    }
+  }
+  function tutWin(ev) {
+    const lesson = tut.lesson;
+    const L = TUT[lesson];
+    const last = lesson === TUT.length - 1;
+    if (last) { save.tutorial = true; persist(); }
+    $('coachNext').hidden = true;
+    setPadPulse(false);
+    const text = $('coachText');
+    text.textContent = '';
+    text.append(richText(L.done));
+    confetti(ev.winAt.x, ev.winAt.y);
+    Snd.win();
+    setTimeout(() => {
+      if (!tut || tut.lesson !== lesson || !game.won) return;
+      if (last) {
+        showCard('win', {
+          cls: 'win', eyebrow: 'ALL ' + TUT.length + ' LESSONS DONE', title: "YOU'RE READY!",
+          lines: [
+            { rich: 'Keys make rules: [bot][is][me], [star][is][win].' },
+            { rich: 'Push keys to fix a rule, break a rule, or make a new one.' },
+            { text: 'Made a mistake? Tap UNDO, or press Z on a keyboard.' }
+          ],
+          buttons: [{ label: 'PLAY LEVEL 1', cls: 'key--accent', on: () => openLevel(0) }, { label: 'LEVELS', cls: 'key--mod', on: showTitle }]
+        });
+      } else {
+        showCard('win', {
+          cls: 'win', eyebrow: 'LESSON ' + (lesson + 1) + ' OF ' + TUT.length + ' DONE', title: 'NICE!',
+          lines: [{ text: L.done }],
+          buttons: [{ label: 'NEXT LESSON', cls: 'key--accent', on: () => openTutorial(lesson + 1) }, { label: 'TRY AGAIN', cls: 'key--mod', on: () => openTutorial(lesson) }]
+        });
+      }
+    }, reduceMotion ? 250 : 1000);
+  }
+
+  // Where the lesson is pointing on the board (render positions, so pointers follow moving keys).
+  function tutTargets(sel) {
+    const out = [];
+    const i = sel.indexOf(':');
+    const kind = sel.slice(0, i), arg = sel.slice(i + 1);
+    if (kind === 'cell') { const xy = arg.split(',').map(Number); out.push({ x: xy[0], y: xy[1] }); return out; }
+    if (kind === 'rule') {
+      const r = ruleInfo.rules.find(x => x[0] + '=' + x[1] === arg);
+      if (r) r[2].forEach(id => { const v = vis.get(id); if (v) out.push({ x: v.x, y: v.y }); });
+      return out;
+    }
+    for (const o of game.st.objs) {
+      const hit = (kind === 'thing' && o.kind === 'obj' && o.type === arg) || (kind === 'word' && o.kind === 'text' && o.word === arg);
+      if (!hit) continue;
+      const v = vis.get(o.id);
+      if (v) out.push({ x: v.x, y: v.y });
+    }
+    return out;
+  }
+  function drawArrow(a, b, now, startOff, endOff) {
+    const s = tile;
+    const ax = ox + (a.x + 0.5) * s, ay = oy + (a.y + 0.5) * s;
+    const bx = ox + (b.x + 0.5) * s, by = oy + (b.y + 0.5) * s;
+    const len = Math.hypot(bx - ax, by - ay) || 1;
+    const ux = (bx - ax) / len, uy = (by - ay) / len;
+    const bob = reduceMotion ? 0 : Math.sin(now * 0.008) * s * 0.07;
+    const sx = ax + ux * (s * startOff + bob), sy = ay + uy * (s * startOff + bob);
+    const ex = bx - ux * (s * endOff - bob), ey = by - uy * (s * endOff - bob);
+    const hw = s * 0.2;
+    g.save();
+    g.lineCap = 'round';
+    g.lineJoin = 'round';
+    g.shadowColor = 'rgba(255, 255, 255, 0.95)';
+    g.shadowBlur = s * 0.12;
+    g.strokeStyle = '#ff4f97';
+    g.lineWidth = Math.max(4, s * 0.12);
+    g.beginPath();
+    g.moveTo(sx, sy);
+    g.lineTo(ex - ux * hw, ey - uy * hw);
+    g.stroke();
+    g.fillStyle = '#ff4f97';
+    g.beginPath();
+    g.moveTo(ex + ux * hw * 0.4, ey + uy * hw * 0.4);
+    g.lineTo(ex - ux * hw * 1.2 - uy * hw, ey - uy * hw * 1.2 + ux * hw);
+    g.lineTo(ex - ux * hw * 1.2 + uy * hw, ey - uy * hw * 1.2 - ux * hw);
+    g.closePath();
+    g.fill();
+    g.restore();
+  }
+  function drawTutorial(now) {
+    const step = TUT[tut.lesson].steps[tut.step];
+    const s = tile;
+    const cells = [];
+    (step.focus || []).forEach(sel => tutTargets(sel).forEach(c => cells.push(c)));
+    const pulse = reduceMotion ? 1 : 0.5 + 0.5 * Math.sin(now * 0.006);
+    if (step.dim && cells.length && !game.won) {
+      g.save();
+      g.beginPath();
+      g.rect(ox - fr, oy - fr, game.st.W * s + fr * 2, game.st.H * s + fr * 2);
+      for (const c of cells) rr(ox + c.x * s - s * 0.05, oy + c.y * s - s * 0.05, s * 1.1, s * 1.1, s * 0.22, true);
+      g.fillStyle = 'rgba(28, 36, 66, 0.42)';
+      g.fill('evenodd');
+      g.restore();
+    }
+    if (step.ghost) {
+      const gx = step.ghost.x, gy = step.ghost.y;
+      const filled = game.st.objs.some(o => o.x === gx && o.y === gy);
+      if (!filled) {
+        const x = ox + gx * s + s * 0.08, y = oy + gy * s + s * 0.08, w = s * 0.84;
+        const st = WORD_STYLE[step.ghost.word];
+        g.save();
+        rr(x, y, w, w, s * 0.16);
+        g.fillStyle = 'rgba(255, 210, 63, 0.22)';
+        g.fill();
+        g.setLineDash([s * 0.1, s * 0.07]);
+        g.lineDashOffset = reduceMotion ? 0 : -now * 0.02;
+        g.lineWidth = Math.max(2, s * 0.05);
+        g.strokeStyle = 'rgba(217, 122, 0, ' + (0.55 + 0.45 * pulse) + ')';
+        g.stroke();
+        g.setLineDash([]);
+        g.font = legendSize(st.label, w * 0.7, w * 0.4) + 'px ' + DISPLAY;
+        g.textAlign = 'center';
+        g.textBaseline = 'middle';
+        g.fillStyle = 'rgba(217, 122, 0, 0.6)';
+        g.fillText(st.label, x + w / 2, y + w / 2 + s * 0.01);
+        g.restore();
+      }
+    }
+    if (game.won) return;
+    for (const c of cells) {
+      g.save();
+      g.lineWidth = Math.max(3, s * 0.07);
+      g.strokeStyle = 'rgba(255, 255, 255, ' + (0.65 + 0.35 * pulse) + ')';
+      g.shadowColor = 'rgba(255, 194, 26, 0.95)';
+      g.shadowBlur = s * 0.3;
+      const inf = s * (0.02 + 0.04 * pulse);
+      rr(ox + c.x * s - inf, oy + c.y * s - inf, s + inf * 2, s + inf * 2, s * 0.22);
+      g.stroke();
+      g.restore();
+    }
+    if (step.arrow) {
+      const from = tutTargets(step.arrow.from)[0];
+      if (!from) return;
+      if (step.arrow.to) {
+        const to = { x: step.arrow.to[0], y: step.arrow.to[1] };
+        if (Math.abs(from.x - to.x) + Math.abs(from.y - to.y) > 0.3) drawArrow(from, to, now, 0.45, 0.25);
+      } else {
+        // "stand here and push this way": an arrow that ends on the key
+        const d = E.DIRS[step.arrow.dir];
+        drawArrow({ x: from.x - d[0] * 1.1, y: from.y - d[1] * 1.1 }, from, now, 0.05, 0.5);
+      }
+    }
+  }
+
+  // ---------- Tap a key or a thing to learn what it does ----------
+  const WORD_HELP = {
+    bot: 'The word for the little robot.',
+    wall: 'The word for the brick walls.',
+    star: 'The word for the shiny star.',
+    box: 'The word for the wooden boxes.',
+    lava: 'The word for the hot lava.',
+    water: 'The word for the blue water.',
+    is: 'The middle of every rule: THING = POWER.',
+    me: 'Whatever is ME, you control!',
+    win: 'Touch something that is WIN to win.',
+    stop: 'Things that are STOP block you, like a wall.',
+    push: 'Things that are PUSH can be shoved around.',
+    zap: 'If ME touches something that is ZAP, ME gets zapped!',
+    sink: 'Anything that goes into a SINK thing sinks, and the SINK thing sinks too.'
+  };
+  const POWER_SAY = { me: 'is YOU', win: 'wins when you touch it', stop: 'blocks you', push: 'can be pushed', zap: 'zaps ME', sink: 'sinks things' };
+  let tipTimer = null;
+  function hideTip() {
+    clearTimeout(tipTimer);
+    const old = wrap.querySelector('.tip');
+    if (old) old.remove();
+  }
+  function showTip(o, cx, cy) {
+    hideTip();
+    const tip = el('div', 'tip');
+    tip.setAttribute('role', 'status');
+    const head = el('div', 'tip-head');
+    if (o.kind === 'text') {
+      head.append(chip(o.word));
+      tip.append(head, el('p', null, WORD_HELP[o.word]));
+      const sample = E.WORDS[o.word] === 'noun' ? 'Put it at the start of a rule.' : (o.word === 'is' ? '' : 'Put it at the end of a rule.');
+      if (sample) tip.append(el('p', 'tip-state', sample));
+      tip.append(el('p', 'tip-state', ruleInfo.active.has(o.id) ? 'It is glowing, so it is in a rule right now.' : 'It is not in a rule right now.'));
+    } else {
+      head.append(chip(o.type), el('span', null, 'right now:'));
+      const powers = Object.keys(POWER_SAY).filter(p => hasP(o, p)).map(p => POWER_SAY[p]);
+      tip.append(head, el('p', null, powers.length ? 'It ' + powers.join(', and it ') + '.' : 'It does nothing special. You can walk over it.'));
+    }
+    wrap.append(tip);
+    const below = oy + cy * tile < tip.offsetHeight + 16;
+    if (below) tip.classList.add('below');
+    const half = tip.offsetWidth / 2;
+    const x = Math.max(half + 8, Math.min(cssW - half - 8, ox + (cx + 0.5) * tile));
+    tip.style.left = x + 'px';
+    tip.style.top = (below ? oy + (cy + 1) * tile + 6 : oy + cy * tile - 6) + 'px';
+    tipTimer = setTimeout(hideTip, 4500);
+  }
+  function tapBoard(clientX, clientY) {
+    if (!game || cardKind) return;
+    const r = cvs.getBoundingClientRect();
+    const cx = Math.floor((clientX - r.left - ox) / tile), cy = Math.floor((clientY - r.top - oy) / tile);
+    if (cx < 0 || cy < 0 || cx >= game.st.W || cy >= game.st.H) { hideTip(); return; }
+    const here = game.st.objs.filter(o => o.x === cx && o.y === cy);
+    if (!here.length) { hideTip(); return; }
+    here.sort((a, b) => (b.kind === 'text' ? 9 : LAYER[b.type]) - (a.kind === 'text' ? 9 : LAYER[a.type]));
+    Snd.key(0.5);
+    showTip(here[0], cx, cy);
+  }
+
+  function doMove(dir) {
+    if (!game || screen !== 'game') return;
+    if (cardKind === 'intro' || cardKind === 'hint') { closeCards(); return; }
+    if (game.won) return;
+    hideTip();
+    const now = performance.now();
+    const beforeActive = ruleInfo.active;
+    const r = E.step(game.st, dir);
+    if (r.ev.noMe) { Snd.bonk(); showNoMe(); return; }
+    if (!r.ev.changed) {
+      Snd.bonk();
+      for (const o of game.st.objs) {
+        if (o.kind === 'obj' && hasP(o, 'me')) {
+          const v = vis.get(o.id);
+          if (v) { v.nudge = { t: now, dx: E.DIRS[dir][0], dy: E.DIRS[dir][1] }; v.look = E.DIRS[dir].slice(); }
+        }
+      }
+      return;
+    }
+    if (cardKind === 'nome') closeCards();
+    game.history.push(game.st);
+    if (game.history.length > 3000) game.history.shift();
+    game.st = r.state;
+    game.moves++;
+    computeDerived();
+    syncVis(now, {});
+    effects(r.ev, dir, beforeActive, now);
+    updateHud(r.ev.formed);
+    if (!r.ev.won) ruleToast(r.ev.formed, r.ev.broken);
+    if (r.ev.won) { onWin(r.ev); return; }
+    tutAfterMove();
+    if (r.ev.meLeft === 0) {
+      const g0 = game, mv = game.moves;
+      setTimeout(() => { if (game === g0 && game.moves === mv && !game.won && E.meCount(game.st) === 0) showNoMe(); }, 650);
+    }
+  }
+
+  function effects(ev, dir, beforeActive, now) {
+    const d = E.DIRS[dir];
+    let pushedText = 0, pushedThing = 0;
+    for (const id of ev.pushed) {
+      const o = findObj(id);
+      const v = vis.get(id);
+      if (o && o.kind === 'text') { pushedText++; if (v) v.press = now; }
+      else pushedThing++;
+      if (o) dust(o.x - d[0] * 0.5, o.y - d[1] * 0.5, d[0], d[1], o.kind === 'text' ? 3 : 5);
+    }
+    for (const id of ev.moved) {
+      const v = vis.get(id);
+      if (v) { v.look = d.slice(); v.squash = now; }
+    }
+    // sounds by importance
+    if (pushedText) Snd.key(Math.min(1.3, 0.9 + 0.12 * pushedText));
+    else if (pushedThing) Snd.thud();
+    else Snd.step();
+    if (pushedText && pushedThing) Snd.thud();
+    if (ev.formed.length) {
+      Snd.ruleOn();
+      for (const id of ruleInfo.active) {
+        if (beforeActive.has(id)) continue;
+        const o = findObj(id);
+        if (o) sparkle(o.x, o.y, 9);
+      }
+      if (!reduceMotion) shake = Math.max(shake, tile * 0.05);
+    } else if (ev.broken.length) {
+      Snd.ruleOff();
+    }
+    for (const t of ev.transformed) poof(t.x, t.y, THING_COLOR[t.to[0]] || '#ffffff');
+    if (ev.transformed.length) Snd.poof();
+    for (const s of ev.sunk) splash(s.x, s.y);
+    if (ev.sunk.length) Snd.splash();
+    for (const z of ev.zapped) explode(z.x, z.y, THING_COLOR[z.type] || '#ff7a1a');
+    if (ev.zapped.length) Snd.boom();
+  }
+
+  function onWin(ev) {
+    game.won = true;
+    if (tut) { tutWin(ev); return; }
+    const i = game.index;
+    if (!game.level.sandbox) {
+      save.done[i] = true;
+      if (!save.best[i] || game.moves < save.best[i]) save.best[i] = game.moves;
+      persist();
+    }
+    confetti(ev.winAt.x, ev.winAt.y);
+    if (!reduceMotion) shake = Math.max(shake, tile * 0.12);
+    Snd.win();
+    const moves = game.moves;
+    setTimeout(() => { if (game && game.won && game.index === i && game.moves === moves) showWin(); }, reduceMotion ? 250 : 1000);
+  }
+
+  function undo() {
+    if (!game) return;
+    if (!game.history.length) { Snd.bonk(); toast('Nothing to undo yet'); return; }
+    game.st = game.history.pop();
+    game.moves = Math.max(0, game.moves - 1);
+    game.won = false;
+    closeCards();
+    computeDerived();
+    syncVis(performance.now(), { dur: 90 });
+    updateHud();
+    Snd.undo();
+    tutAfterUndo();
+  }
+
+  function restart() {
+    if (!game) return;
+    if (tut) { openTutorial(tut.lesson, { skipTalk: true }); Snd.poof(); return; }
+    const fresh = E.load(game.level);
+    game.history.push(game.st);
+    game.st = fresh;
+    game.moves = 0;
+    game.won = false;
+    closeCards();
+    computeDerived();
+    syncVis(performance.now(), { dur: 260 });
+    updateHud();
+    Snd.poof();
+    toast('Back to the start. Undo brings it back.');
+  }
+
+  // ---------- Screens ----------
+  function showScreen(name) {
+    screen = name;
+    $('title').hidden = name !== 'title';
+    $('game').hidden = name !== 'game';
+    if (name === 'game') requestAnimationFrame(resize);
+  }
+  function showTitle() {
+    closeCards();
+    hideTip();
+    tut = null;
+    setPadPulse(false);
+    $('coach').hidden = true;
+    buildLevelGrid();
+    showScreen('title');
+  }
+
+  function buildHowTo() {
+    const slot = $('howtoSlot');
+    slot.textContent = '';
+    const done = !!save.tutorial;
+    const b = el('button', 'key key--gold howto-key' + (done ? '' : ' pulse'));
+    const face = el('span', 'face');
+    face.append(el('span', 'lv-num', 'HOW TO PLAY'), el('span', 'lv-name', done ? 'Done! Tap to practice again.' : 'Start here! 4 quick lessons with the robot.'));
+    b.append(face);
+    b.addEventListener('pointerdown', () => Snd.key(0.9));
+    b.addEventListener('click', () => openTutorial(0));
+    slot.append(b);
+  }
+  function buildLevelGrid() {
+    buildHowTo();
+    const grid = $('levelGrid');
+    grid.textContent = '';
+    let done = 0;
+    LEVELS.forEach((lv, i) => {
+      const b = el('button', 'key' + (lv.sandbox ? ' space' : '') + (!lv.sandbox && save.done[i] ? ' done' : ''));
+      const face = el('span', 'face');
+      if (lv.sandbox) {
+        face.append(el('span', 'lv-num', 'SANDBOX'), el('span', 'lv-name', 'Lots of keys. No puzzle. Break everything.'));
+        b.setAttribute('aria-label', 'Sandbox: lots of keys, no puzzle');
+      } else {
+        face.append(el('span', 'lv-num', String(i + 1)), el('span', 'lv-name', lv.name));
+        b.setAttribute('aria-label', 'Level ' + (i + 1) + ': ' + lv.name + (save.done[i] ? ', cleared' : ''));
+      }
+      b.append(face);
+      if (!lv.sandbox && save.done[i]) { done++; b.append(el('span', 'lv-done', 'BEST ' + save.best[i])); }
+      b.addEventListener('pointerdown', () => Snd.key(0.9));
+      b.addEventListener('click', () => openLevel(i));
+      grid.append(b);
+    });
+    $('progress').textContent = done + ' of ' + PUZZLES + ' cleared';
+  }
+
+  function buildTitleWord() {
+    const words = [['R', 'U', 'L', 'E'], ['B', 'R', 'E', 'A', 'K', 'E', 'R']];
+    const rows = $('titleRows');
+    rows.textContent = '';
+    words.forEach((letters, wi) => {
+      const w = el('div', 'title-word' + (wi === 1 ? ' break' : ''));
+      letters.forEach(ch => {
+        const k = el('button', 'key');
+        k.setAttribute('aria-label', 'Key ' + ch);
+        k.tabIndex = -1;
+        k.append(el('span', 'face', ch));
+        k.addEventListener('pointerdown', () => {
+          Snd.init();
+          Snd.key(1.1);
+          k.classList.remove('hop');
+          void k.offsetWidth;
+          k.classList.add('hop');
+        });
+        w.append(k);
+      });
+      rows.append(w);
+    });
+  }
+
+  function syncSoundButtons() {
+    const on = Snd.on;
+    $('titleSound').querySelector('.face').textContent = on ? 'SOUND: ON' : 'SOUND: OFF';
+    const b = $('btnSound');
+    b.setAttribute('aria-label', on ? 'Sound is on. Turn sound off' : 'Sound is off. Turn sound on');
+    b.querySelector('.wave').style.display = on ? '' : 'none';
+    b.querySelector('.mute').style.display = on ? 'none' : '';
+  }
+  function toggleSound() {
+    Snd.init();
+    Snd.set(!Snd.on);
+    save.sound = Snd.on;
+    persist();
+    syncSoundButtons();
+    if (Snd.on) Snd.key(1);
+  }
+
+  // ---------- Controls ----------
+  const pressArrow = dir => {
+    const b = document.querySelector('.pad [data-dir="' + dir + '"]');
+    if (!b) return;
+    b.classList.add('is-down');
+    setTimeout(() => b.classList.remove('is-down'), 110);
+  };
+  document.querySelectorAll('.pad .key').forEach(btn => {
+    const dir = btn.dataset.dir;
+    let t1 = null, t2 = null;
+    const stop = () => { clearTimeout(t1); clearInterval(t2); t1 = t2 = null; btn.classList.remove('is-down'); };
+    btn.addEventListener('pointerdown', e => {
+      e.preventDefault();
+      Snd.init();
+      try { btn.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+      btn.classList.add('is-down');
+      Snd.key(0.45);
+      doMove(dir);
+      stop();
+      btn.classList.add('is-down');
+      t1 = setTimeout(() => { t2 = setInterval(() => doMove(dir), 150); }, 320);
+    });
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(t => btn.addEventListener(t, stop));
+    btn.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); doMove(dir); } });
+  });
+
+  let swipe = null;
+  cvs.addEventListener('pointerdown', e => {
+    swipe = { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, id: e.pointerId, t: performance.now(), moved: false };
+    try { cvs.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+  });
+  cvs.addEventListener('pointermove', e => {
+    if (!swipe || e.pointerId !== swipe.id) return;
+    const dx = e.clientX - swipe.x, dy = e.clientY - swipe.y;
+    const th = Math.max(24, tile * 0.6);
+    if (Math.abs(dx) < th && Math.abs(dy) < th) return;
+    const dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
+    doMove(dir);
+    swipe.moved = true;
+    swipe.x = e.clientX; swipe.y = e.clientY;
+  });
+  cvs.addEventListener('pointerup', e => {
+    if (swipe && !swipe.moved && e.pointerId === swipe.id && performance.now() - swipe.t < 500 &&
+        Math.hypot(e.clientX - swipe.sx, e.clientY - swipe.sy) < 14) tapBoard(e.clientX, e.clientY);
+    swipe = null;
+  });
+  cvs.addEventListener('pointercancel', () => { swipe = null; });
+  cvs.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+
+  const KEYS = {
+    ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
+    w: 'up', s: 'down', a: 'left', d: 'right', W: 'up', S: 'down', A: 'left', D: 'right'
+  };
+  let lastKeyMove = 0;
+  document.addEventListener('keydown', e => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (screen !== 'game') return;
+    const dir = KEYS[e.key];
+    if (dir) {
+      e.preventDefault();
+      const now = performance.now();
+      if (e.repeat && now - lastKeyMove < 130) return;
+      lastKeyMove = now;
+      pressArrow(dir);
+      doMove(dir);
+      return;
+    }
+    if (e.key === 'z' || e.key === 'Z' || e.key === 'u' || e.key === 'U' || e.key === 'Backspace') { e.preventDefault(); flashKey('btnUndo'); undo(); }
+    else if (e.key === 'r' || e.key === 'R') { e.preventDefault(); flashKey('btnRestart'); restart(); }
+    else if (e.key === 'Escape') { e.preventDefault(); if (cardKind && cardKind !== 'win') closeCards(); else showTitle(); }
+    else if ((e.key === 'Enter' || e.key === ' ') && cardPrimary && !(document.activeElement && document.activeElement.tagName === 'BUTTON')) { e.preventDefault(); cardPrimary(); }
+    else if ((e.key === 'Enter' || e.key === ' ') && tut && !$('coachNext').hidden && !(document.activeElement && document.activeElement.tagName === 'BUTTON')) { e.preventDefault(); nextStep(); }
+    else if (e.key === 'h' || e.key === 'H') { showHint(); }
+  });
+  function flashKey(id) {
+    const b = $(id);
+    b.classList.add('is-down');
+    Snd.key(0.7);
+    setTimeout(() => b.classList.remove('is-down'), 120);
+  }
+
+  function bindKey(id, fn) {
+    const b = $(id);
+    b.addEventListener('pointerdown', () => Snd.key(0.8));
+    b.addEventListener('click', e => { e.preventDefault(); fn(); });
+  }
+  bindKey('btnUndo', undo);
+  bindKey('btnRestart', restart);
+  bindKey('btnLevels', showTitle);
+  bindKey('btnHint', showHint);
+  bindKey('btnSound', toggleSound);
+  bindKey('titleSound', toggleSound);
+  bindKey('coachNext', nextStep);
+  bindKey('coachSkip', showTitle);
+
+  if (window.ResizeObserver) new ResizeObserver(() => { if (screen === 'game') resize(); }).observe(wrap);
+  window.addEventListener('resize', () => { if (screen === 'game') resize(); });
+  if (document.fonts) {
+    const refresh = () => { fontCache.clear(); bgDirty = true; };
+    if (document.fonts.load) document.fonts.load('20px "Bungee"').then(refresh, () => {});
+    if (document.fonts.ready) document.fonts.ready.then(refresh);
+  }
+
+  // ---------- Start ----------
+  function snapshot() {
+    if (tut) return { screen, lesson: tut.lesson };
+    return game ? { screen, index: game.index, st: game.st, moves: game.moves, history: game.history.slice(-300) } : { screen };
+  }
+  function start(data) {
+    buildTitleWord();
+    buildLevelGrid();
+    syncSoundButtons();
+    data = data || {};
+    if (data.screen === 'game' && typeof data.lesson === 'number' && TUT[data.lesson]) {
+      openTutorial(data.lesson);
+    } else if (data.screen === 'game' && typeof data.index === 'number' && LEVELS[data.index] && data.st) {
+      try { openLevel(data.index, { st: data.st, moves: data.moves, history: data.history || [] }); } catch (e) { showScreen('title'); }
+    } else {
+      showScreen('title');
+    }
+    requestAnimationFrame(frame);
+  }
+  const hot = window.claude && window.claude.hot;
+  if (hot && typeof hot.snapshot === 'function') { try { hot.snapshot(snapshot); } catch (e) { /* ignore */ } }
+  if (hot && typeof hot.ready === 'function') hot.ready(start);
+  else start((hot && hot.data) || {});
+
+  // Test hook (harmless): lets automated checks read the board.
+  window.__ruleBreaker = {
+    move: doMove, undo, restart, open: openLevel, sound: Snd, lesson: openTutorial, next: nextStep, tap: tapBoard,
+    get step() { return tut ? { lesson: tut.lesson, step: tut.step } : null; },
+    get state() { return game && game.st; },
+    get won() { return !!(game && game.won); },
+    get card() { return cardKind; },
+    get rules() { return ruleInfo.rules.map(r => r[0] + '=' + r[1]); }
+  };
+})();
+
+</script>
+
+</body></html>

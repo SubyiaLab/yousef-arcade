@@ -1,0 +1,148 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Pew Pew City</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;800&family=Barlow:wght@400;600&display=swap">
+<style>
+/* Layout: full-bleed 3D view; restrained HUD pinned to corners — map + health bottom-left, wanted + cash top-right */
+:root{
+  --ink:#0b0c0e;
+  --panel:rgba(8,9,11,.62);
+  --hud:#ecebe6;
+  --money:#a3cf96;
+  --hot:#c22f3b;
+  --cool:#7fb4d6;
+  --muted:#8b8f96;
+  --line:rgba(236,235,230,.28);
+  --display:'Barlow Condensed','Arial Narrow',sans-serif;
+  --ui:'Barlow','Helvetica Neue',Arial,sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%;margin:0;background:var(--ink);color:var(--hud);overflow:hidden;font-family:var(--ui)}
+body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+#view{position:fixed;inset:0}
+#view canvas{display:block;width:100%;height:100%}
+.hud{position:fixed;inset:0;pointer-events:none;text-shadow:0 1px 3px rgba(0,0,0,.85)}
+.tr{position:absolute;right:22px;top:calc(env(safe-area-inset-top,0px) + 18px);display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.stars{display:flex;gap:4px;font-size:21px;line-height:1}
+.stars span{color:rgba(255,255,255,.14)}
+.stars span.on{color:#f4f3ee}
+.stars.flash span.on{animation:blink .5s steps(2) infinite}
+@keyframes blink{50%{color:var(--cool)}}
+.score{font-family:var(--display);font-weight:600;font-size:34px;line-height:1.05;color:var(--money);letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.bonus{font-family:var(--display);font-weight:600;font-size:18px;color:var(--hud);opacity:0;transition:opacity .4s}
+.bonus.show{opacity:.9;transition:none}
+.weapon{font-family:var(--display);font-weight:500;font-size:14px;letter-spacing:.24em;color:var(--muted)}
+.bl{position:absolute;left:22px;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);display:flex;flex-direction:column;gap:6px}
+#mini{width:176px;height:176px;display:block;border-radius:6px;border:1px solid var(--line);box-shadow:0 2px 14px rgba(0,0,0,.6)}
+.bars{display:flex;width:178px}
+.bar{flex:1;height:5px;background:rgba(0,0,0,.55)}
+.bar i{display:block;height:100%;background:var(--money);transition:width .15s}
+.bar.car i{background:var(--cool)}
+.br{position:absolute;right:22px;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);text-align:right}
+.speed{font-family:var(--display);font-weight:600;font-size:48px;line-height:.9;color:var(--hud);font-variant-numeric:tabular-nums}
+.speed small{font-size:14px;letter-spacing:.2em;color:var(--muted)}
+.hint{font-size:12px;letter-spacing:.04em;color:rgba(236,235,230,.7);max-width:280px}
+.cross{position:absolute;left:50%;top:50%;width:18px;height:18px;margin:-9px 0 0 -9px}
+.cross::before,.cross::after{content:"";position:absolute;background:rgba(255,255,255,.75)}
+.cross::before{left:8.5px;top:0;width:1px;height:18px}
+.cross::after{top:8.5px;left:0;height:1px;width:18px}
+.cross i{position:absolute;left:6px;top:6px;width:6px;height:6px;background:transparent}
+.prompt{position:absolute;left:50%;top:64%;transform:translateX(-50%);font-size:13px;font-weight:600;letter-spacing:.16em;background:var(--panel);padding:8px 14px;border-radius:2px;white-space:nowrap}
+.lockhint{position:absolute;left:50%;top:22%;transform:translateX(-50%);font-size:14px;background:var(--panel);padding:8px 14px;border-radius:2px;white-space:nowrap}
+.msg{position:absolute;left:0;right:0;top:40%;text-align:center;font-family:var(--display);font-weight:800;font-size:clamp(46px,10vw,96px);color:var(--hot);letter-spacing:.14em;text-shadow:0 2px 18px rgba(0,0,0,.9)}
+.overlay{position:fixed;inset:0;display:flex;align-items:flex-start;background:linear-gradient(90deg,rgba(8,9,11,.93) 0%,rgba(8,9,11,.7) 46%,rgba(8,9,11,.12) 100%);padding-inline:max(16px,7vw);overflow:auto}
+.card{margin-block:auto;max-width:520px;width:100%;display:flex;flex-direction:column;gap:16px;align-items:flex-start;padding-block:24px}
+.eyebrow{font-family:var(--display);font-weight:500;font-size:14px;letter-spacing:.34em;color:var(--muted)}
+.card h1{margin:0;font-family:var(--display);font-weight:800;font-size:clamp(54px,11vw,112px);line-height:.84;letter-spacing:.01em;color:var(--hud);text-wrap:balance}
+.card h1 em{font-style:normal;color:transparent;-webkit-text-stroke:1.5px var(--hud)}
+.card p{margin:0;font-size:15px;line-height:1.5;max-width:44ch;color:rgba(236,235,230,.82)}
+.keys{display:grid;grid-template-columns:auto 1fr;gap:7px 18px;border-left:1px solid var(--line);padding:4px 0 4px 18px;font-size:14px;color:rgba(236,235,230,.85)}
+.keys b{font-family:var(--display);font-weight:600;letter-spacing:.12em;color:var(--hud);white-space:nowrap}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+button#play,button#timeBtn{pointer-events:auto;font-family:var(--display);font-weight:600;font-size:20px;letter-spacing:.22em;border-radius:2px;padding:11px 30px;cursor:pointer}
+button#play{color:var(--ink);background:var(--hud);border:1px solid var(--hud)}
+button#play:hover{background:#fff}
+button#timeBtn{color:var(--hud);background:transparent;border:1px solid var(--line);font-size:15px;padding:11px 18px}
+button#timeBtn:hover{border-color:var(--hud)}
+button#play:focus-visible,button#timeBtn:focus-visible,#sens:focus-visible{outline:2px solid var(--cool);outline-offset:3px}
+label.sens{display:flex;gap:10px;align-items:center;font-size:12px;font-weight:600;letter-spacing:.14em;color:var(--muted)}
+#sens{accent-color:var(--hud);width:120px}
+.small{font-size:12px;color:var(--muted)}
+.touch{position:fixed;inset:0;touch-action:none}
+.stick{position:absolute;left:30px;bottom:calc(env(safe-area-inset-bottom,0px) + 40px);width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.3);pointer-events:none}
+.stick.on{bottom:auto}
+.stick i{position:absolute;left:39px;top:39px;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.35)}
+.tbtns{position:absolute;right:20px;bottom:calc(env(safe-area-inset-bottom,0px) + 24px);display:grid;grid-template-columns:repeat(2,auto);gap:12px;align-items:end;justify-items:end}
+.tbtn{font-family:var(--display);font-weight:600;font-size:15px;letter-spacing:.12em;color:var(--hud);width:64px;height:64px;border-radius:50%;background:rgba(8,9,11,.45);border:1px solid rgba(255,255,255,.35);touch-action:none}
+.tbtn.on{background:var(--hud);color:var(--ink)}
+.tbtn.fire{width:100px;height:100px;font-size:20px;border-color:rgba(194,47,59,.8);background:rgba(194,47,59,.3);grid-column:1 / -1}
+.tbtn.fire.on{background:var(--hot)}
+#tPause{width:46px;height:46px;font-size:14px}
+body.touchmode .bl{bottom:auto;top:calc(env(safe-area-inset-top,0px) + 14px);left:14px}
+body.touchmode #mini{width:120px;height:120px}
+body.touchmode .bars{width:122px}
+body.touchmode .br{right:auto;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 12px);bottom:auto;text-align:center}
+body.touchmode .hint{display:none}
+body.touchmode .prompt{top:30%}
+@media (max-width:560px){#mini{width:120px;height:120px}.bars{width:122px}.speed{font-size:38px}.hint{display:none}}
+@media (prefers-reduced-motion:reduce){.stars.flash span.on{animation:none}}
+</style>
+
+<div id="view"></div>
+<div class="hud">
+  <div class="tr">
+    <div class="stars" id="stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+    <div class="score" id="score">$0</div>
+    <div class="bonus" id="bonus">+10</div>
+    <div class="weapon" id="weapon">RIFLE</div>
+  </div>
+  <div class="bl">
+    <canvas id="mini" width="360" height="360"></canvas>
+    <div class="bars"><div class="bar" id="hpbar"><i id="hp" style="width:100%"></i></div></div>
+  </div>
+  <div class="br">
+    <div class="speed" id="speed" hidden>0 <small>KM/H</small></div>
+    <div class="hint" id="hint">E steal a car · P pause</div>
+  </div>
+  <div class="cross" id="cross" hidden><i></i></div>
+  <div class="prompt" id="prompt" hidden>PRESS E TO DRIVE</div>
+  <div class="lockhint" id="lockhint" hidden>Click the game to look around with the mouse</div>
+  <div class="msg" id="msg" hidden></div>
+</div>
+<div class="touch" id="touch" hidden>
+  <div class="stick" id="stick"><i id="knob"></i></div>
+  <div class="tbtns">
+    <button class="tbtn" id="tPause" aria-label="Pause">II</button>
+    <button class="tbtn" id="tGun">GUN</button>
+    <button class="tbtn" id="tRun">RUN</button>
+    <button class="tbtn" id="tCar">CAR</button>
+    <button class="tbtn fire" id="tFire">FIRE</button>
+  </div>
+</div>
+<div class="overlay" id="menu">
+  <div class="card">
+    <div class="eyebrow">OPEN WORLD</div>
+    <h1>PEW PEW <em>CITY</em></h1>
+    <p>A full 3D city. Steal any car, cause chaos, and lose the cops when they come after you.</p>
+    <div class="keys">
+      <b>WASD / ARROWS</b><span>Walk or drive</span>
+      <b>MOUSE</b><span>Look around and aim, click to shoot</span>
+      <b>SHIFT</b><span>Sprint</span>
+      <b>SPACE</b><span>Handbrake (in a car)</span>
+      <b>E</b><span>Get in or out of a car</span>
+      <b>1 · 2 · Q</b><span>Rifle or rocket launcher</span>
+      <b>M · P</b><span>Sound on/off · Pause</span>
+      <b>N</b><span>Switch evening / rainy night / daytime</span>
+    </div>
+    <div class="row">
+      <button id="play">PLAY</button>
+      <button id="timeBtn">TIME: EVENING</button>
+      <label class="sens" for="sens">MOUSE SPEED <input type="range" id="sens" min="0.4" max="2" step="0.1" value="1"></label>
+    </div>
+    <div class="small" id="needs">Works with keyboard and mouse, or touch on a tablet or phone.</div>
+    <div class="small" id="hdstat">Loading HD graphics…</div>
+  </div>
+</div>
+<script src="game.js"></script>
+
+</body></html>
