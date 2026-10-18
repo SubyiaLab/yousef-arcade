@@ -176,28 +176,6 @@
   "updated": "2026-10-14"
  },
  {
-  "slug": "the-ugly-truth",
-  "name": "The Ugly Truth",
-  "artifact": "https://claude.ai/code/artifact/77e8cc5c-0b50-45c0-baed-e40667b2c9ce",
-  "genre": "Adventure",
-  "blurb": "Ricky Fisher looks perfect but is secretly a troublemaker. Escape detention.",
-  "colorA": "#f2c14e",
-  "colorB": "#5c2e1a",
-  "pattern": "dots",
-  "updated": "2026-10-13"
- },
- {
-  "slug": "brickverse",
-  "name": "Brickverse",
-  "artifact": "https://claude.ai/code/artifact/799bf5ae-b789-4284-980b-f7fb0b530f25",
-  "genre": "Sandbox",
-  "blurb": "Many games in one world, with avatar customization.",
-  "colorA": "#ef476f",
-  "colorB": "#3d1f6b",
-  "pattern": "grid",
-  "updated": "2026-10-12"
- },
- {
   "slug": "sky-smash-cosmos",
   "name": "Sky Smash Cosmos",
   "artifact": "https://claude.ai/code/artifact/f1287e44-0b6d-47e0-a460-a598a301ae66",

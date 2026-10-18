@@ -34,3 +34,4 @@ Yousef's games are made as Claude artifacts. This file is the procedure Claude f
 ## Exclusions
 - Around the World Trivia: a slide deck, not a web game.
 - Older duplicates: the first Sky Smash Remastered (89e190a7…) and the original Claude FC (92d27ae7…).
+- Brickverse and The Ugly Truth: removed from the site by the owner. Do not re-add.
