@@ -1,0 +1,694 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Thunder Riff</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Metal+Mania&family=Barlow+Condensed:wght@500;700;800&display=swap">
+<style>
+/* Layout: full-bleed stage canvas; menus float as one centered column over the live stage. Single committed night-arena look. */
+:root{
+  --night:#0d0a1f; --pit:#050309; --steel:#c9d3e6; --chrome-hi:#ffffff; --chrome-lo:#58627f;
+  --molten:#ff7a1a; --volt:#38e1ff; --ink:#f3f1ff; --dim:#9a94bd; --panel:rgba(18,13,38,.86); --line:#3a3160;
+  --f-logo:"Metal Mania","Impact",fantasy;
+  --f-ui:"Barlow Condensed","Arial Narrow","Roboto Condensed",sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--night);color:var(--ink);font-family:var(--f-ui);overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+#app{position:relative;height:100%;overflow:hidden}
+#cv{display:block;width:100%;height:100%}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible{outline:3px solid var(--volt);outline-offset:3px}
+
+.screen{position:absolute;inset:0;display:flex;overflow-y:auto;padding-block:24px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:radial-gradient(ellipse at 50% 35%,rgba(13,10,31,.35),rgba(5,3,9,.88) 75%);touch-action:pan-y}
+.panel{margin:auto;width:100%;max-width:760px;display:flex;flex-direction:column;gap:14px}
+.eyebrow{margin:0;font-weight:700;letter-spacing:.32em;text-transform:uppercase;font-size:13px;color:var(--volt);text-align:center}
+.logo{margin:0;font-family:var(--f-logo);font-weight:400;font-size:clamp(54px,15vw,104px);line-height:.92;text-align:center;letter-spacing:.01em;
+  background:linear-gradient(180deg,var(--chrome-hi) 0%,var(--steel) 42%,var(--chrome-lo) 50%,#eef2ff 58%,#8e9cc4 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 3px 0 var(--molten)) drop-shadow(0 0 22px rgba(56,225,255,.45));text-wrap:balance}
+.tag{margin:0 auto;max-width:52ch;text-align:center;color:var(--dim);font-size:18px;line-height:1.3;font-weight:500}
+.lbl{margin:8px 0 0;font-size:13px;letter-spacing:.28em;text-transform:uppercase;color:var(--dim);font-weight:700}
+.songs{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:8px}
+.song{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 12px;text-align:left;padding:12px 16px;background:var(--panel);border:2px solid var(--line);border-radius:6px;transition:border-color .15s,box-shadow .15s}
+.song .nm{font-size:23px;font-weight:800;letter-spacing:.02em;line-height:1.05}
+.song .meta{grid-column:1;font-size:15px;color:var(--dim);font-weight:500;letter-spacing:.04em}
+.lvl{display:inline-flex;gap:2px;vertical-align:middle;margin-left:4px}.lvl i{width:6px;height:11px;border-radius:1px;background:var(--line)}.lvl i.on{background:var(--molten)}
+.song .best{grid-row:1/span 2;grid-column:2;text-align:right;font-size:14px;color:var(--dim);font-variant-numeric:tabular-nums}
+.song .best b{display:block;color:var(--molten);font-size:18px;letter-spacing:.1em}
+.song[aria-pressed="true"]{border-color:var(--molten);box-shadow:0 0 0 1px var(--molten),0 0 24px rgba(255,122,26,.35)}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.seg button{padding:12px 6px;background:var(--panel);border:2px solid var(--line);border-radius:6px;font-size:20px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.seg button[aria-pressed="true"]{border-color:var(--volt);color:var(--volt);box-shadow:0 0 18px rgba(56,225,255,.3)}
+.go{margin-top:8px;padding:12px;font-family:var(--f-logo);font-size:46px;line-height:1;border-radius:8px;color:#1a0700;
+  background:linear-gradient(180deg,#ffd27a,var(--molten) 55%,#c2410c);box-shadow:0 6px 0 #7a2406,0 0 30px rgba(255,122,26,.45)}
+.go:active{transform:translateY(4px);box-shadow:0 2px 0 #7a2406}
+.keys{margin:0;text-align:center;color:var(--dim);font-size:15px;line-height:1.4}
+.keys kbd{font-family:var(--f-ui);font-weight:800;color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:0 6px}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{padding:14px;border-radius:6px;font-size:22px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;background:var(--panel);border:2px solid var(--line)}
+.btn.main{border-color:var(--molten);color:#ffd9b8}
+.big-title{margin:0;text-align:center;font-family:var(--f-logo);font-weight:400;font-size:clamp(44px,11vw,72px);line-height:1;color:var(--molten);text-shadow:0 0 24px rgba(255,122,26,.5);text-wrap:balance}
+.big-title.fail{color:#ff5470;text-shadow:0 0 24px rgba(255,84,112,.5)}
+.sub{margin:0;text-align:center;color:var(--dim);font-size:18px;font-weight:500}
+.stars{text-align:center;font-size:44px;letter-spacing:.12em;color:#3a3160;line-height:1}
+.stars .on{color:#ffc93a;text-shadow:0 0 14px rgba(255,201,58,.6)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px;text-align:center}
+.stat span{display:block;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);font-weight:700}
+.stat b{font-size:28px;font-weight:800;font-variant-numeric:tabular-nums}
+.judges{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--dim)}
+.newbest{align-self:center;padding:4px 14px;border-radius:999px;background:var(--volt);color:#03151b;font-weight:800;letter-spacing:.14em;text-transform:uppercase;font-size:15px}
+
+#hudBtns{position:absolute;top:10px;right:max(10px,env(safe-area-inset-right,0px));display:flex;gap:8px;z-index:5}
+#hudBtns button{height:48px;min-width:48px;padding:0 14px;border-radius:8px;background:rgba(18,13,38,.75);border:2px solid var(--line);font-weight:800;font-size:18px;letter-spacing:.1em;display:flex;align-items:center;gap:6px}
+#shredBtn{color:#5c6a8a}
+#shredBtn svg{width:18px;height:22px;fill:currentColor}
+#shredBtn.ready{color:var(--volt);border-color:var(--volt);box-shadow:0 0 18px rgba(56,225,255,.5);animation:pulse 0.8s ease-in-out infinite alternate}
+#shredBtn.on{color:#fff;background:var(--volt);border-color:#fff}
+@keyframes pulse{to{box-shadow:0 0 30px rgba(56,225,255,.85)}}
+@media (prefers-reduced-motion:reduce){#shredBtn.ready{animation:none}}
+</style>
+
+<div id="app">
+  <canvas id="cv" aria-label="Thunder Riff stage"></canvas>
+  <div id="hudBtns" hidden>
+    <button id="shredBtn" aria-label="Shred mode"><svg viewBox="0 0 18 22" aria-hidden="true"><path d="M11 0 1 13h6l-2 9 11-13h-6z"/></svg>SHRED</button>
+    <button id="pauseBtn" aria-label="Pause">II</button>
+  </div>
+
+  <section id="menu" class="screen">
+    <div class="panel">
+      <p class="eyebrow">Live at the Steel Arena</p>
+      <h1 class="logo">Thunder Riff</h1>
+      <p class="tag">Hit the notes in time and the guitar roars. Miss them and the riff drops out. Keep the crowd headbanging to the last chord.</p>
+      <h2 class="lbl">Set list</h2>
+      <div id="songs" class="songs"></div>
+      <h2 class="lbl">Difficulty</h2>
+      <div class="seg" id="diffs">
+        <button id="d-easy" data-d="easy" aria-pressed="false">Easy</button>
+        <button id="d-medium" data-d="medium" aria-pressed="true">Medium</button>
+        <button id="d-hard" data-d="hard" aria-pressed="false">Hard</button>
+      </div>
+      <button id="go" class="go">Rock!</button>
+      <p class="keys">Tap the 4 lanes, or play with <kbd>D</kbd> <kbd>F</kbd> <kbd>J</kbd> <kbd>K</kbd>.<br>Fill the blue bar, then hit <b>SHRED</b> or <kbd>Space</kbd> for double points.</p>
+    </div>
+  </section>
+
+  <section id="pause" class="screen" hidden>
+    <div class="panel">
+      <h2 class="big-title">Paused</h2>
+      <button id="resume" class="btn main">Resume</button>
+      <div class="btns"><button id="restart" class="btn">Restart</button><button id="quit" class="btn">Set list</button></div>
+    </div>
+  </section>
+
+  <section id="results" class="screen" hidden>
+    <div class="panel">
+      <h2 id="resTitle" class="big-title">Encore!</h2>
+      <p id="resSub" class="sub"></p>
+      <div id="resStars" class="stars"></div>
+      <span id="resBest" class="newbest" hidden>New best</span>
+      <div class="stats">
+        <div class="stat"><span>Score</span><b id="rScore">0</b></div>
+        <div class="stat"><span>Accuracy</span><b id="rAcc">0%</b></div>
+        <div class="stat"><span>Max combo</span><b id="rCombo">0</b></div>
+      </div>
+      <div class="judges" id="rJudges"></div>
+      <div class="btns"><button id="again" class="btn main">Play again</button><button id="toMenu" class="btn">Set list</button></div>
+    </div>
+  </section>
+</div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s);
+const cv=$('#cv'), g=cv.getContext('2d');
+let W=0,H=0,DPR=1;
+function resize(){DPR=Math.min(2,window.devicePixelRatio||1);W=cv.width=Math.max(1,Math.round(cv.clientWidth*DPR));H=cv.height=Math.max(1,Math.round(cv.clientHeight*DPR));}
+addEventListener('resize',resize);resize();
+const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------------- Songs (original riffs) ----------------
+   Each bar = 16 sixteenth-steps. '-' rest, 'x' palm-muted chug, 0-f = power chord fret on low E.
+   Lead parts use the same letters as frets on the high E string, with 'b' as the backing rhythm. */
+const SONGS=[
+ {id:'highway',name:'Highway Thunder',style:'80s speed metal',bpm:168,lvl:4,parts:[
+  {r:['0---------------','0-------3---5---'],d:['crash','crash']},
+  {r:['x-xxx-xxx-xx5-3-','x-xxx-xxx-xx7-5-','x-xxx-xxx-xx8-7-','5-55a-aa7-77x-xx'],d:'gallop',rep:2,crash:1},
+  {r:['0-00a-aa8-887-77','0-00a-aa8-88c-a-'],d:'thrash',rep:4,crash:1},
+  {r:['5-------7-------','8-------7---5---','5-------7-------','a-------c-------'],d:'double',rep:2,crash:1},
+  {r:['x-xxx-xxx-xx5-3-','x-xxx-xxx-xx7-5-','x-xxx-xxx-xx8-7-','5-55a-aa7-77x-xx'],d:'gallop',rep:1,crash:1},
+  {r:['0-00a-aa8-887-77','0-00a-aa8-88c-a-'],d:'thrash',rep:2,crash:1},
+  {lead:1,r:['0-3-5-7-a-7-5-3-','c-a-7-a-c---f---','f-c-a-c-a-7-5-7-','0-------3---5---'],b:['x-xxx-xxx-xxx-xx','5-55x-xx5-55x-xx','8-88x-xx8-88x-xx','0-------3---5---'],d:'gallop',rep:2,crash:1},
+  {r:['5-------7-------','8-------7---5---','5-------7-------','a-------c-------'],d:'double',rep:1,crash:1},
+  {r:['x-xxx-xxx-xxx-xx','0---------------'],d:['gallop','crash'],crash:1}
+ ]},
+ {id:'anvil',name:'Iron Anvil',style:'90s groove metal',bpm:104,lvl:2,parts:[
+  {r:['0---------------','3-------2-------'],d:['crash','half']},
+  {r:['x-x--xx-x--3-5--','x-x--xx-x--8-7-5'],d:'groove',rep:3,crash:1},
+  {r:['x---x---x-x-x---','x---x---x-x-3-2-'],d:'half',rep:2,crash:1},
+  {r:['0-------3-------','5-------3---2---'],d:'groove',rep:2,crash:1},
+  {r:['x-x--xx-x--3-5--','x-x--xx-x--8-7-5'],d:'groove',rep:2,crash:1},
+  {lead:1,r:['7-a-c-a-7-5-3-5-','7---a---c---f---','c-a-7-5-3-0-3-5-','7---------------'],b:['0-------0-------','3-------3-------','5-------5-------','0---------------'],d:'groove',rep:1,crash:1},
+  {r:['x---x---x-x-x---','x---x---x-x-3-2-'],d:'half',rep:2,crash:1},
+  {r:['0-------3-------','5-------3---2---'],d:'groove',rep:2,crash:1},
+  {r:['x-x--xx-x--3-5--','0---------------'],d:['groove','crash'],crash:1}
+ ]},
+ {id:'dragon',name:'Neon Dragon Wings',style:'80s power metal',bpm:150,lvl:3,parts:[
+  {r:['0-------8-------','a-------7-------'],d:['crash','crash']},
+  {r:['0-0-0-0-3-3-3-3-','5-5-5-5-3-3-2-2-'],d:'double',rep:3,crash:1},
+  {r:['x-xxx-xx0---3---','x-xxx-xx5---3---'],d:'gallop',rep:2,crash:1},
+  {r:['0-------8-------','a-------7-------','0-------8-------','a---a---c---c---'],d:'thrash',rep:2,crash:1},
+  {r:['0-0-0-0-3-3-3-3-','5-5-5-5-3-3-2-2-'],d:'double',rep:2,crash:1},
+  {r:['x-xxx-xx0---3---','x-xxx-xx5---3---'],d:'gallop',rep:2,crash:1},
+  {lead:1,r:['0-3-5-7-a-c-f-c-','a-7-5-7-a-c-a-7-','5-7-a-7-5-3-0-3-','5-------7-------'],b:['0-------0-------','8-------8-------','a-------a-------','7-------7-------'],d:'double',rep:2,crash:1},
+  {r:['0-------8-------','a-------7-------','0-------8-------','a---a---c---c---'],d:'thrash',rep:1,crash:1},
+  {r:['0-0-0-0-3-3-5-5-','0---------------'],d:['double','crash'],crash:1}
+ ]},
+ {id:'volcano',name:'Volcano King',style:'90s doom metal',bpm:76,lvl:1,tune:-4,parts:[
+  {r:['0---------------','3-------2-------'],d:['crash','half']},
+  {r:['0-------0---3---','5-------3---2---'],d:'half',rep:3,crash:1},
+  {r:['x---x---0-------','x---x---3---5---'],d:'half',rep:2,crash:1},
+  {r:['0---------------','7-------5-------'],d:'groove',rep:2,crash:1},
+  {lead:1,r:['0---3---5---7---','a-------7-------','5---3---0---3---','0---------------'],b:['0---------------','5---------------','3---------------','0---------------'],d:'half',rep:1,crash:1},
+  {r:['0-------0---3---','5-------3---2---'],d:'half',rep:2,crash:1},
+  {r:['0-------3---2---','0---------------'],d:['half','crash'],crash:1}
+ ]},
+ {id:'steel',name:'Steel Horizon',style:'80s heavy metal',bpm:132,lvl:2,parts:[
+  {r:['0-------5-------','3-------2-------'],d:['crash','crash']},
+  {r:['0-0-0-0-0-0-3-5-','0-0-0-0-0-0-7-5-'],d:'rock',rep:3,crash:1},
+  {r:['8-------7-------','5-------3-------'],d:'rock',rep:1,crash:1},
+  {r:['0---0---5---5---','3---3---7---5---'],d:'thrash',rep:2,crash:1},
+  {r:['0-0-0-0-0-0-3-5-','0-0-0-0-0-0-7-5-'],d:'rock',rep:2,crash:1},
+  {r:['8-------7-------','5-------3-------'],d:'rock',rep:1,crash:1},
+  {r:['0---0---5---5---','3---3---7---5---'],d:'thrash',rep:2,crash:1},
+  {lead:1,r:['7-5-7-a-c-a-7-5-','3-5-7-5-3-0-3-5-','7---a---c---a---','f---------------'],b:['0-------0-------','5-------5-------','3-------3-------','0---------------'],d:'rock',rep:2,crash:1},
+  {r:['0---0---5---5---','3---3---7---5---'],d:'thrash',rep:2,crash:1},
+  {r:['0-0-0-0-3-3-5-5-','0---------------'],d:['rock','crash'],crash:1}
+ ]},
+ {id:'chrome',name:'Chrome Wheels',style:'80s glam metal',bpm:126,lvl:2,parts:[
+  {r:['0-------3-------','5-------7-------'],d:['crash','crash']},
+  {r:['0-0-0-0-0-0-0-0-','3-3-3-3-5-5-5-5-'],d:'rock',rep:3,crash:1},
+  {r:['0-------3-------','5-------3---0---','0-------3-------','7-------5-------'],d:'rock',rep:2,crash:1},
+  {r:['0-0-0-0-0-0-0-0-','3-3-3-3-5-5-5-5-'],d:'rock',rep:2,crash:1},
+  {lead:1,r:['c-a-c-f-c-a-7-a-','c-------f-------','f-c-a-7-5-3-0-3-','5-------7-------'],b:['0-------0-------','3-------3-------','5-------5-------','7-------7-------'],d:'rock',rep:2,crash:1},
+  {r:['0-------3-------','5-------3---0---','0-------3-------','7-------5-------'],d:'rock',rep:2,crash:1},
+  {r:['0-0-0-0-3-3-5-5-','0---------------'],d:['rock','crash'],crash:1}
+ ]},
+ {id:'robot',name:'Robot Rampage',style:'90s industrial metal',bpm:116,lvl:3,tune:-2,parts:[
+  {r:['x---x---x---x---','x---x---x-x-x-x-'],d:['crash','half']},
+  {r:['x-x-x---x-x-3---','x-x-x---x-x-5-3-'],d:'rock',rep:3,crash:1},
+  {r:['xxx-xxx-xx-x5---','xxx-xxx-xx-x7-5-'],d:'groove',rep:2,crash:1},
+  {r:['0-------5-------','3-------1-------'],d:'thrash',rep:2,crash:1},
+  {r:['x-x-x---x-x-3---','x-x-x---x-x-5-3-'],d:'rock',rep:2,crash:1},
+  {r:['x---x---x---xxxx','x---x---x-x-x-x-'],d:'half',rep:2,crash:1},
+  {lead:1,r:['0-1-3-5-7-5-3-1-','0---3---5---7---','8-7-5-3-1-0-1-3-','0---------------'],b:['0-------0-------','5-------5-------','3-------3-------','1-------0-------'],d:'rock',rep:1,crash:1},
+  {r:['0-------5-------','3-------1-------'],d:'thrash',rep:2,crash:1},
+  {r:['x-x-x---x-x-3---','0---------------'],d:['rock','crash'],crash:1}
+ ]},
+ {id:'viking',name:'Viking Storm',style:'90s Viking metal',bpm:144,lvl:3,tune:-2,parts:[
+  {r:['0-------5-------','3-------7-------'],d:['crash','crash']},
+  {r:['0-0-0-3-0-0-0-5-','0-0-0-7-5-3-2-3-'],d:'double',rep:3,crash:1},
+  {r:['x-xxx-xxx-xxx-xx','5-55x-xx3-33x-xx'],d:'gallop',rep:2,crash:1},
+  {r:['0-------5-------','3-------7-------','0-------5-------','8-------7-------'],d:'thrash',rep:2,crash:1},
+  {r:['0-0-0-3-0-0-0-5-','0-0-0-7-5-3-2-3-'],d:'double',rep:2,crash:1},
+  {lead:1,r:['0-2-3-5-7-5-3-2-','0---5---7---a---','c-a-8-7-5-3-2-0-','2-------3-------'],b:['0-------0-------','5-------7-------','3-------3-------','8-------7-------'],d:'double',rep:2,crash:1},
+  {r:['0-------5-------','3-------7-------','0-------5-------','8-------7-------'],d:'thrash',rep:1,crash:1},
+  {r:['0-0-0-3-0-0-0-5-','0---------------'],d:['double','crash'],crash:1}
+ ]},
+ {id:'thrash',name:'Thrash Attack Zone',style:'80s thrash metal',bpm:190,lvl:5,parts:[
+  {r:['x-x-x-x-x-x-x-x-','x-x-x-x-3-3-5-5-'],d:'thrash',crash:1},
+  {r:['x-xx3-xxx-xx5-xx','x-xx3-xxx-xx6-5-'],d:'thrash',rep:4,crash:1},
+  {r:['xxxx3-3-xxxx5-5-','xxxx6-6-xxxx5-3-'],d:'double',rep:3,crash:1},
+  {r:['0-------6-------','5-------3-------'],d:'thrash',rep:2,crash:1},
+  {r:['x-xx3-xxx-xx5-xx','x-xx3-xxx-xx6-5-'],d:'thrash',rep:2,crash:1},
+  {lead:1,r:['f-c-a-c-f-c-a-c-','a-7-5-7-a-7-5-7-','5-3-0-3-5-7-a-c-','f-------c-------'],b:['x-xxx-xxx-xxx-xx','x-xxx-xxx-xxx-xx','x-xxx-xxx-xx3-5-','0-------6-------'],d:'double',rep:2,crash:1},
+  {r:['xxxx3-3-xxxx5-5-','xxxx6-6-xxxx5-3-'],d:'double',rep:2,crash:1},
+  {r:['0-------6-------','5-------3-------'],d:'thrash',rep:2,crash:1},
+  {r:['x-xx3-xxx-xx5-xx','x-xx3-xxx-xx6-5-'],d:'thrash',rep:2,crash:1},
+  {r:['x-x-x-x-6-5-3-0-','0---------------'],d:['thrash','crash'],crash:1}
+ ]},
+ {id:'boss',name:'Final Boss Battle',style:'90s speed metal',bpm:176,lvl:5,parts:[
+  {r:['x-x-x-x-x-x-x-x-','xxxxxxxx3-3-5-5-'],d:['crash','double']},
+  {r:['x-xxx-xx1-x-3-x-','x-xxx-xx5-x-3-1-'],d:'gallop',rep:3,crash:1},
+  {r:['xxxx1-1-xxxx3-3-','xxxx5-5-xxxx6-5-'],d:'blast',rep:2,crash:1},
+  {r:['0-------1-------','3-------5---6---'],d:'thrash',rep:2,crash:1},
+  {r:['x-xxx-xx1-x-3-x-','x-xxx-xx5-x-3-1-'],d:'gallop',rep:2,crash:1},
+  {lead:1,r:['0-1-3-5-6-5-3-1-','0-3-5-7-8-7-5-3-','c-a-8-7-5-3-1-0-','c-------f-------'],b:['x-xxx-xxx-xxx-xx','x-xxx-xxx-xxx-xx','1-11x-xx3-33x-xx','0-------3-------'],d:'double',rep:2,crash:1},
+  {r:['x-xxx-xx1-x-3-x-','x-xxx-xx5-x-3-1-'],d:'gallop',rep:2,crash:1},
+  {r:['xxxx1-1-xxxx3-3-','xxxx5-5-xxxx6-5-'],d:'blast',rep:2,crash:1},
+  {r:['0-------1-------','3-------5---6---'],d:'thrash',rep:2,crash:1},
+  {r:['x-xxx-xx1-x-3-x-','0---------------'],d:['gallop','crash'],crash:1}
+ ]}
+];
+SONGS.sort((a,b)=>a.lvl-b.lvl);
+const DIFFS={
+ easy:{label:'Easy',mod:4,gap:0.28,travel:1.8,miss:0.035},
+ medium:{label:'Medium',mod:2,gap:0.14,travel:1.45,miss:0.06},
+ hard:{label:'Hard',mod:1,gap:0.08,travel:1.2,miss:0.075}
+};
+const LANES=[{c:'#ff3b5c',k:'D'},{c:'#ffb21a',k:'F'},{c:'#38e1ff',k:'J'},{c:'#b65cff',k:'K'}];
+const WIN={perfect:0.05,good:0.095,ok:0.14};
+
+function laneOf(n){
+  if(n.lead) return n.fret<3?0:n.fret<7?1:n.fret<11?2:3;
+  if(n.mute) return (n.step>>2)%2;
+  return n.fret===0?0:n.fret<5?1:n.fret<8?2:3;
+}
+function parseBar(str,t0,st,lead,out,tune){
+  for(let s=0;s<16;s++){const ch=str[s];if(!ch||ch==='-')continue;const mute=ch==='x';
+    out.push({t:t0+s*st,step:s,fret:mute?0:parseInt(ch,16),mute,lead,tune:tune||0});}
+}
+function setDur(list,st){
+  list.sort((a,b)=>a.t-b.t);
+  for(let i=0;i<list.length;i++){const n=list[i];const next=list[i+1]?list[i+1].t:n.t+8*st;
+    n.dur=n.mute?st*0.9:Math.max(st*0.8,Math.min(next-n.t,8*st)-0.012);}
+}
+function drumBar(ev,d,t0,st,crash){
+  const add=(type,s)=>ev.push({t:t0+s*st,type});
+  if(crash||d==='crash')add('crash',0);
+  switch(d){
+    case 'gallop':[0,2,3,4,6,7,8,10,11,12,14,15].forEach(s=>add('kick',s));add('snare',4);add('snare',12);for(let s=0;s<16;s+=2)add('hat',s);break;
+    case 'thrash':for(let s=0;s<16;s+=4){add('kick',s);add('snare',s+2);}for(let s=0;s<16;s+=2)add('hat',s);break;
+    case 'groove':[0,3,6,10,11].forEach(s=>add('kick',s));add('snare',4);add('snare',12);for(let s=0;s<16;s+=2)add('hat',s);break;
+    case 'half':add('kick',0);add('kick',10);add('snare',8);for(let s=0;s<16;s+=4)add('ride',s);break;
+    case 'double':for(let s=0;s<16;s++)add('kick2',s);add('snare',4);add('snare',12);for(let s=0;s<16;s+=4)add('ride',s);break;
+    case 'rock':[0,8,10].forEach(s=>add('kick',s));add('snare',4);add('snare',12);for(let s=0;s<16;s+=2)add('hat',s);break;
+    case 'blast':for(let s=0;s<16;s++)add('kick2',s);for(let s=0;s<16;s+=2)add('snare',s);for(let s=0;s<16;s+=4)add('ride',s);break;
+    case 'crash':add('kick',0);break;
+  }
+}
+function buildChart(song,D){
+  const spb=60/song.bpm,st=spb/4,bar=spb*4;
+  const main=[],back=[],ev=[];let b=0;
+  for(const p of song.parts){for(let k=0;k<(p.rep||1);k++){p.r.forEach((rs,i)=>{
+    const d=Array.isArray(p.d)?p.d[i%p.d.length]:p.d;const t0=b*bar;
+    drumBar(ev,d,t0,st,p.crash&&i===0&&d!=='crash');
+    parseBar(rs,t0,st,!!p.lead,main,song.tune);
+    if(p.b)parseBar(p.b[i],t0,st,false,back,song.tune);
+    b++;});}}
+  const rhythm=main.filter(n=>!n.lead),leads=main.filter(n=>n.lead);
+  setDur(rhythm,st);setDur(leads,st);setDur(back,st);
+  main.sort((a,b)=>a.t-b.t);
+  let last=-9;const notes=[];
+  for(const n of main){
+    if(n.step%D.mod===0&&n.t-last>=D.gap){n.play=true;n.lane=laneOf(n);n.state=0;last=n.t;notes.push(n);}
+    else{n.play=false;ev.push({t:n.t,type:n.lead?'lead':'gtr',n,vol:0.85});}
+  }
+  for(const n of back)ev.push({t:n.t,type:'gtr',n,vol:0.7});
+  for(const n of rhythm.concat(back))ev.push({t:n.t,type:'bass',n});
+  for(let i=0;i<4;i++)ev.push({t:-4*spb+i*spb,type:'stick'});
+  ev.sort((a,b)=>a.t-b.t);
+  return {events:ev,notes,length:b*bar,spb};
+}
+
+/* ---------------- Audio: all instruments synthesized ---------------- */
+let ctx=null,master,noiseBuf;
+function initAudio(){
+  if(ctx)return;
+  ctx=new (window.AudioContext||window.webkitAudioContext)();
+  const comp=ctx.createDynamicsCompressor();comp.threshold.value=-16;comp.ratio.value=4;comp.attack.value=0.003;comp.release.value=0.15;
+  master=ctx.createGain();master.gain.value=0.9;master.connect(comp);comp.connect(ctx.destination);
+  noiseBuf=ctx.createBuffer(1,ctx.sampleRate*4,ctx.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+  const s=ctx.createBufferSource();s.buffer=ctx.createBuffer(1,1,22050);s.connect(ctx.destination);s.start(0);
+}
+function curve(k){const n=1024,c=new Float32Array(n);for(let i=0;i<n;i++){const x=i*2/n-1;c[i]=Math.tanh(k*x);}return c;}
+function makeRig(){
+  const bus=ctx.createGain();bus.connect(master);
+  const gIn=ctx.createGain();gIn.gain.value=0.6;
+  const hp=ctx.createBiquadFilter();hp.type='highpass';hp.frequency.value=110;
+  const drive=ctx.createGain();drive.gain.value=8;
+  const sh=ctx.createWaveShaper();sh.curve=curve(3);sh.oversample='2x';
+  const cab=ctx.createBiquadFilter();cab.type='lowpass';cab.frequency.value=4300;cab.Q.value=0.9;
+  const scoop=ctx.createBiquadFilter();scoop.type='peaking';scoop.frequency.value=750;scoop.Q.value=1;scoop.gain.value=-7;
+  const low=ctx.createBiquadFilter();low.type='lowshelf';low.frequency.value=180;low.gain.value=5;
+  const gOut=ctx.createGain();gOut.gain.value=0.17;
+  gIn.connect(hp);hp.connect(drive);drive.connect(sh);sh.connect(cab);cab.connect(scoop);scoop.connect(low);low.connect(gOut);gOut.connect(bus);
+  const lIn=ctx.createGain();lIn.gain.value=0.5;
+  const ldrive=ctx.createGain();ldrive.gain.value=6;
+  const lsh=ctx.createWaveShaper();lsh.curve=curve(2.5);lsh.oversample='2x';
+  const llp=ctx.createBiquadFilter();llp.type='lowpass';llp.frequency.value=5200;
+  const lOut=ctx.createGain();lOut.gain.value=0.13;
+  const dl=ctx.createDelay(1);dl.delayTime.value=0.32;const fb=ctx.createGain();fb.gain.value=0.3;const wet=ctx.createGain();wet.gain.value=0.5;
+  lIn.connect(ldrive);ldrive.connect(lsh);lsh.connect(llp);llp.connect(lOut);lOut.connect(bus);lOut.connect(dl);dl.connect(fb);fb.connect(dl);dl.connect(wet);wet.connect(bus);
+  const dr=ctx.createGain();dr.gain.value=0.75;dr.connect(bus);
+  const bass=ctx.createGain();bass.gain.value=0.5;bass.connect(bus);
+  return {bus,gIn,lIn,dr,bass};
+}
+function noiseHit(dest,t,len,type,freq,vol,q){
+  const s=ctx.createBufferSource();s.buffer=noiseBuf;const f=ctx.createBiquadFilter();f.type=type;f.frequency.value=freq;if(q)f.Q.value=q;
+  const gn=ctx.createGain();gn.gain.setValueAtTime(vol,t);gn.gain.exponentialRampToValueAtTime(0.001,t+len);
+  s.connect(f);f.connect(gn);gn.connect(dest);s.start(t,Math.random()*2);s.stop(t+len+0.03);
+}
+function tone(dest,t,type,f0,f1,len,vol){
+  const o=ctx.createOscillator(),gn=ctx.createGain();o.type=type;o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(f1,t+len*0.4);
+  gn.gain.setValueAtTime(vol,t);gn.gain.exponentialRampToValueAtTime(0.001,t+len);o.connect(gn);gn.connect(dest);o.start(t);o.stop(t+len+0.02);
+}
+const DRUM={
+  kick:(d,t)=>{tone(d,t,'sine',150,46,0.22,1.1);noiseHit(d,t,0.012,'highpass',3000,0.35);},
+  kick2:(d,t)=>{tone(d,t,'sine',140,50,0.1,0.9);noiseHit(d,t,0.01,'highpass',3000,0.3);},
+  snare:(d,t)=>{noiseHit(d,t,0.2,'bandpass',1900,1.0,0.6);tone(d,t,'triangle',200,160,0.09,0.5);},
+  hat:(d,t)=>noiseHit(d,t,0.045,'highpass',7500,0.28),
+  ride:(d,t)=>noiseHit(d,t,0.35,'bandpass',6200,0.2,1.4),
+  crash:(d,t)=>noiseHit(d,t,1.6,'highpass',4500,0.5),
+  stick:(d,t)=>noiseHit(d,t,0.03,'bandpass',2600,0.8,3)
+};
+function guitar(dest,n,t,dur,vol){
+  const f=82.41*Math.pow(2,(n.fret+n.tune)/12),env=ctx.createGain(),oscs=[];
+  env.gain.setValueAtTime(0.0001,t);
+  const mk=(type,fr,det,gv)=>{const o=ctx.createOscillator();o.type=type;o.frequency.value=fr;o.detune.value=det;const gg=ctx.createGain();gg.gain.value=gv;o.connect(gg);gg.connect(env);oscs.push(o);};
+  let end;
+  if(n.mute){
+    mk('sawtooth',f,-5,1);mk('sawtooth',f*1.4983,4,0.7);
+    const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1100;lp.Q.value=2;env.connect(lp);lp.connect(dest);
+    env.gain.exponentialRampToValueAtTime(vol,t+0.004);env.gain.exponentialRampToValueAtTime(0.001,t+0.14);end=t+0.16;
+  }else{
+    mk('sawtooth',f,-8,1);mk('sawtooth',f,8,1);mk('sawtooth',f*1.4983,0,0.8);mk('square',f*2,5,0.35);
+    env.connect(dest);
+    env.gain.exponentialRampToValueAtTime(vol*0.9,t+0.006);env.gain.setTargetAtTime(vol*0.55,t+0.02,0.25);env.gain.setTargetAtTime(0.0001,t+dur,0.03);end=t+dur+0.2;
+  }
+  oscs.forEach(o=>{o.start(t);o.stop(end);});
+}
+function leadNote(dest,n,t,dur,vol){
+  const f=329.63*Math.pow(2,(n.fret+n.tune)/12),env=ctx.createGain();
+  const o1=ctx.createOscillator();o1.type='sawtooth';o1.frequency.value=f;
+  const o2=ctx.createOscillator();o2.type='square';o2.frequency.value=f;o2.detune.value=7;
+  const g2=ctx.createGain();g2.gain.value=0.5;
+  const lfo=ctx.createOscillator();lfo.frequency.value=5.8;const lg=ctx.createGain();lg.gain.setValueAtTime(0,t);lg.gain.linearRampToValueAtTime(0,t+0.12);lg.gain.linearRampToValueAtTime(22,t+0.4);
+  lfo.connect(lg);lg.connect(o1.detune);lg.connect(o2.detune);
+  o1.connect(env);o2.connect(g2);g2.connect(env);env.connect(dest);
+  env.gain.setValueAtTime(0.0001,t);env.gain.exponentialRampToValueAtTime(vol*0.9,t+0.01);env.gain.setTargetAtTime(vol*0.6,t+0.03,0.3);env.gain.setTargetAtTime(0.0001,t+dur,0.05);
+  const end=t+dur+0.35;[o1,o2,lfo].forEach(o=>{o.start(t);o.stop(end);});
+}
+function bassNote(dest,n,t,dur){
+  const f=41.2*Math.pow(2,(n.fret+n.tune)/12),env=ctx.createGain();
+  const o=ctx.createOscillator();o.type='sawtooth';o.frequency.value=f;const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=480;
+  const s=ctx.createOscillator();s.type='sine';s.frequency.value=f;
+  o.connect(lp);lp.connect(env);s.connect(env);env.connect(dest);
+  env.gain.setValueAtTime(0.0001,t);env.gain.exponentialRampToValueAtTime(0.8,t+0.008);env.gain.setTargetAtTime(0.0001,t+dur,0.03);
+  o.start(t);s.start(t);o.stop(t+dur+0.2);s.stop(t+dur+0.2);
+}
+function clank(rig){const t=ctx.currentTime;noiseHit(rig.bus,t,0.07,'bandpass',2400,0.35,4);}
+
+/* ---------------- Game state ---------------- */
+let run=null,songIdx=0,diffKey='medium';
+const store={get(){try{return JSON.parse(localStorage.getItem('thunderRiffBest')||'{}');}catch(e){return {};}},set(v){try{localStorage.setItem('thunderRiffBest',JSON.stringify(v));}catch(e){}}};
+let best=store.get();
+const particles=[];const pressed=[0,0,0,0];const laneGlow=[0,0,0,0];
+let wakeLock=null;
+
+function startRun(){
+  initAudio();ctx.resume();
+  const song=SONGS[songIdx],D=DIFFS[diffKey],ch=buildChart(song,D);
+  const lead=Math.max(D.travel,4*ch.spb)+0.5;
+  run={song,D,diff:diffKey,spb:ch.spb,T0:ctx.currentTime+lead,events:ch.events,ei:0,notes:ch.notes,ni:0,end:ch.length+1.4,
+    score:0,combo:0,maxCombo:0,cnt:{p:0,g:0,o:0,m:0},rock:0.6,shred:0,shredOn:false,rig:makeRig(),paused:false,over:false,flash:null,lastT:-99,bolt:0,boltT:0};
+  particles.length=0;
+  show(null);$('#hudBtns').hidden=false;updateShredBtn();
+  try{navigator.wakeLock&&navigator.wakeLock.request('screen').then(w=>wakeLock=w).catch(()=>{});}catch(e){}
+}
+function stopRun(){
+  if(!run)return;const r=run.rig;
+  try{r.bus.gain.setTargetAtTime(0,ctx.currentTime,0.05);setTimeout(()=>{try{r.bus.disconnect();}catch(e){}},600);}catch(e){}
+  run=null;$('#hudBtns').hidden=true;
+  try{wakeLock&&wakeLock.release();}catch(e){}wakeLock=null;
+}
+function pump(){
+  if(!run||run.paused||run.over)return;
+  const ahead=ctx.currentTime+0.25,rig=run.rig;
+  while(run.ei<run.events.length&&run.T0+run.events[run.ei].t<ahead){
+    const e=run.events[run.ei++];const t=Math.max(ctx.currentTime,run.T0+e.t);
+    if(DRUM[e.type])DRUM[e.type](rig.dr,t);
+    else if(e.type==='gtr')guitar(rig.gIn,e.n,t,e.n.dur,e.vol);
+    else if(e.type==='lead')leadNote(rig.lIn,e.n,t,e.n.dur,e.vol);
+    else if(e.type==='bass')bassNote(rig.bass,e.n,t,e.n.dur);
+  }
+}
+setInterval(pump,30);
+
+function mult(){return Math.min(4,1+Math.floor(run.combo/10))*(run.shredOn?2:1);}
+function judge(n,dt){
+  const a=Math.abs(dt);let kind,pts,rk,sh;
+  if(a<=WIN.perfect){kind='p';pts=100;rk=0.025;sh=0.03;}else if(a<=WIN.good){kind='g';pts=70;rk=0.02;sh=0.02;}else{kind='o';pts=40;rk=0.012;sh=0.01;}
+  n.state=1;run.cnt[kind]++;run.combo++;run.maxCombo=Math.max(run.maxCombo,run.combo);
+  run.score+=pts*mult();run.rock=Math.min(1,run.rock+rk);if(!run.shredOn)run.shred=Math.min(1,run.shred+sh);
+  run.flash={text:kind==='p'?'PERFECT!':kind==='g'?'GOOD':'OK',color:kind==='p'?'#ffc93a':kind==='g'?'#7dffb0':'#c9d3e6',t:performance.now()};
+  if(n.lead)leadNote(run.rig.lIn,n,ctx.currentTime,n.dur,1);else guitar(run.rig.gIn,n,ctx.currentTime,n.dur,1);
+  laneGlow[n.lane]=1;spark(n.lane,LANES[n.lane].c,kind==='p'?18:11);
+  updateShredBtn();
+}
+function miss(n){
+  n.state=2;run.cnt.m++;run.combo=0;run.rock-=run.D.miss;
+  run.flash={text:'MISS',color:'#ff5470',t:performance.now()};
+  if(run.rock<=0){run.rock=0;finish(false);}
+}
+function press(lane){
+  pressed[lane]=1;
+  if(!run||run.paused||run.over)return;
+  const now=ctx.currentTime-run.T0;let bestN=null,bd=9;
+  for(let i=run.ni;i<run.notes.length;i++){const n=run.notes[i];if(n.t-now>WIN.ok)break;
+    if(n.state||n.lane!==lane)continue;const d=Math.abs(n.t-now);if(d<=WIN.ok&&d<bd){bd=d;bestN=n;}}
+  if(bestN)judge(bestN,bestN.t-now);else clank(run.rig);
+}
+function release(lane){pressed[lane]=0;}
+function toggleShred(){
+  if(!run||run.paused||run.over||run.shredOn||run.shred<0.5)return;
+  run.shredOn=true;run.bolt=1;DRUM.crash(run.rig.dr,ctx.currentTime);updateShredBtn();
+}
+function updateShredBtn(){
+  const b=$('#shredBtn');if(!run){b.className='';return;}
+  b.className=run.shredOn?'on':run.shred>=0.5?'ready':'';
+}
+function update(){
+  const now=ctx.currentTime-run.T0;pump();
+  const dt=Math.max(0,Math.min(0.1,now-run.lastT));run.lastT=now;
+  while(run.ni<run.notes.length&&run.notes[run.ni].state)run.ni++;
+  for(let i=run.ni;i<run.notes.length;i++){const n=run.notes[i];if(n.t>now-WIN.ok)break;if(!n.state){miss(n);if(run.over)return;}}
+  if(run.shredOn){run.shred-=dt*0.1;if(run.shred<=0){run.shred=0;run.shredOn=false;updateShredBtn();}}
+  if(now>run.end)finish(true);
+}
+function stars(acc){return acc>=0.95?5:acc>=0.85?4:acc>=0.7?3:acc>=0.5?2:1;}
+function finish(win){
+  run.over=true;const c=run.cnt,total=run.notes.length||1;
+  const acc=(c.p+c.g*0.75+c.o*0.5)/total;const st=win?stars(acc):0;
+  const key=run.song.id+'_'+run.diff;const prev=best[key];let nb=false;
+  if(win&&(!prev||run.score>prev.score)){best[key]={score:run.score,stars:Math.max(st,prev?prev.stars:0)};store.set(best);nb=true;}
+  $('#resTitle').textContent=win?'Encore!':'Booed off stage';$('#resTitle').classList.toggle('fail',!win);
+  $('#resSub').textContent=win?run.song.name+' · '+run.D.label:'The crowd lost the energy. Try again or pick an easier level.';
+  $('#resStars').innerHTML=[1,2,3,4,5].map(i=>`<span class="${i<=st?'on':''}">★</span>`).join('');
+  $('#resBest').hidden=!nb;
+  $('#rScore').textContent=run.score.toLocaleString();$('#rAcc').textContent=Math.round(acc*100)+'%';$('#rCombo').textContent=run.maxCombo;
+  $('#rJudges').innerHTML=`<span>Perfect ${c.p}</span><span>Good ${c.g}</span><span>OK ${c.o}</span><span>Miss ${c.m}</span>`;
+  const r=run;setTimeout(()=>{if(run===r){stopRun();show('#results');}},win?900:400);
+  if(!win){try{r.rig.bus.gain.setTargetAtTime(0,ctx.currentTime,0.15);}catch(e){}}
+}
+function pause(){if(!run||run.paused||run.over)return;run.paused=true;ctx.suspend();show('#pause');}
+function resume(){if(!run)return;show(null);ctx.resume().then(()=>{if(run)run.paused=false;});}
+
+/* ---------------- Drawing ---------------- */
+function proj(z){return 1/(1+Math.max(z,-0.4)*2.6);}
+let GEO={};
+function geo(){
+  const hitY=H*0.76,vanY=H*0.17,hw=Math.min(W*0.47,H*0.5);
+  GEO={cx:W/2,hitY,vanY,hw};
+}
+function Y(z){return GEO.vanY+(GEO.hitY-GEO.vanY)*proj(z);}
+function laneX(l,z){return GEO.cx+(-GEO.hw+GEO.hw/4+l*GEO.hw/2)*proj(z);}
+function ell(x,y,rx,ry){g.beginPath();g.ellipse(x,y,Math.max(0.5,rx),Math.max(0.5,ry),0,0,Math.PI*2);}
+function spark(l,col,n){const x=laneX(l,0),y=GEO.hitY;for(let i=0;i<n;i++){const a=-Math.PI*Math.random(),s=(2+Math.random()*6)*DPR;particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:1,col});}}
+
+function drawStage(t,pulse){
+  const gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,'#1d1042');gr.addColorStop(0.55,'#0d0a1f');gr.addColorStop(1,'#040208');
+  g.fillStyle=gr;g.fillRect(0,0,W,H);
+  g.globalCompositeOperation='lighter';
+  const cols=['255,59,92','56,225,255','255,178,26','182,92,255'];
+  for(let i=0;i<4;i++){
+    const x0=W*(0.12+i*0.253),ang=reduceMotion?(i-1.5)*0.2:Math.sin(t*0.5+i*1.7)*0.45,len=H*1.15,sp=0.15;
+    const lg=g.createLinearGradient(x0,0,x0+Math.sin(ang)*len,Math.cos(ang)*len);
+    lg.addColorStop(0,`rgba(${cols[i]},${0.2+pulse*0.14})`);lg.addColorStop(1,`rgba(${cols[i]},0)`);
+    g.fillStyle=lg;g.beginPath();g.moveTo(x0,0);g.lineTo(x0+Math.sin(ang-sp)*len,Math.cos(ang-sp)*len);g.lineTo(x0+Math.sin(ang+sp)*len,Math.cos(ang+sp)*len);g.fill();
+  }
+  g.globalCompositeOperation='source-over';
+  // truss
+  g.fillStyle='#1a1430';g.fillRect(0,0,W,10*DPR);
+  for(let i=0;i<4;i++){g.fillStyle='#2a2446';g.fillRect(W*(0.12+i*0.253)-7*DPR,4*DPR,14*DPR,12*DPR);}
+  // amp stacks
+  if(W>H*1.05){
+    const aw=Math.min(W*0.12,H*0.2),ah=aw*0.62,top=H*0.34;
+    for(const side of [0,1]){
+      const x=side?W-aw-W*0.03:W*0.03;
+      for(let k=0;k<3;k++){
+        const y=top+k*(ah+3*DPR);
+        g.fillStyle='#120e22';g.fillRect(x,y,aw,ah);g.strokeStyle='#3a3160';g.lineWidth=2*DPR;g.strokeRect(x,y,aw,ah);
+        g.fillStyle='#0a0814';g.fillRect(x+aw*0.07,y+ah*(k===0?0.3:0.1),aw*0.86,ah*(k===0?0.6:0.8));
+        if(k===0){g.fillStyle='#c9d3e6';g.font=`${Math.round(ah*0.2)}px "Metal Mania", Impact, fantasy`;g.textAlign='center';g.fillText('STEEL',x+aw/2,y+ah*0.25);
+          for(let j=0;j<5;j++){g.fillStyle='#58627f';ell(x+aw*0.18+j*aw*0.16,y+ah*0.12,aw*0.035,aw*0.035);g.fill();}}
+        else{g.strokeStyle='rgba(88,98,127,.35)';g.lineWidth=1*DPR;for(let j=1;j<6;j++){const yy=y+ah*0.1+j*ah*0.8/6;g.beginPath();g.moveTo(x+aw*0.07,yy);g.lineTo(x+aw*0.93,yy);g.stroke();}}
+      }
+    }
+  }
+}
+function drawHighway(now,travel,spb,shredOn){
+  const {cx,hw}=GEO,z0=-0.14,z1=1.2;
+  const p0=proj(z0),p1=proj(z1);
+  g.beginPath();g.moveTo(cx-hw*p0,Y(z0));g.lineTo(cx+hw*p0,Y(z0));g.lineTo(cx+hw*p1,Y(z1));g.lineTo(cx-hw*p1,Y(z1));g.closePath();
+  const hg=g.createLinearGradient(0,Y(z1),0,Y(z0));hg.addColorStop(0,'rgba(10,7,22,.25)');hg.addColorStop(0.35,'rgba(16,11,34,.9)');hg.addColorStop(1,'rgba(22,15,46,.96)');
+  g.fillStyle=hg;g.fill();
+  // lane tints
+  for(let l=0;l<4;l++){if(laneGlow[l]>0.01||pressed[l]){const a=Math.max(laneGlow[l]*0.35,pressed[l]?0.12:0);
+    const xl=-hw+l*hw/2,xr=xl+hw/2;g.beginPath();g.moveTo(cx+xl*p0,Y(z0));g.lineTo(cx+xr*p0,Y(z0));g.lineTo(cx+xr*p1,Y(z1));g.lineTo(cx+xl*p1,Y(z1));g.closePath();
+    const lg=g.createLinearGradient(0,Y(z1),0,Y(z0));lg.addColorStop(0,'rgba(0,0,0,0)');lg.addColorStop(1,hexA(LANES[l].c,a));g.fillStyle=lg;g.fill();}}
+  // beat lines
+  const b0=Math.floor(now/spb),b1=Math.ceil((now+travel*z1)/spb);
+  for(let b=b0;b<=b1;b++){const z=(b*spb-now)/travel;if(z<z0||z>z1)continue;const p=proj(z),y=Y(z);
+    const barLine=((b%4)+4)%4===0;g.strokeStyle=barLine?'rgba(201,211,230,.45)':'rgba(201,211,230,.14)';g.lineWidth=(barLine?3:1.5)*DPR*p;
+    g.beginPath();g.moveTo(cx-hw*p,y);g.lineTo(cx+hw*p,y);g.stroke();}
+  // lane dividers
+  g.strokeStyle='rgba(201,211,230,.16)';g.lineWidth=1.5*DPR;
+  for(let i=1;i<4;i++){const o=-hw+i*hw/2;g.beginPath();g.moveTo(cx+o*p0,Y(z0));g.lineTo(cx+o*p1,Y(z1));g.stroke();}
+  // rails
+  const railCol=shredOn?'#38e1ff':'#c9d3e6';
+  g.strokeStyle=railCol;g.lineWidth=(shredOn?5:3)*DPR;if(shredOn){g.shadowColor='#38e1ff';g.shadowBlur=24*DPR;}
+  for(const s of [-1,1]){g.beginPath();g.moveTo(cx+s*hw*p0,Y(z0));g.lineTo(cx+s*hw*p1,Y(z1));g.stroke();}
+  g.shadowBlur=0;
+}
+function hexA(h,a){const n=parseInt(h.slice(1),16);return `rgba(${n>>16},${(n>>8)&255},${n&255},${a})`;}
+function gem(x,y,r,col,n,alpha){
+  g.globalAlpha=alpha;
+  g.fillStyle='rgba(0,0,0,.55)';ell(x,y+r*0.2,r,r*0.5);g.fill();
+  const gr=g.createLinearGradient(0,y-r*0.5,0,y+r*0.5);gr.addColorStop(0,'#ffffff');gr.addColorStop(0.25,col);gr.addColorStop(1,shade(col));
+  g.fillStyle=gr;ell(x,y,r,r*0.5);g.fill();
+  g.strokeStyle='#eef2ff';g.lineWidth=Math.max(1,r*0.12);g.stroke();
+  if(n.mute){g.fillStyle='rgba(10,8,20,.8)';ell(x,y,r*0.32,r*0.16);g.fill();}
+  if(n.lead){g.fillStyle='#fff';star(x,y-r*0.05,r*0.3);}
+  g.globalAlpha=1;
+}
+function shade(h){const n=parseInt(h.slice(1),16);return `rgb(${(n>>16)*0.45|0},${((n>>8)&255)*0.45|0},${(n&255)*0.45|0})`;}
+function star(x,y,r){g.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?r*0.45:r;g.lineTo(x+Math.cos(a)*rr,y+Math.sin(a)*rr*0.6);}g.closePath();g.fill();}
+function drawNotes(now,travel){
+  const r0=GEO.hw*0.17;
+  for(let i=Math.max(0,run.ni-12);i<run.notes.length;i++){
+    const n=run.notes[i];const z=(n.t-now)/travel;if(z>1.2)break;if(n.state===1||z<-0.14)continue;
+    const p=proj(z),x=laneX(n.lane,z),y=Y(z);
+    const alpha=n.state===2?0.25:z>0.95?Math.max(0,(1.2-z)/0.25):1;
+    gem(x,y,r0*p,n.state===2?'#55506e':LANES[n.lane].c,n,alpha);
+  }
+}
+function drawTargets(){
+  const r=GEO.hw*0.17,y=GEO.hitY;
+  for(let l=0;l<4;l++){const x=laneX(l,0),c=LANES[l].c;
+    g.fillStyle='rgba(0,0,0,.5)';ell(x,y,r*1.05,r*0.55);g.fill();
+    if(pressed[l]||laneGlow[l]>0.05){g.fillStyle=hexA(c,0.25+laneGlow[l]*0.5);ell(x,y,r,r*0.5);g.fill();}
+    g.strokeStyle=c;g.lineWidth=4*DPR;ell(x,y,r,r*0.5);g.stroke();
+    g.strokeStyle='rgba(255,255,255,.6)';g.lineWidth=1.5*DPR;ell(x,y,r*0.62,r*0.3);g.stroke();
+    g.fillStyle='rgba(243,241,255,.55)';g.font=`700 ${Math.round(r*0.42)}px "Barlow Condensed", sans-serif`;g.textAlign='center';g.textBaseline='middle';g.fillText(LANES[l].k,x,y+r*0.9);
+  }
+  g.textBaseline='alphabetic';
+}
+function drawCrowd(t,beat){
+  const base=H,sp=34*DPR,hR=10*DPR;
+  for(let row=0;row<2;row++){
+    const yb=base-(row?H*0.035:0)-4*DPR;g.fillStyle=row?'#0b0718':'#05030b';
+    for(let i=-1;i*sp<W+sp;i++){
+      const x=i*sp+(row?sp/2:0),ph=(i*0.37+row*0.5)%1,bob=Math.pow(Math.max(0,1-((beat+ph)%1)*2.2),2)*8*DPR*(reduceMotion?0:1);
+      const hy=yb-H*0.05-bob;
+      ell(x,hy,hR,hR*1.1);g.fill();
+      g.fillRect(x-hR*1.3,hy+hR*0.8,hR*2.6,H);
+      if((i+row)%3===0){const ax=x+hR*1.1;g.fillRect(ax,hy-hR*3.2,4*DPR,hR*3.4);g.fillRect(ax-3*DPR,hy-hR*3.6,3*DPR,hR*1.1);g.fillRect(ax+4*DPR,hy-hR*3.6,3*DPR,hR*1.1);}
+    }
+  }
+}
+function drawHUD(now){
+  const P=DPR,pad=14*P;
+  // progress
+  g.fillStyle='rgba(201,211,230,.15)';g.fillRect(0,0,W,4*P);g.fillStyle='#ff7a1a';g.fillRect(0,0,W*Math.max(0,Math.min(1,now/run.end)),4*P);
+  g.textAlign='left';g.fillStyle='#f3f1ff';g.font=`800 ${Math.round(34*P)}px "Barlow Condensed", sans-serif`;
+  g.fillText(run.score.toLocaleString(),pad,44*P);
+  const m=mult();g.font=`800 ${Math.round(22*P)}px "Barlow Condensed", sans-serif`;
+  g.fillStyle=run.shredOn?'#38e1ff':m>=4?'#ffc93a':'#9a94bd';g.fillText('×'+m,pad,72*P);
+  if(run.combo>=5){g.fillStyle='#f3f1ff';g.font=`700 ${Math.round(18*P)}px "Barlow Condensed", sans-serif`;g.fillText(run.combo+' COMBO',pad+46*P,72*P);}
+  // crowd meter + shred meter
+  const mw=Math.min(W*0.36,300*P),mx=W/2-mw/2,my=22*P,mh=11*P;
+  const cg=g.createLinearGradient(mx,0,mx+mw,0);cg.addColorStop(0,'#ff3b5c');cg.addColorStop(0.45,'#ffb21a');cg.addColorStop(1,'#46e07a');
+  g.fillStyle='rgba(0,0,0,.5)';g.fillRect(mx-2*P,my-2*P,mw+4*P,mh+4*P);g.fillStyle=cg;g.fillRect(mx,my,mw,mh);
+  const nx=mx+mw*run.rock;g.fillStyle='#fff';g.fillRect(nx-2*P,my-5*P,4*P,mh+10*P);
+  g.font=`700 ${Math.round(12*P)}px "Barlow Condensed", sans-serif`;g.fillStyle='#9a94bd';g.textAlign='center';g.fillText('CROWD',W/2,my-6*P+0);
+  const sy=my+mh+8*P;g.fillStyle='rgba(0,0,0,.5)';g.fillRect(mx-2*P,sy-2*P,mw+4*P,9*P);
+  g.fillStyle=run.shred>=0.5||run.shredOn?'#38e1ff':'#2a6f86';g.fillRect(mx,sy,mw*run.shred,5*P);
+  g.fillStyle='rgba(255,255,255,.5)';g.fillRect(mx+mw*0.5-1*P,sy-2*P,2*P,9*P);
+  // judgement
+  if(run.flash){const age=(performance.now()-run.flash.t)/1000;if(age<0.6){const s=1+Math.max(0,0.25-age)*1.6;
+    g.globalAlpha=Math.min(1,(0.6-age)*4);g.fillStyle=run.flash.color;g.textAlign='center';
+    g.font=`${Math.round(GEO.hw*0.16*s)}px "Metal Mania", Impact, fantasy`;g.fillText(run.flash.text,W/2,GEO.hitY-GEO.hw*0.42);g.globalAlpha=1;}}
+  // count-in
+  if(now<0){const c=Math.ceil(-now/run.spb);if(c<=4){const fr=1-((-now/run.spb)%1);
+    g.globalAlpha=Math.min(1,fr*3);g.fillStyle='#f3f1ff';g.textAlign='center';g.font=`${Math.round(Math.min(W,H)*0.16)}px "Metal Mania", Impact, fantasy`;
+    g.fillText(c,W/2,H*0.45);g.globalAlpha=1;}
+    if(-now>run.spb*4){g.fillStyle='#c9d3e6';g.textAlign='center';g.font=`${Math.round(Math.min(W,H)*0.07)}px "Metal Mania", Impact, fantasy`;g.fillText(run.song.name,W/2,H*0.42);}}
+}
+function bolt(){
+  const x0=GEO.cx+(Math.random()-0.5)*GEO.hw*1.6;let x=x0,y=0;g.strokeStyle='#dff8ff';g.lineWidth=3*DPR;g.shadowColor='#38e1ff';g.shadowBlur=20*DPR;
+  g.beginPath();g.moveTo(x,y);while(y<GEO.hitY*0.8){y+=H*0.05;x+=(Math.random()-0.5)*W*0.06;g.lineTo(x,y);}g.stroke();g.shadowBlur=0;
+}
+let lastFrame=performance.now();
+function frame(){
+  requestAnimationFrame(frame);
+  const tp=performance.now(),fdt=Math.min(0.05,(tp-lastFrame)/1000);lastFrame=tp;
+  if(run&&!run.paused&&!run.over)update();
+  geo();
+  const t=tp/1000;let now,spb,travel;
+  if(run){now=ctx.currentTime-run.T0;spb=run.spb;travel=run.D.travel;}else{spb=60/120;now=t;travel=1.5;}
+  const beat=((now/spb)%1+1)%1,pulse=Math.pow(1-beat,3);
+  drawStage(t,run?pulse:pulse*0.5);
+  drawHighway(now,travel,spb,run&&run.shredOn);
+  if(run){drawNotes(now,travel);}
+  drawTargets();
+  for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.x+=p.vx;p.y+=p.vy;p.vy+=0.35*DPR;p.life-=fdt*1.8;
+    if(p.life<=0){particles.splice(i,1);continue;}g.globalAlpha=p.life;g.fillStyle=p.col;g.fillRect(p.x,p.y,4*DPR,4*DPR);}
+  g.globalAlpha=1;
+  if(run&&run.shredOn&&!reduceMotion){run.boltT-=fdt;if(run.boltT<=0){run.boltT=0.5+Math.random()*0.6;run.bolt=1;}
+    if(run.bolt>0.55)bolt();if(run.bolt>0){g.fillStyle=`rgba(56,225,255,${run.bolt*0.12})`;g.fillRect(0,0,W,H);run.bolt=Math.max(0,run.bolt-fdt*3);}}
+  drawCrowd(t,beat);
+  for(let l=0;l<4;l++)laneGlow[l]=Math.max(0,laneGlow[l]-fdt*4);
+  if(run)drawHUD(now);
+}
+
+/* ---------------- Input ---------------- */
+const pointerLane=new Map();
+cv.addEventListener('pointerdown',e=>{e.preventDefault();const l=Math.max(0,Math.min(3,Math.floor(e.clientX/cv.clientWidth*4)));pointerLane.set(e.pointerId,l);press(l);});
+const up=e=>{const l=pointerLane.get(e.pointerId);if(l!==undefined){pointerLane.delete(e.pointerId);if(![...pointerLane.values()].includes(l))release(l);}};
+cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+const KEYMAP={KeyD:0,KeyF:1,KeyJ:2,KeyK:3,KeyA:0,KeyS:1,KeyL:3,Digit1:0,Digit2:1,Digit3:2,Digit4:3,ArrowLeft:0,ArrowDown:1,ArrowUp:2,ArrowRight:3};
+addEventListener('keydown',e=>{
+  if(!run)return;
+  if(e.code==='Escape'||e.code==='KeyP'){run.paused?resume():pause();e.preventDefault();return;}
+  if(e.repeat)return;
+  if(e.code==='Space'){toggleShred();e.preventDefault();return;}
+  if(e.code in KEYMAP){press(KEYMAP[e.code]);e.preventDefault();}
+});
+addEventListener('keyup',e=>{if(e.code in KEYMAP)release(KEYMAP[e.code]);});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();});
+
+/* ---------------- Menus ---------------- */
+function show(sel){['#menu','#pause','#results'].forEach(s=>$(s).hidden=s!==sel);}
+function renderSongs(){
+  $('#songs').innerHTML=SONGS.map((s,i)=>{const b=best[s.id+'_'+diffKey];
+    const st=b?'★'.repeat(b.stars)+'☆'.repeat(5-b.stars):'☆☆☆☆☆';
+    return `<button class="song" id="song-${s.id}" data-i="${i}" aria-pressed="${i===songIdx}"><span class="nm">${s.name}</span><span class="meta">${s.style} · ${s.bpm} BPM · Level <span class="lvl" aria-label="level ${s.lvl} of 5">${[1,2,3,4,5].map(k=>`<i class="${k<=s.lvl?'on':''}"></i>`).join('')}</span></span><span class="best"><b>${st}</b>${b?b.score.toLocaleString():'Not played'}</span></button>`;}).join('');
+}
+$('#songs').addEventListener('click',e=>{const b=e.target.closest('.song');if(!b)return;songIdx=+b.dataset.i;renderSongs();});
+$('#diffs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;diffKey=b.dataset.d;
+  document.querySelectorAll('#diffs button').forEach(x=>x.setAttribute('aria-pressed',x===b));renderSongs();});
+$('#go').addEventListener('click',startRun);
+$('#pauseBtn').addEventListener('click',pause);
+$('#shredBtn').addEventListener('click',toggleShred);
+$('#resume').addEventListener('click',resume);
+$('#restart').addEventListener('click',()=>{stopRun();ctx.resume().then(startRun);});
+$('#quit').addEventListener('click',()=>{stopRun();ctx.resume();renderSongs();show('#menu');});
+$('#again').addEventListener('click',startRun);
+$('#toMenu').addEventListener('click',()=>{renderSongs();show('#menu');});
+renderSongs();
+requestAnimationFrame(frame);
+})();
+</script>
+
+</body></html>

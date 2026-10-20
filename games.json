@@ -1,5 +1,16 @@
 [
  {
+  "slug": "thunder-riff",
+  "name": "Thunder Riff",
+  "artifact": "https://claude.ai/code/artifact/1a884fde-15fa-4c21-abdc-8b31d4caf61d",
+  "genre": "Action",
+  "blurb": "Rock out on a heavy metal guitar! Hit the notes in time to keep the crowd headbanging through 10 songs.",
+  "colorA": "#ff7a1a",
+  "colorB": "#1d1042",
+  "pattern": "rays",
+  "updated": "2026-10-19"
+ },
+ {
   "slug": "megalodon",
   "name": "Megalodon",
   "artifact": "https://claude.ai/code/artifact/a1c1219e-1243-4e15-aeab-496a0fa61016",
