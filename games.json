@@ -1,5 +1,16 @@
 [
  {
+  "slug": "rotor-academy",
+  "name": "Rotor Academy",
+  "artifact": "https://claude.ai/artifact/TDXJtG5UThXPkRpayeZkMa",
+  "genre": "Adventure",
+  "blurb": "Learn to fly a drone! Bucket test lane, mountain gate race, rooftop deliveries and a refinery inspection.",
+  "colorA": "#ffb21e",
+  "colorB": "#14303f",
+  "pattern": "grid",
+  "updated": "2026-10-21"
+ },
+ {
   "slug": "thunder-riff",
   "name": "Thunder Riff",
   "artifact": "https://claude.ai/code/artifact/1a884fde-15fa-4c21-abdc-8b31d4caf61d",
