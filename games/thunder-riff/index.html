@@ -13,6 +13,7 @@
   color-scheme:dark;
 }
 html,body{height:100%}
+[hidden]{display:none!important}
 body{background:var(--night);color:var(--ink);font-family:var(--f-ui);overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 #app{position:relative;height:100%;overflow:hidden}
 #cv{display:block;width:100%;height:100%}
@@ -27,17 +28,33 @@ button:focus-visible{outline:3px solid var(--volt);outline-offset:3px}
   filter:drop-shadow(0 3px 0 var(--molten)) drop-shadow(0 0 22px rgba(56,225,255,.45));text-wrap:balance}
 .tag{margin:0 auto;max-width:52ch;text-align:center;color:var(--dim);font-size:18px;line-height:1.3;font-weight:500}
 .lbl{margin:8px 0 0;font-size:13px;letter-spacing:.28em;text-transform:uppercase;color:var(--dim);font-weight:700}
-.songs{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:8px}
-.song{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 12px;text-align:left;padding:12px 16px;background:var(--panel);border:2px solid var(--line);border-radius:6px;transition:border-color .15s,box-shadow .15s}
-.song .nm{font-size:23px;font-weight:800;letter-spacing:.02em;line-height:1.05}
-.song .meta{grid-column:1;font-size:15px;color:var(--dim);font-weight:500;letter-spacing:.04em}
-.lvl{display:inline-flex;gap:2px;vertical-align:middle;margin-left:4px}.lvl i{width:6px;height:11px;border-radius:1px;background:var(--line)}.lvl i.on{background:var(--molten)}
-.song .best{grid-row:1/span 2;grid-column:2;text-align:right;font-size:14px;color:var(--dim);font-variant-numeric:tabular-nums}
-.song .best b{display:block;color:var(--molten);font-size:18px;letter-spacing:.1em}
+.cats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+@media (min-width:700px){.cats{grid-template-columns:repeat(5,minmax(0,1fr))}.cat .cn{font-size:18px}}
+.cat{display:flex;flex-direction:column;justify-content:space-between;gap:2px;text-align:left;padding:10px 12px;background:var(--panel);border:2px solid var(--line);border-radius:6px;transition:border-color .15s,box-shadow .15s}
+.cat .cn{font-size:21px;font-weight:800;letter-spacing:.02em;line-height:1.05}
+.cat .cs{font-size:14px;color:var(--dim);font-weight:700;font-variant-numeric:tabular-nums}
+.cat .cs b{color:#ffc93a}
+.cat[aria-pressed="true"]{border-color:var(--volt);box-shadow:0 0 0 1px var(--volt),0 0 20px rgba(56,225,255,.3)}
+.cat[aria-pressed="true"] .cn{color:var(--volt)}
+.catblurb{margin:-8px 0 0;color:var(--dim);font-size:17px;font-weight:500}
+.songs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:8px}
+.song{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;padding:12px 14px;background:var(--panel);border:2px solid var(--line);border-radius:6px;transition:border-color .15s,box-shadow .15s}
+.tier{font-size:12px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;padding:2px 8px;border-radius:3px;color:#0d0a1f}
+.t-easy{background:#46e07a}.t-medium{background:#ffb21a}.t-hard{background:#ff3b5c}
+.song .nm{font-size:24px;font-weight:800;letter-spacing:.02em;line-height:1.05}
+.song .meta{font-size:15px;color:var(--dim);font-weight:500;letter-spacing:.04em}
+.song .line .more{font-style:normal;color:var(--dim);font-size:13px;white-space:nowrap}
+.song .line{font-size:15px;font-style:italic;color:#ffd9b8;line-height:1.25}
+.song .best{font-size:14px;color:var(--dim);font-variant-numeric:tabular-nums}
+.song .best b{color:var(--molten);font-size:16px;letter-spacing:.1em;margin-right:6px}
 .song[aria-pressed="true"]{border-color:var(--molten);box-shadow:0 0 0 1px var(--molten),0 0 24px rgba(255,122,26,.35)}
 .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .seg button{padding:12px 6px;background:var(--panel);border:2px solid var(--line);border-radius:6px;font-size:20px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.seg button small{display:block;font-size:12px;letter-spacing:.12em;color:var(--dim);font-weight:700}
 .seg button[aria-pressed="true"]{border-color:var(--volt);color:var(--volt);box-shadow:0 0 18px rgba(56,225,255,.3)}
+.voice{align-self:center;padding:8px 18px;border:2px solid var(--line);border-radius:999px;background:var(--panel);font-size:17px;font-weight:700;letter-spacing:.06em}
+.voice b{color:var(--volt)}
+.voice[aria-pressed="false"] b{color:var(--dim)}
 .go{margin-top:8px;padding:12px;font-family:var(--f-logo);font-size:46px;line-height:1;border-radius:8px;color:#1a0700;
   background:linear-gradient(180deg,#ffd27a,var(--molten) 55%,#c2410c);box-shadow:0 6px 0 #7a2406,0 0 30px rgba(255,122,26,.45)}
 .go:active{transform:translateY(4px);box-shadow:0 2px 0 #7a2406}
@@ -80,16 +97,20 @@ button:focus-visible{outline:3px solid var(--volt);outline-offset:3px}
       <p class="eyebrow">Live at the Steel Arena</p>
       <h1 class="logo">Thunder Riff</h1>
       <p class="tag">Hit the notes in time and the guitar roars. Miss them and the riff drops out. Keep the crowd headbanging to the last chord.</p>
-      <h2 class="lbl">Set list</h2>
+      <h2 class="lbl">Pick a style</h2>
+      <div id="cats" class="cats"></div>
+      <h2 class="lbl" id="catLbl">Songs</h2>
+      <p id="catBlurb" class="catblurb"></p>
       <div id="songs" class="songs"></div>
-      <h2 class="lbl">Difficulty</h2>
+      <h2 class="lbl">Your mode</h2>
       <div class="seg" id="diffs">
-        <button id="d-easy" data-d="easy" aria-pressed="false">Easy</button>
-        <button id="d-medium" data-d="medium" aria-pressed="true">Medium</button>
-        <button id="d-hard" data-d="hard" aria-pressed="false">Hard</button>
+        <button id="d-easy" data-d="easy" aria-pressed="true">Rookie<small>few notes</small></button>
+        <button id="d-medium" data-d="medium" aria-pressed="false">Rocker<small>more notes</small></button>
+        <button id="d-hard" data-d="hard" aria-pressed="false">Legend<small>lots of notes</small></button>
       </div>
+      <button id="voiceBtn" class="voice" aria-pressed="true">Rock singer: <b>On</b></button>
       <button id="go" class="go">Rock!</button>
-      <p class="keys">Tap the 4 lanes, or play with <kbd>D</kbd> <kbd>F</kbd> <kbd>J</kbd> <kbd>K</kbd>.<br>Fill the blue bar, then hit <b>SHRED</b> or <kbd>Space</kbd> for double points.</p>
+      <p class="keys">Tap the 4 lanes, or play with <kbd>D</kbd> <kbd>F</kbd> <kbd>J</kbd> <kbd>K</kbd>.<br>Fill the blue bar, then hit <b>SHRED</b> or <kbd>Space</kbd> for double points.<br>Start on <b>Rookie</b> if you are new. You can miss lots of notes and still finish.</p>
     </div>
   </section>
 
@@ -130,8 +151,34 @@ const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
 /* ---------------- Songs (original riffs) ----------------
    Each bar = 16 sixteenth-steps. '-' rest, 'x' palm-muted chug, 0-f = power chord fret on low E.
    Lead parts use the same letters as frets on the high E string, with 'b' as the backing rhythm. */
+const CATS=[
+ {id:'heavy',name:'Heavy Metal',blurb:'Classic 80s riffs, big choruses and screaming solos.'},
+ {id:'speed',name:'Speed Metal',blurb:'Galloping riffs at full throttle. Hold on tight.'},
+ {id:'thrash',name:'Thrash Metal',blurb:'Fast chugging palm-mutes and mosh-pit energy.'},
+ {id:'power',name:'Power Metal',blurb:'Epic dragons, castles and double-bass drums.'},
+ {id:'glam',name:'Glam Metal',blurb:'Big hair, bigger choruses. 80s party anthems.'},
+ {id:'shred',name:'Shred Metal',blurb:'80s guitar heroes. Lightning solos with a classical twist.'},
+ {id:'groove',name:'Groove Metal',blurb:'90s stomp. Heavy, bouncy and full of breakdowns.'},
+ {id:'industrial',name:'Industrial Metal',blurb:'Machine beats and robot riffs from the 90s.'},
+ {id:'garage',name:'Garage Bänd',blurb:'Loud, messy basement-band metal with way too many umlauts.'},
+ {id:'doom',name:'Doom Metal',blurb:'Slow, low and crushing. Tuned way down.'}
+];
+
+const SOUND={
+ heavy:     {v:{base:196,grit:3.5,rasp:0.3,shift:1.0, wave:'sawtooth',tts:[1.0,1.5],voices:/daniel|alex|fred/i},  g:{drive:8, k:3,  cut:4300,scoop:-7, low:5},  extra:null},
+ speed:     {v:{base:247,grit:4,  rasp:0.3,shift:1.12,wave:'sawtooth',tts:[1.5,1.7],voices:/rishi|daniel|alex/i}, g:{drive:10,k:3.2,cut:4900,scoop:-5, low:4},  extra:null},
+ thrash:    {v:{base:147,grit:7,  rasp:0.6,shift:0.95,wave:'sawtooth',tts:[0.7,1.7],voices:/fred|daniel|aaron/i,gang:1}, g:{drive:15,k:4,cut:3800,scoop:-11,low:6},extra:null},
+ power:     {v:{base:262,grit:1.8,rasp:0.12,shift:1.15,wave:'sawtooth',tts:[1.7,1.35],voices:/arthur|daniel|oliver/i,vib:1.8}, g:{drive:9,k:3,cut:5000,scoop:-4,low:4},extra:'choir'},
+ glam:      {v:{base:220,grit:2.6,rasp:0.25,shift:1.1,wave:'sawtooth',tts:[1.35,1.5],voices:/samantha|karen|moira|tessa/i,gang:1}, g:{drive:5,k:2.2,cut:5300,scoop:-2,low:3},extra:'keys'},
+ shred:     {v:{base:233,grit:2.2,rasp:0.15,shift:1.08,wave:'sawtooth',tts:[1.25,1.4],voices:/oliver|arthur|alex/i,vib:1.5}, g:{drive:9,k:3,cut:5700,scoop:-5,low:3},extra:'organ'},
+ groove:    {v:{base:123,grit:8,  rasp:0.7,shift:0.88,wave:'sawtooth',tts:[0.45,1.5],voices:/fred|ralph|daniel/i,gang:1}, g:{drive:17,k:4.5,cut:3500,scoop:-12,low:7},extra:null},
+ industrial:{v:{base:147,grit:5,  rasp:0.35,shift:1.0,wave:'square',tts:[0.35,1.3],voices:/zarvox|trinoids|fred|ralph/i,robot:1}, g:{drive:13,k:4,cut:3200,scoop:-9,low:6},extra:'synth'},
+ garage:    {v:{base:196,grit:4.5,rasp:0.45,shift:1.05,wave:'sawtooth',tts:[1.15,1.8],voices:/junior|rishi|daniel/i,gang:1}, g:{drive:4,k:6,cut:2900,scoop:1,low:2},extra:null},
+ doom:      {v:{base:98, grit:4.5,rasp:0.45,shift:0.82,wave:'sawtooth',tts:[0.15,1.1],voices:/ralph|fred|bad news|daniel/i,vib:1.3}, g:{drive:12,k:3.5,cut:2700,scoop:-6,low:9},extra:'organ'}
+};
+const TIERS=['easy','medium','hard'],TIER_NAME={easy:'Easy',medium:'Medium',hard:'Hard'};
 const SONGS=[
- {id:'highway',name:'Highway Thunder',style:'80s speed metal',bpm:168,lvl:4,parts:[
+ {id:'highway',name:'Highway Thunder',style:'80s speed metal',bpm:168,cat:'speed',tier:'medium',parts:[
   {r:['0---------------','0-------3---5---'],d:['crash','crash']},
   {r:['x-xxx-xxx-xx5-3-','x-xxx-xxx-xx7-5-','x-xxx-xxx-xx8-7-','5-55a-aa7-77x-xx'],d:'gallop',rep:2,crash:1},
   {r:['0-00a-aa8-887-77','0-00a-aa8-88c-a-'],d:'thrash',rep:4,crash:1},
@@ -142,7 +189,7 @@ const SONGS=[
   {r:['5-------7-------','8-------7---5---','5-------7-------','a-------c-------'],d:'double',rep:1,crash:1},
   {r:['x-xxx-xxx-xxx-xx','0---------------'],d:['gallop','crash'],crash:1}
  ]},
- {id:'anvil',name:'Iron Anvil',style:'90s groove metal',bpm:104,lvl:2,parts:[
+ {id:'anvil',name:'Iron Anvil',style:'90s groove metal',bpm:104,cat:'groove',tier:'easy',parts:[
   {r:['0---------------','3-------2-------'],d:['crash','half']},
   {r:['x-x--xx-x--3-5--','x-x--xx-x--8-7-5'],d:'groove',rep:3,crash:1},
   {r:['x---x---x-x-x---','x---x---x-x-3-2-'],d:'half',rep:2,crash:1},
@@ -153,7 +200,7 @@ const SONGS=[
   {r:['0-------3-------','5-------3---2---'],d:'groove',rep:2,crash:1},
   {r:['x-x--xx-x--3-5--','0---------------'],d:['groove','crash'],crash:1}
  ]},
- {id:'dragon',name:'Neon Dragon Wings',style:'80s power metal',bpm:150,lvl:3,parts:[
+ {id:'dragon',name:'Neon Dragon Wings',style:'80s power metal',bpm:162,cat:'power',tier:'hard',parts:[
   {r:['0-------8-------','a-------7-------'],d:['crash','crash']},
   {r:['0-0-0-0-3-3-3-3-','5-5-5-5-3-3-2-2-'],d:'double',rep:3,crash:1},
   {r:['x-xxx-xx0---3---','x-xxx-xx5---3---'],d:'gallop',rep:2,crash:1},
@@ -164,7 +211,7 @@ const SONGS=[
   {r:['0-------8-------','a-------7-------','0-------8-------','a---a---c---c---'],d:'thrash',rep:1,crash:1},
   {r:['0-0-0-0-3-3-5-5-','0---------------'],d:['double','crash'],crash:1}
  ]},
- {id:'volcano',name:'Volcano King',style:'90s doom metal',bpm:76,lvl:1,tune:-4,parts:[
+ {id:'volcano',name:'Volcano King',style:'90s doom metal',bpm:76,cat:'doom',tier:'easy',tune:-4,parts:[
   {r:['0---------------','3-------2-------'],d:['crash','half']},
   {r:['0-------0---3---','5-------3---2---'],d:'half',rep:3,crash:1},
   {r:['x---x---0-------','x---x---3---5---'],d:'half',rep:2,crash:1},
@@ -173,7 +220,7 @@ const SONGS=[
   {r:['0-------0---3---','5-------3---2---'],d:'half',rep:2,crash:1},
   {r:['0-------3---2---','0---------------'],d:['half','crash'],crash:1}
  ]},
- {id:'steel',name:'Steel Horizon',style:'80s heavy metal',bpm:132,lvl:2,parts:[
+ {id:'steel',name:'Steel Horizon',style:'80s heavy metal',bpm:132,cat:'heavy',tier:'medium',parts:[
   {r:['0-------5-------','3-------2-------'],d:['crash','crash']},
   {r:['0-0-0-0-0-0-3-5-','0-0-0-0-0-0-7-5-'],d:'rock',rep:3,crash:1},
   {r:['8-------7-------','5-------3-------'],d:'rock',rep:1,crash:1},
@@ -185,7 +232,7 @@ const SONGS=[
   {r:['0---0---5---5---','3---3---7---5---'],d:'thrash',rep:2,crash:1},
   {r:['0-0-0-0-3-3-5-5-','0---------------'],d:['rock','crash'],crash:1}
  ]},
- {id:'chrome',name:'Chrome Wheels',style:'80s glam metal',bpm:126,lvl:2,parts:[
+ {id:'chrome',name:'Chrome Wheels',style:'80s glam metal',bpm:126,cat:'heavy',tier:'easy',parts:[
   {r:['0-------3-------','5-------7-------'],d:['crash','crash']},
   {r:['0-0-0-0-0-0-0-0-','3-3-3-3-5-5-5-5-'],d:'rock',rep:3,crash:1},
   {r:['0-------3-------','5-------3---0---','0-------3-------','7-------5-------'],d:'rock',rep:2,crash:1},
@@ -194,7 +241,7 @@ const SONGS=[
   {r:['0-------3-------','5-------3---0---','0-------3-------','7-------5-------'],d:'rock',rep:2,crash:1},
   {r:['0-0-0-0-3-3-5-5-','0---------------'],d:['rock','crash'],crash:1}
  ]},
- {id:'robot',name:'Robot Rampage',style:'90s industrial metal',bpm:116,lvl:3,tune:-2,parts:[
+ {id:'robot',name:'Robot Rampage',style:'90s industrial groove',bpm:116,cat:'groove',tier:'medium',tune:-2,parts:[
   {r:['x---x---x---x---','x---x---x-x-x-x-'],d:['crash','half']},
   {r:['x-x-x---x-x-3---','x-x-x---x-x-5-3-'],d:'rock',rep:3,crash:1},
   {r:['xxx-xxx-xx-x5---','xxx-xxx-xx-x7-5-'],d:'groove',rep:2,crash:1},
@@ -205,7 +252,7 @@ const SONGS=[
   {r:['0-------5-------','3-------1-------'],d:'thrash',rep:2,crash:1},
   {r:['x-x-x---x-x-3---','0---------------'],d:['rock','crash'],crash:1}
  ]},
- {id:'viking',name:'Viking Storm',style:'90s Viking metal',bpm:144,lvl:3,tune:-2,parts:[
+ {id:'viking',name:'Viking Storm',style:'90s Viking metal',bpm:144,cat:'power',tier:'medium',tune:-2,parts:[
   {r:['0-------5-------','3-------7-------'],d:['crash','crash']},
   {r:['0-0-0-3-0-0-0-5-','0-0-0-7-5-3-2-3-'],d:'double',rep:3,crash:1},
   {r:['x-xxx-xxx-xxx-xx','5-55x-xx3-33x-xx'],d:'gallop',rep:2,crash:1},
@@ -215,7 +262,7 @@ const SONGS=[
   {r:['0-------5-------','3-------7-------','0-------5-------','8-------7-------'],d:'thrash',rep:1,crash:1},
   {r:['0-0-0-3-0-0-0-5-','0---------------'],d:['double','crash'],crash:1}
  ]},
- {id:'thrash',name:'Thrash Attack Zone',style:'80s thrash metal',bpm:190,lvl:5,parts:[
+ {id:'thrash',name:'Thrash Attack Zone',style:'80s thrash metal',bpm:190,cat:'thrash',tier:'hard',parts:[
   {r:['x-x-x-x-x-x-x-x-','x-x-x-x-3-3-5-5-'],d:'thrash',crash:1},
   {r:['x-xx3-xxx-xx5-xx','x-xx3-xxx-xx6-5-'],d:'thrash',rep:4,crash:1},
   {r:['xxxx3-3-xxxx5-5-','xxxx6-6-xxxx5-3-'],d:'double',rep:3,crash:1},
@@ -227,7 +274,7 @@ const SONGS=[
   {r:['x-xx3-xxx-xx5-xx','x-xx3-xxx-xx6-5-'],d:'thrash',rep:2,crash:1},
   {r:['x-x-x-x-6-5-3-0-','0---------------'],d:['thrash','crash'],crash:1}
  ]},
- {id:'boss',name:'Final Boss Battle',style:'90s speed metal',bpm:176,lvl:5,parts:[
+ {id:'boss',name:'Final Boss Battle',style:'90s speed metal',bpm:176,cat:'speed',tier:'hard',parts:[
   {r:['x-x-x-x-x-x-x-x-','xxxxxxxx3-3-5-5-'],d:['crash','double']},
   {r:['x-xxx-xx1-x-3-x-','x-xxx-xx5-x-3-1-'],d:'gallop',rep:3,crash:1},
   {r:['xxxx1-1-xxxx3-3-','xxxx5-5-xxxx6-5-'],d:'blast',rep:2,crash:1},
@@ -238,16 +285,205 @@ const SONGS=[
   {r:['xxxx1-1-xxxx3-3-','xxxx5-5-xxxx6-5-'],d:'blast',rep:2,crash:1},
   {r:['0-------1-------','3-------5---6---'],d:'thrash',rep:2,crash:1},
   {r:['x-xxx-xx1-x-3-x-','0---------------'],d:['gallop','crash'],crash:1}
+ ]},
+ {id:'eagle',name:'Iron Eagle',style:'80s heavy metal',bpm:158,cat:'heavy',tier:'hard',parts:[
+  {r:['0-------7-------','5-------8-------'],d:['crash','crash']},
+  {r:['x-xxx-xx5-557-77','x-xxx-xx8-87-5-5'],d:'gallop',rep:3,crash:1},
+  {r:['0-------8-------','7-------5---3---','0-------8-------','a-------c-------'],d:'double',rep:2,crash:1},
+  {r:['5-55x-xx7-77x-xx','8-88x-xx7-77x-xx'],d:'thrash',rep:2,crash:1},
+  {lead:1,r:['0-3-5-7-8-7-5-3-','5-7-8-a-c-a-8-7-','c-f-c-a-8-7-5-3-','0-------7-------'],b:['x-xxx-xxx-xxx-xx','5-55x-xx5-55x-xx','8-88x-xx8-88x-xx','0-------7-------'],d:'gallop',rep:2,crash:1},
+  {r:['x-xxx-xx5-557-77','x-xxx-xx8-87-5-5'],d:'gallop',rep:2,crash:1},
+  {r:['0-------8-------','7-------5---3---','0-------8-------','a-------c-------'],d:'double',rep:1,crash:1},
+  {r:['0-0-0-0-7-7-8-8-','0---------------'],d:['double','crash'],crash:1}
+ ]},
+ {id:'turbo',name:'Turbo Lane',style:'80s speed metal',bpm:140,cat:'speed',tier:'easy',parts:[
+  {r:['0---------------','5-------7-------'],d:['crash','thrash']},
+  {r:['0---0---5---5---','3---3---7---5---'],d:'thrash',rep:3,crash:1},
+  {r:['0-------8-------','7-------5-------'],d:'double',rep:2,crash:1},
+  {r:['0---0---5---5---','3---3---7---5---'],d:'thrash',rep:4,crash:1},
+  {lead:1,r:['0---3---5---7---','a---7---5---3---','5---7---a---c---','f---------------'],b:['0-------0-------','5-------5-------','3-------3-------','0---------------'],d:'thrash',rep:1,crash:1},
+  {r:['0-------8-------','7-------5-------'],d:'double',rep:2,crash:1},
+  {r:['0---0---5---7---','0---------------'],d:['thrash','crash'],crash:1}
+ ]},
+ {id:'skate',name:'Skate Park Shred',style:'80s thrash metal',bpm:124,cat:'thrash',tier:'easy',parts:[
+  {r:['x-x-x-x-x-x-x-x-','0---------------'],d:['thrash','crash']},
+  {r:['0---x-x-0---x-x-','3---x-x-5---x-x-'],d:'thrash',rep:3,crash:1},
+  {r:['0-------3-------','5-------6-------'],d:'rock',rep:2,crash:1},
+  {r:['0---x-x-0---x-x-','3---x-x-5---x-x-'],d:'thrash',rep:2,crash:1},
+  {lead:1,r:['0---3---5---6---','7-------5-------','3---5---7---a---','c---------------'],b:['0-------0-------','5-------5-------','3-------3-------','0---------------'],d:'rock',rep:1,crash:1},
+  {r:['0-------3-------','5-------6-------'],d:'rock',rep:2,crash:1},
+  {r:['0---x-x-3---5---','0---------------'],d:['thrash','crash'],crash:1}
+ ]},
+ {id:'mosh',name:'Mosh Pit Machine',style:'80s thrash metal',bpm:160,cat:'thrash',tier:'medium',parts:[
+  {r:['x-x-x-x-x-x-x-x-','x-x-x-x-6-5-3-0-'],d:'thrash',crash:1},
+  {r:['x-xx1-xxx-xx3-xx','x-xx1-xxx-xx5-3-'],d:'thrash',rep:3,crash:1},
+  {r:['0-------1-------','3-------5-------'],d:'half',rep:2,crash:1},
+  {r:['xxxx5-5-xxxx3-3-','xxxx1-1-xxxx0---'],d:'double',rep:2,crash:1},
+  {r:['x-xx1-xxx-xx3-xx','x-xx1-xxx-xx5-3-'],d:'thrash',rep:2,crash:1},
+  {lead:1,r:['0-1-3-5-6-5-3-1-','0---3---5---6---','7-6-5-3-1-0-1-3-','5-------6-------'],b:['x-xxx-xxx-xxx-xx','1-11x-xx1-11x-xx','3-33x-xx3-33x-xx','5-------6-------'],d:'thrash',rep:2,crash:1},
+  {r:['xxxx5-5-xxxx3-3-','xxxx1-1-xxxx0---'],d:'double',rep:2,crash:1},
+  {r:['x-xx1-xxx-xx3-xx','0---------------'],d:['thrash','crash'],crash:1}
+ ]},
+ {id:'castle',name:'Crystal Castle',style:'80s power metal',bpm:118,cat:'power',tier:'easy',parts:[
+  {r:['0-------7-------','5-------3-------'],d:['crash','crash']},
+  {r:['0---0---0---0---','5---5---3---3---'],d:'rock',rep:3,crash:1},
+  {r:['0-------7-------','5-------3-------','0-------7-------','8-------7-------'],d:'double',rep:2,crash:1},
+  {r:['0---0---0---0---','5---5---3---3---'],d:'rock',rep:2,crash:1},
+  {lead:1,r:['7---9---b---c---','e-------c-------','b---9---7---5---','7---------------'],b:['0-------0-------','5-------5-------','3-------3-------','0---------------'],d:'rock',rep:1,crash:1},
+  {r:['0-------7-------','5-------3-------','0-------7-------','8-------7-------'],d:'double',rep:2,crash:1},
+  {r:['0---0---7---7---','0---------------'],d:['rock','crash'],crash:1}
+ ]},
+ {id:'jack',name:'Jackhammer',style:'90s groove metal',bpm:132,cat:'groove',tier:'hard',tune:-2,parts:[
+  {r:['x---x---x-x-x---','0---------------'],d:['half','crash']},
+  {r:['x-x-xx-xx-3-x-5-','x-x-xx-xx-6-5-3-'],d:'groove',rep:3,crash:1},
+  {r:['x--x--x-x--x--x-','x--x--x-xxxx3-5-'],d:'half',rep:2,crash:1},
+  {r:['0-------3-------','5-----6-5---3---'],d:'groove',rep:2,crash:1},
+  {lead:1,r:['0-3-5-6-7-6-5-3-','0-3-5-3-0---a---','c-a-7-6-5-3-0-3-','5---------------'],b:['x-x-xx-xx-3-x-5-','x-x-xx-xx-6-5-3-','x-x-xx-xx-3-x-5-','0---------------'],d:'groove',rep:1,crash:1},
+  {r:['x-x-xx-xx-3-x-5-','x-x-xx-xx-6-5-3-'],d:'groove',rep:2,crash:1},
+  {r:['x--x--x-x--x--x-','x--x--x-xxxx3-5-'],d:'half',rep:1,crash:1},
+  {r:['0-------3-------','5-----6-5---3---'],d:'groove',rep:2,crash:1},
+  {r:['x-x-xx-xx-3-x-5-','0---------------'],d:['groove','crash'],crash:1}
+ ]},
+ {id:'swamp',name:'Swamp Giant',style:'90s doom metal',bpm:88,cat:'doom',tier:'medium',tune:-4,parts:[
+  {r:['0---------------','5-------3-------'],d:['crash','half']},
+  {r:['0-----0-3-------','5-----3-2-------'],d:'half',rep:3,crash:1},
+  {r:['0-------0---5---','7-------5---3---'],d:'groove',rep:2,crash:1},
+  {r:['0-----0-3-------','5-----3-2-------'],d:'half',rep:2,crash:1},
+  {lead:1,r:['0---3---5---7---','8-7-5-3-0-------','5-7-8-a-c-------','a---------------'],b:['0---------------','5---------------','3---------------','0---------------'],d:'half',rep:1,crash:1},
+  {r:['0-------0---5---','7-------5---3---'],d:'groove',rep:2,crash:1},
+  {r:['0-----0-3---2---','0---------------'],d:['half','crash'],crash:1}
+ ]},
+ {id:'mountain',name:'Mountain Crusher',style:'90s doom metal',bpm:100,cat:'doom',tier:'hard',tune:-4,parts:[
+  {r:['0---------------','x-x-x-x-0-------'],d:['crash','half']},
+  {r:['0--0--3-0--5--3-','0--0--3-0--7-5-3'],d:'groove',rep:3,crash:1},
+  {r:['x-xxx-xx0---3---','x-xxx-xx5-3-2-1-'],d:'half',rep:2,crash:1},
+  {r:['0-------5-------','7-------8---7---'],d:'double',rep:2,crash:1},
+  {r:['0--0--3-0--5--3-','0--0--3-0--7-5-3'],d:'groove',rep:2,crash:1},
+  {lead:1,r:['0-3-5-7-8-7-5-3-','5-7-8-a-c-a-8-7-','f-c-a-8-7-5-3-0-','0---------------'],b:['0-------0-------','5-------5-------','7-------7-------','0---------------'],d:'groove',rep:2,crash:1},
+  {r:['0-------5-------','7-------8---7---'],d:'double',rep:2,crash:1},
+  {r:['0--0--3-0--5--3-','0---------------'],d:['groove','crash'],crash:1}
+ ]},
+ {id:'neon',name:'Neon Nights',style:'80s glam metal',bpm:112,cat:'glam',tier:'easy',parts:[
+  {r:['0-------5-------','7-------5-------'],d:['crash','rock']},
+  {r:['0---0---0---0---','5---5---7---7---'],d:'rock',rep:3,crash:1},
+  {r:['0-------5-------','7-------a-------','0-------5-------','7-------0-------'],d:'rock',rep:2,crash:1},
+  {r:['0---0---0---0---','5---5---7---7---'],d:'rock',rep:2,crash:1},
+  {lead:1,r:['7---5---7---a---','c-------a-------','7---a---c---f---','c---------------'],b:['0-------0-------','5-------5-------','7-------7-------','0---------------'],d:'rock',rep:1,crash:1},
+  {r:['0-------5-------','7-------a-------','0-------5-------','7-------0-------'],d:'rock',rep:2,crash:1},
+  {r:['0---5---7---a---','0---------------'],d:['rock','crash'],crash:1}
+ ]},
+ {id:'sunset',name:'Sunset Strip',style:'80s glam metal',bpm:128,cat:'glam',tier:'medium',parts:[
+  {r:['0-0-0-0-3-3-5-5-','0---------------'],d:['rock','crash']},
+  {r:['0-0-x-x-0-0-x-x-','5-5-x-x-3-3-x-x-'],d:'rock',rep:3,crash:1},
+  {r:['0-------3-------','5-----7-5-------'],d:'thrash',rep:2,crash:1},
+  {r:['0-0-x-x-0-0-x-x-','5-5-x-x-3-3-x-x-'],d:'rock',rep:2,crash:1},
+  {lead:1,r:['0-3-5-3-0-3-5-7-','8-7-5-7-8-a-c-a-','c-f-c-a-8-7-5-3-','0---------------'],b:['0-0-x-x-0-0-x-x-','5-5-x-x-5-5-x-x-','3-3-x-x-3-3-x-x-','0---------------'],d:'rock',rep:1,crash:1},
+  {r:['0-------3-------','5-----7-5-------'],d:'thrash',rep:2,crash:1},
+  {r:['0-0-0-0-3-3-5-5-','0---------------'],d:['rock','crash'],crash:1}
+ ]},
+ {id:'hairspray',name:'Hairspray Hurricane',style:'80s glam metal',bpm:150,cat:'glam',tier:'hard',parts:[
+  {r:['0-------5-------','7-------8-------'],d:['crash','crash']},
+  {r:['0-00x-xx5-55x-xx','7-77x-xx8-87-5-3'],d:'gallop',rep:3,crash:1},
+  {r:['0-------5-------','7-----8-7---5---','0-------5-------','a-------c-------'],d:'double',rep:2,crash:1},
+  {r:['0-00x-xx5-55x-xx','7-77x-xx8-87-5-3'],d:'gallop',rep:2,crash:1},
+  {lead:1,r:['0-3-5-7-8-a-c-f-','c-a-8-7-8-a-c-a-','f-c-a-c-f-c-a-8-','7-------f-------'],b:['0-00x-xx0-00x-xx','5-55x-xx5-55x-xx','7-77x-xx7-77x-xx','0-------8-------'],d:'gallop',rep:2,crash:1},
+  {r:['0-------5-------','7-----8-7---5---','0-------5-------','a-------c-------'],d:'double',rep:1,crash:1},
+  {r:['0-0-0-0-5-5-7-7-','0---------------'],d:['double','crash'],crash:1}
+ ]},
+ {id:'fanfare',name:'Royal Fanfare',style:'80s shred metal',bpm:110,cat:'shred',tier:'easy',parts:[
+  {r:['0-------3-------','7-------b-------'],d:['crash','crash']},
+  {r:['0---0---3---3---','7---7---8---7---'],d:'rock',rep:3,crash:1},
+  {lead:1,r:['0---2---3---5---','7-------b-------','c---b---8---7---','b---------------'],b:['0-------0-------','3-------3-------','8-------8-------','7---------------'],d:'double',rep:2,crash:1},
+  {r:['0---0---3---3---','7---7---8---7---'],d:'rock',rep:2,crash:1},
+  {lead:1,r:['0---2---3---5---','7-------b-------','c---b---8---7---','b---------------'],b:['0-------0-------','3-------3-------','8-------8-------','7---------------'],d:'double',rep:1,crash:1},
+  {r:['0---3---7---b---','0---------------'],d:['rock','crash'],crash:1}
+ ]},
+ {id:'marble',name:'Marble Hall',style:'80s shred metal',bpm:138,cat:'shred',tier:'medium',parts:[
+  {r:['0-------8-------','7-------b-------'],d:['crash','crash']},
+  {r:['0-0-0-0-8-8-8-8-','7-7-7-7-b-b-b-b-'],d:'double',rep:2,crash:1},
+  {lead:1,r:['0-2-3-5-7-5-3-2-','3-5-7-8-b-8-7-5-','7-8-b-c-b-8-7-5-','b-------c-------'],b:['0-------0-------','3-------3-------','7-------7-------','b-------0-------'],d:'double',rep:2,crash:1},
+  {r:['0-------3-------','7-------8---7---'],d:'thrash',rep:2,crash:1},
+  {r:['0-0-0-0-8-8-8-8-','7-7-7-7-b-b-b-b-'],d:'double',rep:2,crash:1},
+  {lead:1,r:['0-2-3-5-7-5-3-2-','3-5-7-8-b-8-7-5-','7-8-b-c-b-8-7-5-','b-------c-------'],b:['0-------0-------','3-------3-------','7-------7-------','b-------0-------'],d:'double',rep:1,crash:1},
+  {r:['0-0-0-0-8-8-b-b-','0---------------'],d:['double','crash'],crash:1}
+ ]},
+ {id:'lightning',name:'Lightning Fingers',style:'80s shred metal',bpm:168,cat:'shred',tier:'hard',parts:[
+  {r:['x-x-x-x-x-x-x-x-','0---------------'],d:['double','crash']},
+  {r:['0-00x-xx3-33x-xx','7-77x-xxb-bb7-5-'],d:'gallop',rep:2,crash:1},
+  {lead:1,r:['0-2-3-5-7-8-b-c-','b-8-7-5-3-2-0-2-','3-5-7-8-b-c-f-c-','b-8-7-5-7-8-b-c-'],b:['0-00x-xx0-00x-xx','3-33x-xx3-33x-xx','7-77x-xx7-77x-xx','b-------7-------'],d:'double',rep:2,crash:1},
+  {r:['0-------8-------','7-------b-------'],d:'double',rep:2,crash:1},
+  {r:['0-00x-xx3-33x-xx','7-77x-xxb-bb7-5-'],d:'gallop',rep:2,crash:1},
+  {lead:1,r:['0-2-3-5-7-8-b-c-','b-8-7-5-3-2-0-2-','3-5-7-8-b-c-f-c-','b-8-7-5-7-8-b-c-'],b:['0-00x-xx0-00x-xx','3-33x-xx3-33x-xx','7-77x-xx7-77x-xx','b-------7-------'],d:'double',rep:2,crash:1},
+  {r:['0-0-0-0-3-3-7-7-','0---------------'],d:['double','crash'],crash:1}
+ ]},
+ {id:'factory',name:'Factory Floor',style:'90s industrial metal',bpm:100,cat:'industrial',tier:'easy',tune:-2,parts:[
+  {r:['x---x---x---x---','0---------------'],d:['half','crash']},
+  {r:['0---x---0---x---','3---x---5---x---'],d:'rock',rep:3,crash:1},
+  {r:['0-------5-------','3-------1-------'],d:'groove',rep:2,crash:1},
+  {r:['0---x---0---x---','3---x---5---x---'],d:'rock',rep:2,crash:1},
+  {lead:1,r:['0---1---3---5---','7-------5-------','3---1---0---1---','3---------------'],b:['0-------0-------','5-------5-------','3-------3-------','1---------------'],d:'rock',rep:1,crash:1},
+  {r:['0-------5-------','3-------1-------'],d:'groove',rep:2,crash:1},
+  {r:['0---x---3---5---','0---------------'],d:['rock','crash'],crash:1}
+ ]},
+ {id:'circuit',name:'Circuit Breaker',style:'90s industrial metal',bpm:120,cat:'industrial',tier:'medium',tune:-2,parts:[
+  {r:['x-x-x-x-x-x-x-x-','x-x-x-x-0-------'],d:['rock','crash']},
+  {r:['x-xx-x-x0---x-x-','x-xx-x-x3---1---'],d:'rock',rep:3,crash:1},
+  {r:['0-------6-------','5-------3---1---'],d:'thrash',rep:2,crash:1},
+  {r:['x---xx--x---xx--','x---xx--x-x-3-1-'],d:'half',rep:2,crash:1},
+  {r:['x-xx-x-x0---x-x-','x-xx-x-x3---1---'],d:'rock',rep:2,crash:1},
+  {lead:1,r:['0-1-3-5-6-5-3-1-','0---6---5---3---','7-6-5-3-1-0-1-3-','6---------------'],b:['x-xx-x-x0---x-x-','x-xx-x-x6---5---','x-xx-x-x3---1---','0---------------'],d:'rock',rep:1,crash:1},
+  {r:['0-------6-------','5-------3---1---'],d:'thrash',rep:2,crash:1},
+  {r:['x-xx-x-x0---x-x-','0---------------'],d:['rock','crash'],crash:1}
+ ]},
+ {id:'mecha',name:'Mecha Meltdown',style:'90s industrial metal',bpm:138,cat:'industrial',tier:'hard',tune:-2,parts:[
+  {r:['xxxxxxxx0-------','xxxxxxxx1-------'],d:['double','crash']},
+  {r:['x-xxx-x-xx1-x-3-','x-xxx-x-xx6-5-3-'],d:'groove',rep:3,crash:1},
+  {r:['0-------1-------','6-------5---3---'],d:'double',rep:2,crash:1},
+  {r:['xxx-xxx-xx-x1---','xxx-xxx-xx-x6-5-'],d:'blast',rep:2,crash:1},
+  {r:['x-xxx-x-xx1-x-3-','x-xxx-x-xx6-5-3-'],d:'groove',rep:2,crash:1},
+  {lead:1,r:['0-1-3-6-7-6-3-1-','0-3-6-7-a-7-6-3-','c-a-7-6-3-1-0-1-','3-------6-------'],b:['x-xxx-x-xx1-x-3-','x-xxx-x-xx6-5-3-','x-xxx-x-xx1-x-3-','0-------1-------'],d:'groove',rep:2,crash:1},
+  {r:['0-------1-------','6-------5---3---'],d:'double',rep:2,crash:1},
+  {r:['x-xxx-x-xx1-x-3-','0---------------'],d:['groove','crash'],crash:1}
+ ]},
+ {id:'skoolbus',name:'Sköol Bus Stömp',style:'Garage bänd',bpm:108,cat:'garage',tier:'easy',parts:[
+  {r:['0---------------','5-------7-------'],d:['crash','rock']},
+  {r:['0---0---5---5---','7---7---5---3---'],d:'rock',rep:3,crash:1},
+  {r:['0-------0-------','5-------7-------'],d:'thrash',rep:2,crash:1},
+  {r:['0---0---5---5---','7---7---5---3---'],d:'rock',rep:2,crash:1},
+  {lead:1,r:['0---3---5---3---','0---3---5---7---','a---7---5---3---','0---------------'],b:['0-------0-------','5-------5-------','7-------7-------','0---------------'],d:'rock',rep:1,crash:1},
+  {r:['0-------0-------','5-------7-------'],d:'thrash',rep:2,crash:1},
+  {r:['0---5---7---0---','0---------------'],d:['rock','crash'],crash:1}
+ ]},
+ {id:'grounded',name:'Grounded Förever',style:'Garage bänd',bpm:136,cat:'garage',tier:'medium',parts:[
+  {r:['0-0-0-0-0-0-0-0-','3-3-3-3-5-5-5-5-'],d:['rock','crash']},
+  {r:['0-0-0-0-3-3-5-5-','0-0-0-0-7-7-5-3-'],d:'thrash',rep:3,crash:1},
+  {r:['0-------3-------','5-------7---5---','0-------3-------','8-------7-------'],d:'rock',rep:2,crash:1},
+  {r:['0-0-0-0-3-3-5-5-','0-0-0-0-7-7-5-3-'],d:'thrash',rep:2,crash:1},
+  {lead:1,r:['0-3-5-7-5-3-0-3-','5-7-8-7-5-3-5-7-','a-8-7-5-3-5-7-8-','a---------------'],b:['0-0-0-0-0-0-0-0-','5-5-5-5-5-5-5-5-','7-7-7-7-7-7-7-7-','0---------------'],d:'thrash',rep:1,crash:1},
+  {r:['0-------3-------','5-------7---5---','0-------3-------','8-------7-------'],d:'rock',rep:2,crash:1},
+  {r:['0-0-0-0-3-3-5-5-','0---------------'],d:['thrash','crash'],crash:1}
+ ]},
+ {id:'homework',name:'Hömework Överlöad',style:'Garage bänd',bpm:170,cat:'garage',tier:'hard',parts:[
+  {r:['x-x-x-x-x-x-x-x-','0---------------'],d:['thrash','crash']},
+  {r:['0-00x-xx3-33x-xx','5-55x-xx3-33x-xx'],d:'gallop',rep:3,crash:1},
+  {r:['0-0-0-0-3-3-3-3-','5-5-5-5-7-7-8-7-'],d:'double',rep:2,crash:1},
+  {r:['xxxx0-0-xxxx3-3-','xxxx5-5-xxxx7-5-'],d:'blast',rep:2,crash:1},
+  {r:['0-00x-xx3-33x-xx','5-55x-xx3-33x-xx'],d:'gallop',rep:2,crash:1},
+  {lead:1,r:['0-3-5-7-8-7-5-3-','5-7-8-a-c-a-8-7-','c-a-8-7-5-3-0-3-','5-------7-------'],b:['0-00x-xx0-00x-xx','5-55x-xx5-55x-xx','7-77x-xx7-77x-xx','0-------3-------'],d:'gallop',rep:2,crash:1},
+  {r:['0-0-0-0-3-3-3-3-','5-5-5-5-7-7-8-7-'],d:'double',rep:2,crash:1},
+  {r:['0-0-0-0-3-3-5-5-','0---------------'],d:['double','crash'],crash:1}
  ]}
 ];
-SONGS.sort((a,b)=>a.lvl-b.lvl);
+SONGS.sort((a,b)=>CATS.findIndex(c=>c.id===a.cat)-CATS.findIndex(c=>c.id===b.cat)||TIERS.indexOf(a.tier)-TIERS.indexOf(b.tier));
+const LINES={"chrome": ["My bike has chrome wheels and a squeaky bell!", "Ride so fast my helmet flew away!", "Grandma's on the scooter and she rocks!", "Pedal to the metal, pedal to the cheese!", "Chrome wheels shining like a disco ball!", "Honk honk! Get outta my bike lane!"], "steel": ["Raise your fists and raise your snacks!", "Steel horizon, steel spaghetti!", "I flexed so hard my sleeves fell off!", "Metal in my heart, cereal in my belly!", "Headbang till your hat lands on the moon!", "Yeah yeah yeah! Where's my sandwich?"], "eagle": ["Fly, iron eagle! Don't hit the window!", "Eagle in the sky, pigeon in my pie!", "I got feathers in my underwear!", "Flapping my arms but I'm still on the ground!", "Screech! That's eagle for hello!", "Higher than the clouds and kinda dizzy!"], "turbo": ["Full speed ahead! No brakes! Oops!", "My shopping cart does two hundred miles an hour!", "Vroom vroom! I forgot my shoes!", "Turbo boost powered by baked beans!", "Speed bump! Speed bump! OW!", "Faster than mom yelling dinner's ready!"], "highway": ["Thunder on the highway, rain on my nachos!", "Are we there yet? Are we there yet?", "Road trip snacks are the best snacks!", "I gotta pee! Pull over! Pull over!", "The GPS is singing with me!", "Next stop: the giant donut store!"], "boss": ["Press start! It's the final boss!", "The boss has ninety-nine health bars!", "I saved the game, right? RIGHT?", "My controller is sticky with juice!", "Boss fight! Boss fight! Mom says bedtime!", "Game over? Never! One more coin!"], "skate": ["Drop in and shred! Also ouch!", "Kickflip! Missed it! Kickflip again!", "My skateboard is faster than grandpa!", "Grind the rail and grind the cheese!", "Helmet on, kneepads on, let's go!", "I'm a skate park legend, almost!"], "mosh": ["Jump! Jump! Mind the snack table!", "Bounce like a kangaroo on sugar!", "Spin around until you're dizzy!", "Everybody jump! The floor is lava!", "I jumped so high I saw my house!", "Jump to the left, jump to the... whoops!"], "thrash": ["Welcome to the thrash zone! Wipe your feet!", "My hair is a tornado!", "Too fast for the drummer! He needs a nap!", "Guitar on fire! Get a juice box!", "Faster! Faster! My fingers are noodles!", "So metal I eat cereal with a fork!"], "castle": ["Defend the crystal castle from the bunnies!", "The king lost his crown in the soup!", "Knights in shining tinfoil!", "The dragon just wants a hug!", "Raise the drawbridge, the pizza's here!", "My sword is a baguette and I love it!"], "viking": ["Sail into the storm! Who brought sandwiches?", "Vikings in a bathtub! Row row row!", "My helmet horns are stuck in the door!", "Thunder! Lightning! My boat has a leak!", "Odin, can I have more ketchup?", "We sail at dawn, after breakfast!"], "dragon": ["Dragons rule the sky and they love tacos!", "My dragon sneezed and burned my homework!", "Neon wings and glitter flames!", "Fly dragon fly! Watch out for that plane!", "The dragon is scared of tiny spiders!", "Riding a dragon with my teddy bear!"], "neon": ["Turn up the lights, turn down the broccoli!", "Glitter on my guitar, glitter in my soup!", "My hair is taller than the stage!", "Dancing like a disco flamingo!", "Neon nights in my pajamas!", "Shiny shiny sparkly sparkly yeah!"], "sunset": ["Cruising down the strip on a tricycle!", "Sunglasses on, even at night!", "Ice cream truck! Ice cream truck! Stop!", "My cool jacket is my dad's jacket!", "Rock and roll and a sprinkle donut!", "Sunset? Bedtime? NO WAY!"], "hairspray": ["More hairspray! More volume!", "My hair just ate a bird!", "The wind can't move my hair, it's cement!", "Hairspray hurricane! Everybody sneeze!", "Spiky hair can pop balloons!", "Comb it up to the ceiling!"], "fanfare": ["All hail the guitar king and his goldfish!", "Trumpets! Trumpets! Wait, wrong band!", "Bow down to my mighty kazoo!", "The royal cat wants a solo!", "My crown is made of cardboard!", "Long live rock! Long live snacks!"], "marble": ["Echoes in the hall... hall... hall...", "Don't run in the hall! I'm running in the hall!", "Statues dance when nobody looks!", "Slipping on the marble floor in socks!", "My solo is so long the statues fell asleep!", "Fancy music for a fancy pickle!"], "lightning": ["Faster than lightning, slower than my homework!", "My fingers are on fire! Get some water!", "Zap zap! My hair is standing up!", "Shred so fast the guitar needs a nap!", "Lightning fingers, sticky fingers!", "A million notes and now I'm hungry!"], "anvil": ["Hit it like a hammer! Not my thumb!", "Bonk bonk! The anvil goes bonk!", "Heavy like my backpack on Monday!", "Stomp your feet like a dinosaur!", "Groove it, move it, don't lose it!", "I'm made of iron and jelly beans!"], "robot": ["Beep boop! Rampage mode!", "My robot dances like my uncle!", "Error! Error! Too much rock!", "Batteries not included! Rock included!", "Robot arms go up and down!", "I am a robot, please charge me!"], "jack": ["Break the floor! Then fix the floor!", "Jackhammer! Too loud? NO!", "Shake shake shake like a jelly!", "My teeth are rattling, yeah yeah!", "Construction zone! Wear your helmet!", "Drill a hole to the other side of the world!"], "factory": ["Machines never sleep, but I need a nap!", "Making toys on the conveyor belt!", "Clank clank! Whirr whirr! Boing!", "A million rubber ducks a day!", "Push the big red button! Wait, don't!", "Steam and gears and lemonade!"], "circuit": ["Overload the circuit! Bye bye toaster!", "Unplug the TV, plug in the rock!", "Bzzzt! My hair is electric!", "The wifi's down! Panic! Panic!", "Charge it up to a hundred percent!", "Sparks are flying, call my dad!"], "mecha": ["Mecha, power up! Mecha, tie your shoes!", "My giant robot has a tiny cup holder!", "Transform! Uh oh, still a toaster!", "Rocket boots! Laser eyes! Bubble mode!", "Pilot to mecha: I need snacks!", "Stomping through the city, saying sorry!"], "skoolbus": ["Who left the milk out? NÖT IT!", "Sköol bus bumps make my lünch jump!", "Back seat bänd is the best bänd!", "The bus driver's dancing! Eyes on the röad!", "Füll of kids and smelly söcks!", "Is it Friday yet? Is it Friday yet?"], "grounded": ["Grounded förever but my söcks still STINK!", "Möm took my phöne but not my RÖCK!", "Clean your röom! Nö! Clean your röom! Nö!", "My brother's in my röom again!", "Grounded in the basement with my drums!", "Nö dessert till I'm thirty!"], "homework": ["Too much hömework! My brain will EXPLÖDE!", "The dög ate my hömework and liked it!", "Math is loud and math is mean!", "Spelling test! S P E L L! Help!", "Pencil broke! Eraser lost! Nöö!", "Recess is the best class!"], "volcano": ["Bow to the volcano king! He's very warm!", "Lava is hot! Do not touch!", "The volcano burped! Excuse me!", "Marshmallows on the volcano!", "Slow and heavy like a sleepy hippo!", "Rumble rumble in my tummy!"], "swamp": ["Here comes the swamp giant! He needs a bath!", "Mud in my boots, frogs in my hat!", "Squish squash squish squash!", "The swamp giant's best friend is a duck!", "Mosquito! Mosquito! Go away!", "Swampy, stinky, slimy, yeah!"], "mountain": ["Crush the mountain! Gently, please!", "Climbing the mountain with no snacks!", "Rocks on the mountain, rock on the stage!", "Yodel-ay-hee-hoo, heavy metal!", "The mountain's so big I need a nap!", "Avalanche of pillows! Oof!"]};
+SONGS.forEach(x=>x.lines=LINES[x.id]||[x.name+'!']);
 const DIFFS={
- easy:{label:'Easy',mod:4,gap:0.28,travel:1.8,miss:0.035},
- medium:{label:'Medium',mod:2,gap:0.14,travel:1.45,miss:0.06},
- hard:{label:'Hard',mod:1,gap:0.08,travel:1.2,miss:0.075}
+ easy:{label:'Rookie',mod:4,gap:0.42,travel:2.3,miss:0.012,gain:1.6},
+ medium:{label:'Rocker',mod:4,gap:0.26,travel:1.9,miss:0.022,gain:1.3},
+ hard:{label:'Legend',mod:2,gap:0.15,travel:1.55,miss:0.035,gain:1.1}
 };
 const LANES=[{c:'#ff3b5c',k:'D'},{c:'#ffb21a',k:'F'},{c:'#38e1ff',k:'J'},{c:'#b65cff',k:'K'}];
-const WIN={perfect:0.05,good:0.095,ok:0.14};
+const WIN={perfect:0.075,good:0.14,ok:0.21};
 
 function laneOf(n){
   if(n.lead) return n.fret<3?0:n.fret<7?1:n.fret<11?2:3;
@@ -280,12 +516,14 @@ function drumBar(ev,d,t0,st,crash){
 function buildChart(song,D){
   const spb=60/song.bpm,st=spb/4,bar=spb*4;
   const main=[],back=[],ev=[];let b=0;
-  for(const p of song.parts){for(let k=0;k<(p.rep||1);k++){p.r.forEach((rs,i)=>{
+  let shoutN=0,lastShout=-99;
+  song.parts.forEach((p,pi)=>{for(let k=0;k<(p.rep||1);k++){p.r.forEach((rs,i)=>{
     const d=Array.isArray(p.d)?p.d[i%p.d.length]:p.d;const t0=b*bar;
+    if(pi>0&&!p.lead&&b-lastShout>=4&&(i%2===0)){ev.push({t:t0,type:'shout',idx:shoutN++});lastShout=b;}
     drumBar(ev,d,t0,st,p.crash&&i===0&&d!=='crash');
     parseBar(rs,t0,st,!!p.lead,main,song.tune);
     if(p.b)parseBar(p.b[i],t0,st,false,back,song.tune);
-    b++;});}}
+    b++;});}});
   const rhythm=main.filter(n=>!n.lead),leads=main.filter(n=>n.lead);
   setDur(rhythm,st);setDur(leads,st);setDur(back,st);
   main.sort((a,b)=>a.t-b.t);
@@ -296,6 +534,8 @@ function buildChart(song,D){
   }
   for(const n of back)ev.push({t:n.t,type:'gtr',n,vol:0.7});
   for(const n of rhythm.concat(back))ev.push({t:n.t,type:'bass',n});
+  if((SOUND[song.cat]||{}).extra){const pads=rhythm.concat(back).filter(n=>!n.mute&&n.step%8===0).sort((a,b)=>a.t-b.t);
+    pads.forEach((n,i)=>{const nx=pads[i+1]?pads[i+1].t:n.t+8*st;ev.push({t:n.t,type:'extra',n,dur:Math.min(nx-n.t,8*st)});});}
   for(let i=0;i<4;i++)ev.push({t:-4*spb+i*spb,type:'stick'});
   ev.sort((a,b)=>a.t-b.t);
   return {events:ev,notes,length:b*bar,spb};
@@ -312,15 +552,16 @@ function initAudio(){
   const s=ctx.createBufferSource();s.buffer=ctx.createBuffer(1,1,22050);s.connect(ctx.destination);s.start(0);
 }
 function curve(k){const n=1024,c=new Float32Array(n);for(let i=0;i<n;i++){const x=i*2/n-1;c[i]=Math.tanh(k*x);}return c;}
-function makeRig(){
+function makeRig(P){
+  const G=P.g;
   const bus=ctx.createGain();bus.connect(master);
   const gIn=ctx.createGain();gIn.gain.value=0.6;
   const hp=ctx.createBiquadFilter();hp.type='highpass';hp.frequency.value=110;
-  const drive=ctx.createGain();drive.gain.value=8;
-  const sh=ctx.createWaveShaper();sh.curve=curve(3);sh.oversample='2x';
-  const cab=ctx.createBiquadFilter();cab.type='lowpass';cab.frequency.value=4300;cab.Q.value=0.9;
-  const scoop=ctx.createBiquadFilter();scoop.type='peaking';scoop.frequency.value=750;scoop.Q.value=1;scoop.gain.value=-7;
-  const low=ctx.createBiquadFilter();low.type='lowshelf';low.frequency.value=180;low.gain.value=5;
+  const drive=ctx.createGain();drive.gain.value=G.drive;
+  const sh=ctx.createWaveShaper();sh.curve=curve(G.k);sh.oversample='2x';
+  const cab=ctx.createBiquadFilter();cab.type='lowpass';cab.frequency.value=G.cut;cab.Q.value=0.9;
+  const scoop=ctx.createBiquadFilter();scoop.type='peaking';scoop.frequency.value=750;scoop.Q.value=1;scoop.gain.value=G.scoop;
+  const low=ctx.createBiquadFilter();low.type='lowshelf';low.frequency.value=180;low.gain.value=G.low;
   const gOut=ctx.createGain();gOut.gain.value=0.17;
   gIn.connect(hp);hp.connect(drive);drive.connect(sh);sh.connect(cab);cab.connect(scoop);scoop.connect(low);low.connect(gOut);gOut.connect(bus);
   const lIn=ctx.createGain();lIn.gain.value=0.5;
@@ -332,7 +573,16 @@ function makeRig(){
   lIn.connect(ldrive);ldrive.connect(lsh);lsh.connect(llp);llp.connect(lOut);lOut.connect(bus);lOut.connect(dl);dl.connect(fb);fb.connect(dl);dl.connect(wet);wet.connect(bus);
   const dr=ctx.createGain();dr.gain.value=0.75;dr.connect(bus);
   const bass=ctx.createGain();bass.gain.value=0.5;bass.connect(bus);
-  return {bus,gIn,lIn,dr,bass};
+  const V=P.v;
+  const vIn=ctx.createGain();vIn.gain.value=1;
+  const vsh=ctx.createWaveShaper();vsh.curve=curve(V.grit);vsh.oversample='2x';
+  const vhp=ctx.createBiquadFilter();vhp.type='highpass';vhp.frequency.value=140;
+  const vPres=ctx.createBiquadFilter();vPres.type='peaking';vPres.frequency.value=2600;vPres.Q.value=0.8;vPres.gain.value=6;
+  const vOut=ctx.createGain();vOut.gain.value=0.42;
+  const vdl=ctx.createDelay(1);vdl.delayTime.value=0.24;const vfb=ctx.createGain();vfb.gain.value=0.28;const vwet=ctx.createGain();vwet.gain.value=0.45;
+  vIn.connect(vsh);vsh.connect(vhp);vhp.connect(vPres);vPres.connect(vOut);vOut.connect(bus);vOut.connect(vdl);vdl.connect(vfb);vfb.connect(vdl);vdl.connect(vwet);vwet.connect(bus);
+  const xIn=ctx.createGain();xIn.gain.value=0.16;xIn.connect(bus);xIn.connect(vdl);
+  return {bus,gIn,lIn,dr,bass,vIn,xIn,P};
 }
 function noiseHit(dest,t,len,type,freq,vol,q){
   const s=ctx.createBufferSource();s.buffer=noiseBuf;const f=ctx.createBiquadFilter();f.type=type;f.frequency.value=freq;if(q)f.Q.value=q;
@@ -390,7 +640,7 @@ function bassNote(dest,n,t,dur){
 function clank(rig){const t=ctx.currentTime;noiseHit(rig.bus,t,0.07,'bandpass',2400,0.35,4);}
 
 /* ---------------- Game state ---------------- */
-let run=null,songIdx=0,diffKey='medium';
+let run=null,songIdx=0,diffKey='easy';
 const store={get(){try{return JSON.parse(localStorage.getItem('thunderRiffBest')||'{}');}catch(e){return {};}},set(v){try{localStorage.setItem('thunderRiffBest',JSON.stringify(v));}catch(e){}}};
 let best=store.get();
 const particles=[];const pressed=[0,0,0,0];const laneGlow=[0,0,0,0];
@@ -398,15 +648,17 @@ let wakeLock=null;
 
 function startRun(){
   initAudio();ctx.resume();
+  try{if(voiceOn&&window.speechSynthesis){speechSynthesis.cancel();pickVoice();const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);}}catch(e){}
   const song=SONGS[songIdx],D=DIFFS[diffKey],ch=buildChart(song,D);
   const lead=Math.max(D.travel,4*ch.spb)+0.5;
   run={song,D,diff:diffKey,spb:ch.spb,T0:ctx.currentTime+lead,events:ch.events,ei:0,notes:ch.notes,ni:0,end:ch.length+1.4,
-    score:0,combo:0,maxCombo:0,cnt:{p:0,g:0,o:0,m:0},rock:0.6,shred:0,shredOn:false,rig:makeRig(),paused:false,over:false,flash:null,lastT:-99,bolt:0,boltT:0};
+    score:0,combo:0,maxCombo:0,cnt:{p:0,g:0,o:0,m:0},rock:0.8,shred:0,shout:null,shredOn:false,rig:makeRig(SOUND[song.cat]||SOUND.heavy),paused:false,over:false,flash:null,lastT:-99,bolt:0,boltT:0};
   particles.length=0;
   show(null);$('#hudBtns').hidden=false;updateShredBtn();
   try{navigator.wakeLock&&navigator.wakeLock.request('screen').then(w=>wakeLock=w).catch(()=>{});}catch(e){}
 }
 function stopRun(){
+  try{window.speechSynthesis&&speechSynthesis.cancel();}catch(e){}
   if(!run)return;const r=run.rig;
   try{r.bus.gain.setTargetAtTime(0,ctx.currentTime,0.05);setTimeout(()=>{try{r.bus.disconnect();}catch(e){}},600);}catch(e){}
   run=null;$('#hudBtns').hidden=true;
@@ -421,14 +673,92 @@ function pump(){
     else if(e.type==='gtr')guitar(rig.gIn,e.n,t,e.n.dur,e.vol);
     else if(e.type==='lead')leadNote(rig.lIn,e.n,t,e.n.dur,e.vol);
     else if(e.type==='bass')bassNote(rig.bass,e.n,t,e.n.dur);
+    else if(e.type==='shout')sing(e.idx,t);
+    else if(e.type==='extra')extraNote(e.n,t,e.dur);
   }
 }
 setInterval(pump,30);
 
+let voiceOn=(()=>{try{return localStorage.getItem('thunderRiffVoice')!=='off';}catch(e){return true;}})();
+const VOW={a:[[800,1],[1150,0.5],[2900,0.22]],e:[[400,1],[1700,0.4],[2700,0.22]],i:[[300,1],[2200,0.32],[3000,0.2]],o:[[460,1],[800,0.55],[2800,0.14]],u:[[330,1],[700,0.42],[2500,0.12]]};
+const SCALE=[0,3,5,7,10,12,15,17];
+const TUNES=[[4,4,3,4,5,4,3,2,3,4,5],[2,3,4,4,5,6,5,4,3,4,5],[5,5,4,3,4,3,2,0,2,3,4],[3,4,5,6,5,4,5,4,6,5,6],[0,2,3,4,3,4,5,6,5,6,7],[6,5,4,5,4,3,4,2,3,2,3]];
+const plain=w=>w.normalize('NFD').replace(/[̀-ͯ]/g,'');
+function vowelOf(w){const m=plain(w).toLowerCase().match(/[aeiouy]/);if(!m)return 'a';return m[0]==='y'?'i':m[0];}
+let allVoices=[];
+function pickVoice(){try{allVoices=speechSynthesis.getVoices().filter(x=>/^en/i.test(x.lang));}catch(e){}}
+function voiceFor(cat){
+  if(!allVoices.length)return null;const P=SOUND[cat]||SOUND.heavy;
+  const m=allVoices.find(x=>P.v.voices.test(x.name));if(m)return m;
+  return allVoices[CATS.findIndex(c=>c.id===cat)%allVoices.length];
+}
+try{if(window.speechSynthesis){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}}catch(e){}
+function vox(t,semi,dur,vowel,vol,o){
+  o=o||{};const rig=run.rig,V=rig.P.v,f0=V.base*Math.pow(2,(semi+(run.song.tune||0))/12)*(o.det||1);
+  const osc=ctx.createOscillator();osc.type=V.wave;
+  if(o.scream){osc.frequency.setValueAtTime(f0*0.9,t);osc.frequency.exponentialRampToValueAtTime(f0*1.5,t+0.25);osc.frequency.setTargetAtTime(f0*1.25,t+dur*0.6,0.2);}
+  else if(V.robot){osc.frequency.setValueAtTime(f0,t);}
+  else{osc.frequency.setValueAtTime(f0*1.14,t);osc.frequency.exponentialRampToValueAtTime(f0,t+0.06);osc.frequency.setTargetAtTime(f0*0.9,t+dur*0.8,0.06);}
+  const sub=ctx.createOscillator();sub.type='sawtooth';sub.frequency.value=f0*0.5;const sg=ctx.createGain();sg.gain.value=0.3;
+  const lfo=ctx.createOscillator();lfo.frequency.value=V.robot?28:5.8;const lg=ctx.createGain();
+  const vd=(V.vib||1)*(o.scream?0.05:0.022);
+  lg.gain.setValueAtTime(V.robot?f0*0.03:0,t);if(!V.robot){lg.gain.linearRampToValueAtTime(0,t+Math.min(0.15,dur*0.4));lg.gain.linearRampToValueAtTime(f0*vd,t+Math.min(0.4,dur));}
+  lfo.connect(lg);lg.connect(osc.frequency);
+  const pre=ctx.createGain();osc.connect(pre);sub.connect(sg);sg.connect(pre);
+  const nz=ctx.createBufferSource();nz.buffer=noiseBuf;const ng=ctx.createGain();ng.gain.value=V.rasp*(o.scream?2.2:1.4);nz.connect(ng);ng.connect(pre);
+  const env=ctx.createGain();env.gain.setValueAtTime(0.0001,t);env.gain.exponentialRampToValueAtTime(vol,t+0.012);
+  env.gain.setTargetAtTime(vol*0.7,t+0.04,0.12);env.gain.setTargetAtTime(0.0001,t+dur,0.05);
+  for(const [f,gv] of VOW[vowel]){const ff=f*V.shift*(o.scream?1.15:1);const bp=ctx.createBiquadFilter();bp.type='bandpass';bp.frequency.value=ff;bp.Q.value=ff/90;const fg=ctx.createGain();fg.gain.value=gv*4.5;pre.connect(bp);bp.connect(fg);fg.connect(env);}
+  if(o.pan&&ctx.createStereoPanner){const pn=ctx.createStereoPanner();pn.pan.value=o.pan;env.connect(pn);pn.connect(rig.vIn);}else env.connect(rig.vIn);
+  const end=t+dur+0.3;[osc,sub,lfo].forEach(x=>{x.start(t);x.stop(end);});nz.start(t,Math.random()*2);nz.stop(end);
+}
+function gang(t,semi,dur,vowel){[[-0.6,0.985,0.012],[0.6,1.015,0.022],[0,0.5,0.008]].forEach(([pan,det,d])=>vox(t+d,semi,dur,vowel,0.22,{pan,det}));
+  noiseHit(run.rig.vIn,t,0.12,'bandpass',1200,0.5,1.5);}
+function extraNote(n,t,dur){
+  const rig=run.rig,kind=rig.P.extra,f=82.41*Math.pow(2,(n.fret+n.tune)/12)*2;
+  const out=ctx.createGain();out.connect(rig.xIn);
+  const mk=(type,fr,gv)=>{const o=ctx.createOscillator();o.type=type;o.frequency.value=fr;const g=ctx.createGain();g.gain.value=gv;o.connect(g);g.connect(out);o.start(t);o.stop(t+dur+0.6);return o;};
+  if(kind==='choir'){const lp=ctx.createBiquadFilter();lp.type='bandpass';lp.frequency.value=900;lp.Q.value=1.2;out.disconnect();out.connect(lp);lp.connect(rig.xIn);
+    [1,1.5,2].forEach((m,i)=>{mk('sawtooth',f*m*1.003,0.5);mk('sawtooth',f*m*0.997,0.5);});
+    out.gain.setValueAtTime(0.0001,t);out.gain.exponentialRampToValueAtTime(0.9,t+0.35);out.gain.setTargetAtTime(0.0001,t+dur,0.2);}
+  else if(kind==='keys'){[1,1.26,1.5,2].forEach(m=>mk('square',f*m,0.25));
+    out.gain.setValueAtTime(0.9,t);out.gain.setTargetAtTime(0.25,t+0.02,0.12);out.gain.setTargetAtTime(0.0001,t+Math.min(dur,0.5),0.05);}
+  else if(kind==='organ'){[0.5,1,2,3].forEach((m,i)=>mk(i===3?'sine':'triangle',f*m,[0.6,0.6,0.35,0.2][i]));
+    out.gain.setValueAtTime(0.0001,t);out.gain.exponentialRampToValueAtTime(0.7,t+0.05);out.gain.setTargetAtTime(0.0001,t+dur,0.08);}
+  else if(kind==='synth'){const step=run.spb/4,nst=Math.max(1,Math.round(dur/step));
+    for(let i=0;i<nst;i++){const tt=t+i*step,o=ctx.createOscillator();o.type='square';o.frequency.value=f*[1,2,1.5,2][i%4];const g=ctx.createGain();
+      g.gain.setValueAtTime(0.5,tt);g.gain.exponentialRampToValueAtTime(0.001,tt+step*0.8);o.connect(g);g.connect(rig.xIn);o.start(tt);o.stop(tt+step);}}
+}
+function sayWord(w,semi,when,last){
+  if(!window.speechSynthesis)return;
+  const r=run,V=r.rig.P.v,vc=voiceFor(r.song.cat);setTimeout(()=>{if(run!==r||r.paused||r.over)return;
+    try{const u=new SpeechSynthesisUtterance(plain(w).toUpperCase());
+      u.pitch=Math.max(0,Math.min(2,V.tts[0]+(V.robot?0:(semi-6)*0.05)+(last?0.2:0)));u.rate=Math.min(2,V.tts[1]+(last?-0.3:0));u.volume=1;if(vc)u.voice=vc;speechSynthesis.speak(u);}catch(e){}
+  },Math.max(0,(when-ctx.currentTime-0.06)*1000));
+}
+function sing(idx,t){
+  const lines=run.song.lines,text=lines[idx%lines.length];
+  const words=text.split(/\s+/).filter(Boolean),n=words.length,spb=run.spb;
+  const tune=TUNES[idx%TUNES.length];
+  const span=Math.min(6*spb,Math.max(spb*0.5*(n-1),0));
+  let step=n>1?span/(n-1):spb;step=Math.max(spb*0.5,Math.round(step/(spb*0.5))*spb*0.5);
+  const times=words.map((w,i)=>t+i*step);
+  run.shout={words,times,end:times[n-1]+Math.max(1.4,2*spb)};
+  if(!voiceOn)return;
+  const V=run.rig.P.v;
+  words.forEach((w,i)=>{
+    const last=i===n-1,semi=V.robot?SCALE[2+(i%2)]:SCALE[Math.min(SCALE.length-1,tune[Math.min(i,tune.length-1)]||0)];
+    const dur=last?Math.max(1.1,2*spb):step*0.8,loud=/!|[A-ZÖÄÜ]{3}/.test(w);
+    vox(times[i],semi,dur,vowelOf(w),last||loud?0.6:0.5,{scream:last&&!V.robot});
+    if(V.gang&&(last||loud))gang(times[i],semi,last?Math.min(dur,0.6):dur,vowelOf(w));
+    sayWord(w,semi,times[i],last);
+  });
+  if(!V.gang)noiseHit(run.rig.dr,times[n-1],0.5,'bandpass',1500,0.35,0.8);
+}
 function mult(){return Math.min(4,1+Math.floor(run.combo/10))*(run.shredOn?2:1);}
 function judge(n,dt){
   const a=Math.abs(dt);let kind,pts,rk,sh;
-  if(a<=WIN.perfect){kind='p';pts=100;rk=0.025;sh=0.03;}else if(a<=WIN.good){kind='g';pts=70;rk=0.02;sh=0.02;}else{kind='o';pts=40;rk=0.012;sh=0.01;}
+  if(a<=WIN.perfect){kind='p';pts=100;rk=0.03;sh=0.045;}else if(a<=WIN.good){kind='g';pts=70;rk=0.025;sh=0.035;}else{kind='o';pts=40;rk=0.018;sh=0.02;}rk*=run.D.gain;
   n.state=1;run.cnt[kind]++;run.combo++;run.maxCombo=Math.max(run.maxCombo,run.combo);
   run.score+=pts*mult();run.rock=Math.min(1,run.rock+rk);if(!run.shredOn)run.shred=Math.min(1,run.shred+sh);
   run.flash={text:kind==='p'?'PERFECT!':kind==='g'?'GOOD':'OK',color:kind==='p'?'#ffc93a':kind==='g'?'#7dffb0':'#c9d3e6',t:performance.now()};
@@ -466,14 +796,14 @@ function update(){
   if(run.shredOn){run.shred-=dt*0.1;if(run.shred<=0){run.shred=0;run.shredOn=false;updateShredBtn();}}
   if(now>run.end)finish(true);
 }
-function stars(acc){return acc>=0.95?5:acc>=0.85?4:acc>=0.7?3:acc>=0.5?2:1;}
+function stars(acc){return acc>=0.9?5:acc>=0.75?4:acc>=0.55?3:acc>=0.35?2:1;}
 function finish(win){
   run.over=true;const c=run.cnt,total=run.notes.length||1;
   const acc=(c.p+c.g*0.75+c.o*0.5)/total;const st=win?stars(acc):0;
   const key=run.song.id+'_'+run.diff;const prev=best[key];let nb=false;
   if(win&&(!prev||run.score>prev.score)){best[key]={score:run.score,stars:Math.max(st,prev?prev.stars:0)};store.set(best);nb=true;}
   $('#resTitle').textContent=win?'Encore!':'Booed off stage';$('#resTitle').classList.toggle('fail',!win);
-  $('#resSub').textContent=win?run.song.name+' · '+run.D.label:'The crowd lost the energy. Try again or pick an easier level.';
+  $('#resSub').textContent=win?run.song.name+' · '+TIER_NAME[run.song.tier]+' song · '+run.D.label+' mode':'The crowd lost the energy. Try again, or pick an easier song or Rookie mode.';
   $('#resStars').innerHTML=[1,2,3,4,5].map(i=>`<span class="${i<=st?'on':''}">★</span>`).join('');
   $('#resBest').hidden=!nb;
   $('#rScore').textContent=run.score.toLocaleString();$('#rAcc').textContent=Math.round(acc*100)+'%';$('#rCombo').textContent=run.maxCombo;
@@ -481,14 +811,14 @@ function finish(win){
   const r=run;setTimeout(()=>{if(run===r){stopRun();show('#results');}},win?900:400);
   if(!win){try{r.rig.bus.gain.setTargetAtTime(0,ctx.currentTime,0.15);}catch(e){}}
 }
-function pause(){if(!run||run.paused||run.over)return;run.paused=true;ctx.suspend();show('#pause');}
+function pause(){if(!run||run.paused||run.over)return;run.paused=true;try{window.speechSynthesis&&speechSynthesis.cancel();}catch(e){}ctx.suspend();show('#pause');}
 function resume(){if(!run)return;show(null);ctx.resume().then(()=>{if(run)run.paused=false;});}
 
 /* ---------------- Drawing ---------------- */
 function proj(z){return 1/(1+Math.max(z,-0.4)*2.6);}
 let GEO={};
 function geo(){
-  const hitY=H*0.76,vanY=H*0.17,hw=Math.min(W*0.47,H*0.5);
+  const hitY=H*0.76,vanY=H*0.17,hw=Math.min(W*0.4,H*0.5);
   GEO={cx:W/2,hitY,vanY,hw};
 }
 function Y(z){return GEO.vanY+(GEO.hitY-GEO.vanY)*proj(z);}
@@ -615,6 +945,28 @@ function drawHUD(now){
   const sy=my+mh+8*P;g.fillStyle='rgba(0,0,0,.5)';g.fillRect(mx-2*P,sy-2*P,mw+4*P,9*P);
   g.fillStyle=run.shred>=0.5||run.shredOn?'#38e1ff':'#2a6f86';g.fillRect(mx,sy,mw*run.shred,5*P);
   g.fillStyle='rgba(255,255,255,.5)';g.fillRect(mx+mw*0.5-1*P,sy-2*P,2*P,9*P);
+  // karaoke line
+  if(run.shout){const sh=run.shout,ct=ctx.currentTime;if(ct<sh.end&&ct>sh.times[0]-0.35){
+    const a=Math.min(1,(ct-sh.times[0]+0.35)*5,(sh.end-ct)*2.5);
+    let fs=Math.round(Math.min(W,H)*0.07);const setF=()=>g.font=`${fs}px "Metal Mania", Impact, fantasy`;setF();
+    const sp=g.measureText(' ').width;let ws=sh.words.map(w=>g.measureText(w).width);
+    let total=ws.reduce((x,y)=>x+y,0)+sp*(ws.length-1);let rows=[sh.words.map((_,i)=>i)];
+    if(total>W*0.92){const minF=Math.min(W,H)*0.05;const f2=Math.floor(fs*W*0.92/total);
+      if(f2>=minF){fs=f2;}else{let acc=0,cut=0;for(let i=0;i<ws.length;i++){acc+=ws[i]+sp;if(acc>total/2){cut=i+1;break;}}
+        cut=Math.max(1,Math.min(ws.length-1,cut));rows=[[...Array(cut).keys()],[...Array(ws.length-cut).keys()].map(i=>i+cut)];
+        const wide=Math.max(...rows.map(r=>r.reduce((x,i)=>x+ws[i]+sp,-sp)));if(wide>W*0.92)fs=Math.floor(fs*W*0.92/wide);}
+      setF();ws=sh.words.map(w=>g.measureText(w).width);}
+    const sp2=g.measureText(' ').width;
+    g.globalAlpha=a;g.textAlign='left';g.lineJoin='round';g.lineWidth=Math.max(3,fs*0.14);
+    const y0=GEO.vanY+(GEO.hitY-GEO.vanY)*0.14-(rows.length-1)*fs*0.55;
+    rows.forEach((r,ri)=>{const wRow=r.reduce((x,i)=>x+ws[i]+sp2,-sp2);let x=W/2-wRow/2;const y=y0+ri*fs*1.1;
+      for(const i of r){const sung=ct>=sh.times[i]-0.02,now=sung&&(i===sh.words.length-1||ct<sh.times[i+1]);
+        const bump=now?fs*0.08:0,shk=now&&/!|[A-ZÖÄÜ]{3}/.test(sh.words[i])&&!reduceMotion?(Math.random()-0.5)*fs*0.08:0;x+=shk;
+        g.strokeStyle='#1a0700';g.strokeText(sh.words[i],x,y-bump);
+        if(sung){const tg=g.createLinearGradient(0,y-fs,0,y);tg.addColorStop(0,'#ffe9a8');tg.addColorStop(0.55,'#ff7a1a');tg.addColorStop(1,'#c2410c');g.fillStyle=tg;}
+        else g.fillStyle='rgba(243,241,255,.6)';
+        g.fillText(sh.words[i],x,y-bump);x+=ws[i]+sp2-shk;}});
+    g.globalAlpha=1;}}
   // judgement
   if(run.flash){const age=(performance.now()-run.flash.t)/1000;if(age<0.6){const s=1+Math.max(0,0.25-age)*1.6;
     g.globalAlpha=Math.min(1,(0.6-age)*4);g.fillStyle=run.flash.color;g.textAlign='center';
@@ -654,7 +1006,8 @@ function frame(){
 
 /* ---------------- Input ---------------- */
 const pointerLane=new Map();
-cv.addEventListener('pointerdown',e=>{e.preventDefault();const l=Math.max(0,Math.min(3,Math.floor(e.clientX/cv.clientWidth*4)));pointerLane.set(e.pointerId,l);press(l);});
+function laneAt(clientX){const x=clientX*DPR;let best=0,bd=1e9;for(let l=0;l<4;l++){const d=Math.abs(laneX(l,0)-x);if(d<bd){bd=d;best=l;}}return best;}
+cv.addEventListener('pointerdown',e=>{e.preventDefault();const l=laneAt(e.clientX-cv.getBoundingClientRect().left);pointerLane.set(e.pointerId,l);press(l);});
 const up=e=>{const l=pointerLane.get(e.pointerId);if(l!==undefined){pointerLane.delete(e.pointerId);if(![...pointerLane.values()].includes(l))release(l);}};
 cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
 const KEYMAP={KeyD:0,KeyF:1,KeyJ:2,KeyK:3,KeyA:0,KeyS:1,KeyL:3,Digit1:0,Digit2:1,Digit3:2,Digit4:3,ArrowLeft:0,ArrowDown:1,ArrowUp:2,ArrowRight:3};
@@ -670,15 +1023,28 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();});
 
 /* ---------------- Menus ---------------- */
 function show(sel){['#menu','#pause','#results'].forEach(s=>$(s).hidden=s!==sel);}
+let catId=(()=>{try{const c=localStorage.getItem('thunderRiffCat');return CATS.some(x=>x.id===c)?c:'heavy';}catch(e){return 'heavy';}})();
+songIdx=SONGS.findIndex(x=>x.cat===catId);
 function renderSongs(){
-  $('#songs').innerHTML=SONGS.map((s,i)=>{const b=best[s.id+'_'+diffKey];
+  const cat=CATS.find(c=>c.id===catId);
+  $('#cats').innerHTML=CATS.map(c=>{const list=SONGS.filter(x=>x.cat===c.id);
+    const st=list.reduce((a,x)=>a+((best[x.id+'_'+diffKey]||{}).stars||0),0);
+    return `<button class="cat" id="cat-${c.id}" data-c="${c.id}" aria-pressed="${c.id===catId}"><span class="cn">${c.name}</span><span class="cs"><b>★</b> ${st} / ${list.length*5}</span></button>`;}).join('');
+  $('#catLbl').textContent=cat.name+' songs';$('#catBlurb').textContent=cat.blurb;
+  $('#songs').innerHTML=SONGS.map((x,i)=>{if(x.cat!==catId)return '';const b=best[x.id+'_'+diffKey];
     const st=b?'★'.repeat(b.stars)+'☆'.repeat(5-b.stars):'☆☆☆☆☆';
-    return `<button class="song" id="song-${s.id}" data-i="${i}" aria-pressed="${i===songIdx}"><span class="nm">${s.name}</span><span class="meta">${s.style} · ${s.bpm} BPM · Level <span class="lvl" aria-label="level ${s.lvl} of 5">${[1,2,3,4,5].map(k=>`<i class="${k<=s.lvl?'on':''}"></i>`).join('')}</span></span><span class="best"><b>${st}</b>${b?b.score.toLocaleString():'Not played'}</span></button>`;}).join('');
+    return `<button class="song" id="song-${x.id}" data-i="${i}" aria-pressed="${i===songIdx}"><span class="tier t-${x.tier}">${TIER_NAME[x.tier]}</span><span class="nm">${x.name}</span><span class="meta">${x.style} · ${x.bpm} BPM</span><span class="line">“${x.lines[0]}” <span class="more">+${x.lines.length-1} more</span></span><span class="best"><b>${st}</b>${b?b.score.toLocaleString():'Not played'}</span></button>`;}).join('');
 }
+$('#cats').addEventListener('click',e=>{const b=e.target.closest('.cat');if(!b)return;catId=b.dataset.c;
+  try{localStorage.setItem('thunderRiffCat',catId);}catch(err){}
+  songIdx=SONGS.findIndex(x=>x.cat===catId&&x.tier==='easy');renderSongs();});
 $('#songs').addEventListener('click',e=>{const b=e.target.closest('.song');if(!b)return;songIdx=+b.dataset.i;renderSongs();});
 $('#diffs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;diffKey=b.dataset.d;
   document.querySelectorAll('#diffs button').forEach(x=>x.setAttribute('aria-pressed',x===b));renderSongs();});
 $('#go').addEventListener('click',startRun);
+function renderVoice(){const b=$('#voiceBtn');b.setAttribute('aria-pressed',voiceOn);b.querySelector('b').textContent=voiceOn?'On':'Off';}
+$('#voiceBtn').addEventListener('click',()=>{voiceOn=!voiceOn;try{localStorage.setItem('thunderRiffVoice',voiceOn?'on':'off');}catch(e){}renderVoice();});
+renderVoice();
 $('#pauseBtn').addEventListener('click',pause);
 $('#shredBtn').addEventListener('click',toggleShred);
 $('#resume').addEventListener('click',resume);
