@@ -1,5 +1,16 @@
 [
  {
+  "slug": "blast-off",
+  "name": "Blast Off!",
+  "artifact": "https://claude.ai/artifact/WASCGCx8nwHDmKL8LePZoe",
+  "genre": "Adventure",
+  "blurb": "Build and upgrade a rocket, dodge birds and asteroids, and fly all the way to Pluto!",
+  "colorA": "#ff7a1a",
+  "colorB": "#3b2fa8",
+  "pattern": "rays",
+  "updated": "2026-10-22"
+ },
+ {
   "slug": "rotor-academy",
   "name": "Rotor Academy",
   "artifact": "https://claude.ai/artifact/TDXJtG5UThXPkRpayeZkMa",
