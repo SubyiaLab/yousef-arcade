@@ -1,0 +1,107 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Anti-Boredom</title>
+<style>
+html, body, #canvas { margin: 0; padding: 0; border: 0; }
+html, body { width: 100%; height: 100%; }
+body { background: #2a1b3d; overflow: hidden; touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+#canvas { display: block; position: absolute; inset: 0; width: 100%; height: 100%; }
+#canvas:focus { outline: none; }
+#status { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
+  background: repeating-linear-gradient(45deg, #ff3d7f 0 60px, #ff5c93 60px 120px); font-family: "Arial Rounded MT Bold", "Trebuchet MS", system-ui, sans-serif; color: #fff; z-index: 2; }
+#status h1 { margin: 0; font-size: clamp(42px, 9vw, 96px); letter-spacing: 2px; text-align: center; line-height: 1.0;
+  -webkit-text-stroke: 3px #2a1b3d; text-shadow: 0 6px 0 #2a1b3d; }
+#status h1 span:nth-child(6n+1) { color: #ffd23f; } #status h1 span:nth-child(6n+2) { color: #7cf05a; }
+#status h1 span:nth-child(6n+3) { color: #2ec4ff; } #status h1 span:nth-child(6n+4) { color: #fff; }
+#status h1 span:nth-child(6n+5) { color: #ffd23f; } #status h1 span:nth-child(6n) { color: #8b5cf6; }
+#status h1 span { display: inline-block; animation: bob 1s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(-10px); } }
+.blob { width: 130px; height: 110px; background: #a9aec4; border: 6px solid #2a1b3d; border-radius: 55% 55% 45% 45% / 65% 65% 35% 35%; position: relative; animation: wob 1.6s ease-in-out infinite; }
+.blob::before, .blob::after { content: ""; position: absolute; top: 30px; width: 26px; height: 14px; background: #2a1b3d; border-radius: 0 0 20px 20px; }
+.blob::before { left: 28px; } .blob::after { right: 28px; }
+@keyframes wob { 50% { transform: scale(1.08, 0.93); } }
+.bar { width: min(520px, 80vw); height: 34px; border: 6px solid #2a1b3d; border-radius: 22px; background: #2a1b3d; overflow: hidden; }
+.fill { height: 100%; width: 0%; border-radius: 16px; background: linear-gradient(90deg, #ffd23f, #7cf05a, #2ec4ff); transition: width .2s; }
+#msg { font-size: 22px; font-weight: bold; text-shadow: 0 2px 0 #2a1b3d; text-align: center; padding: 0 20px; }
+#small { font-size: 15px; opacity: .9; text-align: center; padding: 0 24px; }
+</style>
+<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
+<link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
+
+
+
+<canvas id="canvas">Your browser does not support the canvas tag.</canvas>
+<noscript>Your browser does not support JavaScript.</noscript>
+<div id="status">
+  <h1><span>A</span><span>N</span><span>T</span><span>I</span><br><span>B</span><span>O</span><span>R</span><span>E</span><span>D</span><span>O</span><span>M</span></h1>
+  <div class="blob"></div>
+  <div class="bar"><div class="fill" id="fill"></div></div>
+  <div id="msg">Loading the fun...</div>
+  <div id="small">Made with the Godot engine. The first load is big (about 40 MB), so give it a moment.</div>
+</div>
+<script>
+// The engine file is split into parts (hosting limit per file); stitch them back together while streaming.
+(function () {
+  const PARTS = ["index.part1.wasm", "index.part2.wasm", "index.part3.wasm"];
+  if (!PARTS.length) return;
+  const realFetch = window.fetch.bind(window);
+  window.fetch = function (input, init) {
+    const url = typeof input === 'string' ? input : (input && input.url) || '';
+    if (/index\.wasm(\?|$)/.test(url)) {
+      const base = url.replace(/index\.wasm(\?.*)?$/, '');
+      let i = 0, reader = null;
+      const stream = new ReadableStream({
+        async pull(ctrl) {
+          for (;;) {
+            if (!reader) {
+              if (i >= PARTS.length) { ctrl.close(); return; }
+              const r = await realFetch(base + PARTS[i++], { credentials: 'same-origin' });
+              if (!r.ok) throw new Error('Could not load ' + PARTS[i - 1] + ' (' + r.status + ')');
+              reader = r.body.getReader();
+            }
+            const { value, done } = await reader.read();
+            if (done) { reader = null; continue; }
+            ctrl.enqueue(value);
+            return;
+          }
+        }
+      });
+      return Promise.resolve(new Response(stream, { status: 200, headers: { 'Content-Type': 'application/wasm' } }));
+    }
+    if (/index\.pck(\?|$)/.test(url)) {
+      // the game data pack is hosted under a .wasm name (a file type the host serves)
+      return realFetch(url.replace(/index\.pck/, 'index.pck.wasm'), init);
+    }
+    return realFetch(input, init);
+  };
+})();
+</script>
+<script src="index.js"></script>
+<script>
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":1348252,"index.wasm":39514754},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_THREADS_ENABLED = false;
+const engine = new Engine(GODOT_CONFIG);
+(function () {
+  const status = document.getElementById('status');
+  const fill = document.getElementById('fill');
+  const msg = document.getElementById('msg');
+  const lines = ['Loading the fun...', 'Waking up the Fun-bots...', 'Hiding the boring stuff...', 'Inflating balloons...', 'Almost there...'];
+  let li = 0;
+  const timer = setInterval(() => { li = (li + 1) % lines.length; msg.textContent = lines[li]; }, 1800);
+  function fail(err) {
+    clearInterval(timer);
+    console.error(err);
+    msg.textContent = 'Oops! ' + (err && err.message ? err.message : err) + ' — try reloading.';
+  }
+  const missing = Engine.getMissingFeatures({ threads: GODOT_THREADS_ENABLED });
+  if (missing.length) { fail('This browser is missing: ' + missing.join(', ')); return; }
+  engine.startGame({
+    onProgress: function (cur, total) {
+      if (cur > 0 && total > 0) fill.style.width = Math.min(100, cur / total * 100).toFixed(1) + '%';
+    },
+  }).then(() => { clearInterval(timer); status.remove(); }, fail);
+})();
+</script>
+
+</body></html>

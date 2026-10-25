@@ -1,5 +1,16 @@
 [
  {
+  "slug": "anti-boredom",
+  "name": "Anti-Boredom",
+  "artifact": "https://claude.ai/artifact/3J1Fx4hn3iWt2cXUJL3GoC",
+  "genre": "Action",
+  "blurb": "Beat boredom with super-fast micro-games, bubble wrap, slime, spinners, fireworks and a spinning I'M BORED! wheel!",
+  "colorA": "#ff3d7f",
+  "colorB": "#2a1b3d",
+  "pattern": "dots",
+  "updated": "2026-10-24"
+ },
+ {
   "slug": "squeaky-clean",
   "name": "Squeaky Clean",
   "artifact": "https://claude.ai/artifact/CobGTwgebxv8BG9MSx5fQf",
