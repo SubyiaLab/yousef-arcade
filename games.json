@@ -1,5 +1,16 @@
 [
  {
+  "slug": "dune-drift",
+  "name": "Dune Drift",
+  "artifact": "https://claude.ai/artifact/MtM6VgYLffNU9ka3jTH35G",
+  "genre": "Racing",
+  "blurb": "Drift across giant desert dunes, fly off the mega ramp, race the track and unlock awesome cars!",
+  "colorA": "#ffa52a",
+  "colorB": "#3a1a0a",
+  "pattern": "waves",
+  "updated": "2026-10-24"
+ },
+ {
   "slug": "anti-boredom",
   "name": "Anti-Boredom",
   "artifact": "https://claude.ai/artifact/3J1Fx4hn3iWt2cXUJL3GoC",
