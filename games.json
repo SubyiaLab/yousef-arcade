@@ -1,5 +1,16 @@
 [
   {
+    "slug": "blade-quest",
+    "name": "Blade Quest",
+    "artifact": "https://claude.ai/artifact/UQCn99auf7TnRfGShhnARJ",
+    "genre": "Adventure",
+    "blurb": "Explore a cartoon island, bonk silly monsters with your sword, grab epic loot and beat the King Slime!",
+    "colorA": "#ffd84a",
+    "colorB": "#3a7bf2",
+    "pattern": "rays",
+    "updated": "2026-10-25"
+  },
+  {
     "slug": "dune-drift",
     "name": "Dune Drift",
     "artifact": "https://claude.ai/artifact/MtM6VgYLffNU9ka3jTH35G",
