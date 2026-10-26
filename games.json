@@ -1,5 +1,16 @@
 [
   {
+    "slug": "gatlions-galaxy",
+    "name": "Gatlion's Galaxy",
+    "artifact": "https://claude.ai/artifact/JgWXiDo4qQQDAfBFXRpVMa",
+    "genre": "Shooter",
+    "blurb": "Blast goofy aliens with Gatlion, your talking lion gatling gun, and beat the giant jelly boss Kingpin Glorp!",
+    "colorA": "#ffcc40",
+    "colorB": "#2a0f47",
+    "pattern": "rays",
+    "updated": "2026-10-26"
+  },
+  {
     "slug": "sky-captain",
     "name": "Sky Captain",
     "artifact": "https://claude.ai/artifact/6Bxte8ZTT6kdnj6BJxM3Q2",

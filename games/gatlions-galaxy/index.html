@@ -1,0 +1,116 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, viewport-fit=cover">
+<title>Gatlion's Galaxy</title>
+<link rel="icon" type="image/png" href="index.icon.png">
+<link rel="apple-touch-icon" href="index.apple-touch-icon.png">
+<style>
+:root { color-scheme: dark; }
+html, body, #canvas { margin: 0; padding: 0; border: 0; }
+html, body { height: 100%; }
+body { background: #2a0f47; overflow: hidden; touch-action: none; -webkit-user-select: none; user-select: none; }
+#canvas { display: block; width: 100vw; height: 100vh; }
+#canvas:focus { outline: none; }
+#status { position: fixed; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center;
+  background: radial-gradient(circle at 50% 35%, #6b2fb3 0%, #2a0f47 55%, #0c2f3a 100%); font-family: "Segoe UI", Helvetica, Arial, sans-serif; z-index: 5; overflow: hidden; }
+#status.hidden { display: none; }
+#gg-title { font-size: clamp(40px, 8.5vw, 96px); font-weight: 900; color: #ffcc40; letter-spacing: 2px; text-align: center;
+  text-shadow: 0 6px 0 #ff4f8b, -3px -3px 0 #1f0830, 3px -3px 0 #1f0830, -3px 3px 0 #1f0830, 3px 3px 0 #1f0830, 0 12px 20px rgba(0,0,0,.45); transform: rotate(-3deg); }
+#gg-sub { margin-top: 14px; font-size: clamp(16px, 2.6vw, 26px); color: #9dffd9; font-weight: 700; text-shadow: 0 2px 0 #1f0830; text-align: center; padding: 0 16px; }
+#gg-bar { margin-top: 34px; width: min(70vw, 460px); height: 26px; border-radius: 14px; background: rgba(0,0,0,.35); border: 4px solid #1f0830; overflow: hidden; }
+#gg-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #4dffb0, #ffcc40, #ff6a3d); transition: width .25s; }
+#gg-pct { margin-top: 10px; font-size: 18px; color: #fff; font-weight: 800; }
+#gg-note { margin-top: 18px; font-size: 15px; color: #fff; opacity: .75; text-align: center; padding: 0 16px; }
+#status-notice { display: none; margin: 1rem 2rem; padding: 1rem; background: #5b3943; color: #fff; border-radius: 12px; text-align: center; max-width: 80vw; }
+.alien { position: absolute; bottom: -20px; width: 130px; height: 110px; border-radius: 50% 50% 42% 42%; background: #74f04c; border: 5px solid #1f0830; animation: hop 1.1s ease-in-out infinite; }
+.alien:before, .alien:after { content: ""; position: absolute; top: -34px; width: 30px; height: 30px; border-radius: 50%; background: #fff; border: 4px solid #1f0830; box-shadow: inset -6px 4px 0 2px #1f0830; }
+.alien:before { left: 18px; } .alien:after { right: 18px; }
+.alien.a2 { left: 10%; background: #b45cf2; animation-delay: .35s; } .alien.a1 { right: 12%; animation-delay: .7s; }
+@keyframes hop { 0%,100% { transform: translateY(0) scale(1,1); } 40% { transform: translateY(-70px) scale(.9,1.15); } 55% { transform: translateY(-60px) scale(.95,1.05);} 90% { transform: translateY(0) scale(1.15,.85); } }
+</style>
+<canvas id="canvas" tabindex="0">Your browser does not support the canvas tag.</canvas>
+<div id="status">
+  <div class="alien a1"></div><div class="alien a2"></div>
+  <div id="gg-title">GATLION'S GALAXY</div>
+  <div id="gg-sub">Talking guns. Talking aliens. Lots of goo!</div>
+  <div id="gg-bar"><div id="gg-fill"></div></div>
+  <div id="gg-pct">Charging blasters...</div>
+  <div id="gg-note">Use a computer with a mouse for the best fun (touch works too). Turn your sound ON! First load is about 40 MB.</div>
+  <div id="status-notice"></div>
+</div>
+<script>
+// Artifact storage limits mean the engine is shipped in pieces: stitch index.part*.wasm back into index.wasm,
+// and serve the data pack from index.pck.wasm.
+(function () {
+  const PARTS = ["index.part1.wasm", "index.part2.wasm", "index.part3.wasm"];
+  const WASM_SIZE = 39514754;
+  const PCK_SIZE = 2213564;
+  const realFetch = window.fetch.bind(window);
+  const fill = document.getElementById('gg-fill');
+  const pct = document.getElementById('gg-pct');
+  let got = 0;
+  const total = WASM_SIZE + PCK_SIZE;
+  function progress(n) {
+    got += n;
+    const p = Math.min(100, Math.round(100 * got / total));
+    fill.style.width = p + '%';
+    pct.textContent = p < 100 ? ('Charging blasters... ' + p + '%') : 'Waking up Gatlion...';
+  }
+  async function readAll(url) {
+    const r = await realFetch(url);
+    if (!r.ok) throw new Error('Could not load ' + url + ' (' + r.status + ')');
+    const reader = r.body.getReader();
+    const chunks = [];
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      progress(value.byteLength);
+    }
+    const out = new Uint8Array(chunks.reduce((a, c) => a + c.byteLength, 0));
+    let o = 0;
+    for (const c of chunks) { out.set(c, o); o += c.byteLength; }
+    return out;
+  }
+  window.fetch = async function (input, init) {
+    const url = (typeof input === 'string') ? input : (input && input.url) || '';
+    if (/index\.wasm(\?.*)?$/.test(url)) {
+      const parts = await Promise.all(PARTS.map(readAll));
+      const out = new Uint8Array(parts.reduce((a, c) => a + c.byteLength, 0));
+      let o = 0;
+      for (const c of parts) { out.set(c, o); o += c.byteLength; }
+      return new Response(out, { status: 200, headers: { 'Content-Type': 'application/wasm' } });
+    }
+    if (/index\.pck(\?.*)?$/.test(url)) {
+      const data = await readAll('index.pck.wasm');
+      return new Response(data, { status: 200, headers: { 'Content-Type': 'application/octet-stream' } });
+    }
+    return realFetch(input, init);
+  };
+})();
+</script>
+<script src="index.js"></script>
+<script>
+const GODOT_CONFIG = {"args": [], "canvasResizePolicy": 2, "emscriptenPoolSize": 8, "ensureCrossOriginIsolationHeaders": false, "executable": "index", "experimentalVK": false, "fileSizes": {"index.pck": 2213564, "index.wasm": 39514754}, "focusCanvas": true, "gdextensionLibs": [], "godotPoolSize": 4};
+const GODOT_THREADS_ENABLED = false;
+(function(){ const h = (location.hash || '').slice(1); if (h && /^[a-z0-9_-]+$/.test(h)) { GODOT_CONFIG.args = ['--', '--screen=' + h]; } })();
+const engine = new Engine(GODOT_CONFIG);
+(function () {
+  const statusOverlay = document.getElementById('status');
+  const statusNotice = document.getElementById('status-notice');
+  function fail(err) {
+    console.error(err);
+    statusNotice.style.display = 'block';
+    statusNotice.textContent = (err && err.message) ? err.message : String(err);
+  }
+  const missing = Engine.getMissingFeatures({ threads: false });
+  if (missing.length !== 0) {
+    fail('This browser is missing: ' + missing.join(', '));
+    return;
+  }
+  engine.startGame({ 'onProgress': function () {} }).then(() => {
+    statusOverlay.classList.add('hidden');
+    const c = document.getElementById('canvas');
+    if (c) c.focus();
+  }, fail);
+}());
+</script>
