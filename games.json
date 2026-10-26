@@ -1,5 +1,16 @@
 [
   {
+    "slug": "knuckle-kings",
+    "name": "Knuckle Kings",
+    "artifact": "https://claude.ai/artifact/9f7ezT8hqrus4wfhF1GRtN",
+    "genre": "Action",
+    "blurb": "Pick a cartoon fighter, throw POW punches and super specials, and become the champion of the Knuckle Arena!",
+    "colorA": "#e6323c",
+    "colorB": "#110d24",
+    "pattern": "stripes",
+    "updated": "2026-10-25"
+  },
+  {
     "slug": "blade-quest",
     "name": "Blade Quest",
     "artifact": "https://claude.ai/artifact/UQCn99auf7TnRfGShhnARJ",

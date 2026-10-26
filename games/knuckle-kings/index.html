@@ -1,0 +1,97 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Knuckle Kings</title>
+<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	
+	<link id="-gd-engine-icon" rel="icon" type="image/png" href="$GODOT_PROJECT_ICON">
+	<link rel="apple-touch-icon" href="$GODOT_PROJECT_ICON">
+	<style>
+		html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #110d24; touch-action: none; -webkit-user-select: none; user-select: none; }
+		#canvas { display: block; width: 100%; height: 100%; outline: none; }
+		#canvas:focus { outline: none; }
+		#status { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 40%, #3a1d5e 0%, #110d24 70%); font-family: Impact, 'Arial Black', sans-serif; color: #fff; z-index: 10; }
+		#status.hidden { display: none; }
+		.logo { font-size: clamp(42px, 9vw, 110px); color: #ffd93a; letter-spacing: 2px; text-shadow: 5px 5px 0 #1a0f2a, -3px -3px 0 #1a0f2a, 3px -3px 0 #1a0f2a, -3px 3px 0 #1a0f2a; transform: rotate(-3deg); animation: bounce 0.8s ease-in-out infinite alternate; }
+		@keyframes bounce { from { transform: rotate(-3deg) scale(1); } to { transform: rotate(2deg) scale(1.06); } }
+		.sub { font-family: Arial, sans-serif; font-weight: bold; color: #9be8ff; margin-top: 10px; font-size: clamp(14px, 2.5vw, 24px); }
+		.bar { width: min(70vw, 520px); height: 26px; border: 4px solid #1a0f2a; border-radius: 14px; background: #2a1d44; margin-top: 30px; overflow: hidden; box-shadow: 0 6px 0 #1a0f2a; }
+		.fill { height: 100%; width: 0%; background: linear-gradient(90deg, #ff4d4d, #ffb347, #ffd93a); transition: width 0.2s; }
+		.msg { font-family: Arial, sans-serif; margin-top: 14px; font-size: 16px; color: #ddd; }
+		.fist { font-size: 70px; margin-bottom: 10px; animation: punch 0.6s ease-in-out infinite alternate; }
+		@keyframes punch { from { transform: translateX(-20px) rotate(-10deg); } to { transform: translateX(20px) rotate(10deg); } }
+		#tap { display: none; margin-top: 24px; padding: 16px 40px; font-size: 28px; font-family: Impact, 'Arial Black', sans-serif; color: #fff; background: #e6323c; border: 5px solid #1a0f2a; border-radius: 20px; box-shadow: 0 6px 0 #1a0f2a; cursor: pointer; }
+	</style>
+<canvas id="canvas" tabindex="0">Your browser does not support the canvas tag.</canvas>
+	<div id="status">
+		<div class="fist">👊</div>
+		<div class="logo">KNUCKLE KINGS</div>
+		<div class="sub">2D CARTOON FIST FIGHTING</div>
+		<div class="bar"><div class="fill" id="fill"></div></div>
+		<div class="msg" id="msg">Loading the fighters...</div>
+		<button id="tap">TAP TO FIGHT!</button>
+	</div>
+	<script src="index.js"></script>
+	<script>
+	(function () {
+		// Stitch split wasm parts back together (15 MB per-file hosting limit).
+		var origFetch = window.fetch.bind(window);
+		var PARTS = 3;
+		var total = 0; var done = 0;
+		function setProgress(f, text) { document.getElementById('fill').style.width = Math.round(f * 100) + '%'; if (text) document.getElementById('msg').textContent = text; }
+		window.fetch = function (url, opts) {
+			var u = String(url);
+			if (u.indexOf('index.wasm') !== -1 && u.indexOf('index.pck') === -1) {
+				var base = u.substring(0, u.lastIndexOf('index.wasm'));
+				var reqs = [];
+				for (var i = 1; i <= PARTS; i++) reqs.push(origFetch(base + 'index.part' + i + '.wasm').then(function (r) { if (!r.ok) throw new Error('part ' + r.status); return r.arrayBuffer(); }));
+				return Promise.all(reqs).then(function (bufs) {
+					var len = 0; bufs.forEach(function (b) { len += b.byteLength; });
+					var out = new Uint8Array(len); var off = 0;
+					bufs.forEach(function (b) { out.set(new Uint8Array(b), off); off += b.byteLength; });
+					return new Response(out.buffer, { status: 200, headers: { 'Content-Type': 'application/wasm' } });
+				});
+			}
+			if (u.indexOf('index.pck') !== -1) {
+				return origFetch(u.replace('index.pck', 'index.pck.wasm'), opts);
+			}
+			return origFetch(url, opts);
+		};
+		var GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":758316,"index.wasm":39514754},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+		GODOT_CONFIG['canvasResizePolicy'] = 2;
+		GODOT_CONFIG['focusCanvas'] = true;
+		var engine = new Engine(GODOT_CONFIG);
+		var status = document.getElementById('status');
+		function start() {
+			setProgress(0.05, 'Warming up the gloves...');
+			engine.startGame({
+				onProgress: function (current, total) {
+					if (total > 0) setProgress(0.05 + 0.9 * current / total, 'Loading ' + Math.round(100 * current / total) + '%');
+					else setProgress(0.5, 'Loading...');
+				}
+			}).then(function () {
+				setProgress(1, 'FIGHT!');
+				status.classList.add('hidden');
+				document.getElementById('canvas').focus();
+			}).catch(function (err) {
+				document.getElementById('msg').textContent = 'Error: ' + err;
+				console.error(err);
+			});
+		}
+		var missing = Engine.getMissingFeatures({ threads: false });
+		if (missing.length) { document.getElementById('msg').textContent = 'Your browser is missing: ' + missing.join(', '); return; }
+		var tap = document.getElementById('tap');
+		var isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+		if (isTouch) {
+			tap.style.display = 'inline-block';
+			document.getElementById('msg').textContent = 'Ready!';
+			setProgress(0.0, 'Ready!');
+			tap.addEventListener('click', function () { tap.style.display = 'none'; start(); }, { once: true });
+		} else {
+			start();
+		}
+	})();
+	</script>
+
+</body></html>
