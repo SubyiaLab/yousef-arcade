@@ -1,5 +1,16 @@
 [
   {
+    "slug": "sky-captain",
+    "name": "Sky Captain",
+    "artifact": "https://claude.ai/artifact/6Bxte8ZTT6kdnj6BJxM3Q2",
+    "genre": "Adventure",
+    "blurb": "Fly real-style planes from a little trainer to a jumbo jet, land on mountain strips and nail an air show!",
+    "colorA": "#ffd84a",
+    "colorB": "#0b1e3f",
+    "pattern": "grid",
+    "updated": "2026-10-25"
+  },
+  {
     "slug": "knuckle-kings",
     "name": "Knuckle Kings",
     "artifact": "https://claude.ai/artifact/9f7ezT8hqrus4wfhF1GRtN",
