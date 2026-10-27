@@ -1,0 +1,109 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Coral Coast Rally HD</title>
+<style>
+html { height: 100%; box-sizing: border-box; background: #0d6a8c; }
+body, #canvas { margin: 0; padding: 0; border: 0; }
+body { position: relative; width: 100%; height: 100%; background: #0d6a8c; overflow: hidden; touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+#canvas { display: block; position: absolute; inset: 0; width: 100%; height: 100%; }
+#canvas:focus { outline: none; }
+#status { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
+  background: linear-gradient(180deg, #2a8fd8 0%, #8fd3f0 46%, #ffd28a 56%, #16a6b8 57%, #0d6a8c 100%); font-family: "Arial Black", "Trebuchet MS", system-ui, sans-serif; color: #fff; z-index: 2; overflow: hidden; }
+#status h1 { margin: 0; font-size: clamp(42px, 9vw, 112px); letter-spacing: 2px; text-align: center; line-height: 1.0; color: #ffc93f;
+  -webkit-text-stroke: 4px #062a3c; text-shadow: 0 7px 0 #062a3c; font-style: italic; z-index: 1; }
+.sun { position: absolute; top: 10%; right: 13%; width: 110px; height: 110px; border-radius: 50%; background: #ffe38a; box-shadow: 0 0 70px 26px rgba(255,225,140,.6); }
+.isle { position: absolute; left: 6%; bottom: 36%; width: 34%; height: 9%; background: #2f8f48; border-radius: 50% 50% 0 0; }
+.isle::after { content: ""; position: absolute; left: -6%; right: -6%; bottom: -10px; height: 16px; background: #f0d28c; border-radius: 50%; }
+.wave { position: absolute; left: -10%; right: -10%; bottom: 18%; height: 8px; background: rgba(255,255,255,.35); border-radius: 8px; animation: wave 3s ease-in-out infinite alternate; }
+@keyframes wave { from { transform: translateX(-30px); } to { transform: translateX(30px); } }
+.car { width: 120px; height: 46px; position: relative; animation: bounce .8s ease-in-out infinite alternate; z-index: 1; }
+.car::before { content: ""; position: absolute; left: 0; right: 0; bottom: 12px; height: 26px; background: #ff5a4a; border: 5px solid #062a3c; border-radius: 14px 30px 8px 8px; }
+.car::after { content: ""; position: absolute; left: 14px; right: 14px; bottom: -6px; height: 22px;
+  background: radial-gradient(circle at 18px 11px, #222 9px, #062a3c 10px, transparent 11px), radial-gradient(circle at calc(100% - 18px) 11px, #222 9px, #062a3c 10px, transparent 11px); }
+@keyframes bounce { from { transform: translateY(0) rotate(-3deg); } to { transform: translateY(-14px) rotate(4deg); } }
+.bar { width: min(520px, 80vw); height: 34px; border: 6px solid #062a3c; border-radius: 22px; background: #062a3c; overflow: hidden; z-index: 1; }
+.fill { height: 100%; width: 0%; border-radius: 16px; background: linear-gradient(90deg, #4fe3c1, #29b6f6, #ffd23f); transition: width .2s; }
+#msg { font-size: 22px; font-weight: bold; text-shadow: 0 2px 0 #062a3c; text-align: center; padding: 0 20px; z-index: 1; }
+#small { font-size: 15px; opacity: .95; text-align: center; padding: 0 24px; z-index: 1; text-shadow: 0 1px 0 #062a3c; }
+</style>
+<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
+<link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
+
+
+
+<canvas id="canvas">Your browser does not support the canvas tag.</canvas>
+<noscript>Your browser does not support JavaScript.</noscript>
+<div id="status">
+  <div class="sun"></div><div class="isle"></div><div class="wave"></div>
+  <h1>CORAL COAST<br>RALLY</h1>
+  <div class="car"></div>
+  <div class="bar"><div class="fill" id="fill"></div></div>
+  <div id="msg">Warming up the engine...</div>
+  <div id="small">Made with the Godot engine. The first load is big (about 50 MB), so give it a moment.</div>
+</div>
+<script>
+// The engine file is split into parts (hosting limit per file); stitch them back together while streaming.
+(function () {
+  const PARTS = ["index.part1.wasm", "index.part2.wasm", "index.part3.wasm"];
+  if (!PARTS.length) return;
+  const realFetch = window.fetch.bind(window);
+  window.fetch = function (input, init) {
+    const url = typeof input === 'string' ? input : (input && input.url) || '';
+    if (/index\.wasm(\?|$)/.test(url)) {
+      const base = url.replace(/index\.wasm(\?.*)?$/, '');
+      let i = 0, reader = null;
+      const stream = new ReadableStream({
+        async pull(ctrl) {
+          for (;;) {
+            if (!reader) {
+              if (i >= PARTS.length) { ctrl.close(); return; }
+              const r = await realFetch(base + PARTS[i++], { credentials: 'same-origin' });
+              if (!r.ok) throw new Error('Could not load ' + PARTS[i - 1] + ' (' + r.status + ')');
+              reader = r.body.getReader();
+            }
+            const { value, done } = await reader.read();
+            if (done) { reader = null; continue; }
+            ctrl.enqueue(value);
+            return;
+          }
+        }
+      });
+      return Promise.resolve(new Response(stream, { status: 200, headers: { 'Content-Type': 'application/wasm' } }));
+    }
+    if (/index\.pck(\?|$)/.test(url)) {
+      // the game data pack is hosted under a .wasm name (a file type the host serves)
+      return realFetch(url.replace(/index\.pck/, 'index.pck.wasm'), init);
+    }
+    return realFetch(input, init);
+  };
+})();
+</script>
+<script src="index.js"></script>
+<script>
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":11886232,"index.wasm":39514754},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_THREADS_ENABLED = false;
+const engine = new Engine(GODOT_CONFIG);
+(function () {
+  const status = document.getElementById('status');
+  const fill = document.getElementById('fill');
+  const msg = document.getElementById('msg');
+  const lines = ['Warming up the engine...', 'Planting palm trees...', 'Filling the lagoon...', 'Waking up the volcano...', 'Building the endless road...', 'Almost there...'];
+  let li = 0;
+  const timer = setInterval(() => { li = (li + 1) % lines.length; msg.textContent = lines[li]; }, 1800);
+  function fail(err) {
+    clearInterval(timer);
+    console.error(err);
+    msg.textContent = 'Oops! ' + (err && err.message ? err.message : err) + ' — try reloading.';
+  }
+  const missing = Engine.getMissingFeatures({ threads: GODOT_THREADS_ENABLED });
+  if (missing.length) { fail('This browser is missing: ' + missing.join(', ')); return; }
+  engine.startGame({
+    onProgress: function (cur, total) {
+      if (cur > 0 && total > 0) fill.style.width = Math.min(100, cur / total * 100).toFixed(1) + '%';
+    },
+  }).then(() => { clearInterval(timer); status.remove(); }, fail);
+})();
+</script>
+
+</body></html>

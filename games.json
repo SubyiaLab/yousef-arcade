@@ -1,5 +1,16 @@
 [
   {
+    "slug": "coral-coast-rally-hd",
+    "name": "Coral Coast Rally HD",
+    "artifact": "https://claude.ai/artifact/VYptrPfoKHa62bfXBdcy1d",
+    "genre": "Racing",
+    "blurb": "Zoom your rally car down an endless island road past palm trees, lagoons and a smoking volcano!",
+    "colorA": "#ffc93f",
+    "colorB": "#0d6a8c",
+    "pattern": "rays",
+    "updated": "2026-10-26"
+  },
+  {
     "slug": "gatlions-galaxy",
     "name": "Gatlion's Galaxy",
     "artifact": "https://claude.ai/artifact/JgWXiDo4qQQDAfBFXRpVMa",
