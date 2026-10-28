@@ -1,5 +1,16 @@
 [
   {
+    "slug": "paper-land",
+    "name": "Paper Land",
+    "artifact": "https://claude.ai/artifact/RhMcnAesjUHhve6QBorejU",
+    "genre": "Puzzle",
+    "blurb": "Paper.io style: draw loops to grab land, cut the other players' tails, and own the whole map!",
+    "colorA": "#3f80f2",
+    "colorB": "#1b2a4a",
+    "pattern": "grid",
+    "updated": "2026-10-28"
+  },
+  {
     "slug": "coral-coast-rally-hd",
     "name": "Coral Coast Rally HD",
     "artifact": "https://claude.ai/artifact/VYptrPfoKHa62bfXBdcy1d",
