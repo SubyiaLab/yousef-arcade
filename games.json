@@ -1,5 +1,16 @@
 [
   {
+    "slug": "cloudbreaker",
+    "name": "Cloudbreaker",
+    "artifact": "https://claude.ai/artifact/4hsDpdVG2EduBmTxQHtd3j",
+    "genre": "Adventure",
+    "blurb": "Glide, dash and zip between floating sky islands, collect five Storm Cores and beat the giant Storm Titan robot!",
+    "colorA": "#4ab8ff",
+    "colorB": "#3b2a6e",
+    "pattern": "rays",
+    "updated": "2026-10-28"
+  },
+  {
     "slug": "paper-land",
     "name": "Paper Land",
     "artifact": "https://claude.ai/artifact/RhMcnAesjUHhve6QBorejU",
