@@ -1,5 +1,16 @@
 [
   {
+    "slug": "giggle-scroll",
+    "name": "Giggle Scroll",
+    "artifact": "https://claude.ai/artifact/6BqH5ArPDkosT1Tqe5FNWc",
+    "genre": "Sandbox",
+    "blurb": "Swipe through endless funny cartoon videos: sneezing cats, cool ducks, dancing robots and runaway jelly!",
+    "colorA": "#ff5fa2",
+    "colorB": "#7b3cff",
+    "pattern": "dots",
+    "updated": "2026-11-22"
+  },
+  {
     "slug": "cloudbreaker",
     "name": "Cloudbreaker",
     "artifact": "https://claude.ai/artifact/4hsDpdVG2EduBmTxQHtd3j",
