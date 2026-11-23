@@ -1991,6 +1991,7 @@ function drawScene(sc, t) {
   drawBg(sc.bg, t);
   fxDraw(sc.fx, t, true);
   const S = actionState(sc.action, t);
+  if (S.skill) actionBack(sc.action, t, S, h);
   if (!S.hide) {
     c.save(); c.translate(180 + S.x, 470 + S.y);
     if (S.center) { c.translate(0, -h / 2); c.rotate(S.rot); c.translate(0, h / 2); } else c.rotate(S.rot);
@@ -2043,6 +2044,7 @@ function fmt(n) { if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e7 ? 0 : 1).repla
 const feed = [];
 function makeItem(n) {
   const uf = userFeedPick(n); if (uf) return uf;
+  const sf = studioFeedPick(n); if (sf) return sf;
   const R = mulberry(seedBase + n * 7919);
   let tpl;
   if (n > 0 && n % 18 === 17) tpl = BYID.sloth;
@@ -2386,7 +2388,7 @@ function saveNow() {
   catch (e) { saveOk = false; }
   const el = document.querySelector('.saved'); if (el) { el.textContent = saveLine(); el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
 }
-function saveSoon() { clearTimeout(saveTimer); saveTimer = setTimeout(saveNow, 300); }
+function saveSoon() { saveNow(); }
 function saveLine() { return saveOk ? '✓ Auto-save is ON · saved on this device' : '⚠️ Saving is blocked here (private mode?) · use a Save code'; }
 window.addEventListener('pagehide', saveNow);
 document.addEventListener('visibilitychange', () => { if (document.hidden) saveNow(); });
@@ -2435,11 +2437,11 @@ setInterval(() => checkNews(false), 20000);
 
 // ---------- user videos in the feed ----------
 const UTPL = {};
-function userTpl(v) {
-  const key = v.id + ':' + (v.rev || 0); if (UTPL[key]) return UTPL[key];
+function userTpl(v, mine = true) {
+  const key = v.id + ':' + (v.rev || 0) + (mine ? '' : ':o'); if (UTPL[key]) return UTPL[key];
   const n = v.scenes.length, ev = [];
   v.scenes.forEach((s, i) => ev.push(...sceneEvents(s, i * SCENE_D)));
-  return UTPL[key] = { id: 'user', cat: 'mine', user: true, dur: n * SCENE_D, ev, vary: () => ({}), creators: [['me', '😎']], caps: [''], sound: 'original sound', coms: [],
+  return UTPL[key] = { id: 'user', cat: 'mine', user: mine, dur: n * SCENE_D, ev, vary: () => ({}), creators: [['me', '😎']], caps: [''], sound: 'original sound', coms: [],
     draw(t) { const i = Math.min(n - 1, Math.floor(t / SCENE_D)), lt = t - i * SCENE_D; drawScene(v.scenes[i], lt); if (i > 0 && lt < .2) { c.save(); c.globalAlpha = 1 - lt / .2; bgFill('#fff'); c.restore(); }
       if (n > 1) for (let k = 0; k < n; k++) rr(180 - n * 14 + k * 28, 600, 22, 6, 3, k === i ? '#fff' : 'rgba(255,255,255,.4)', 0); } };
 }
@@ -2488,23 +2490,25 @@ const CH_COL = ['#ff3d7f', '#7b3cff', '#3d8bff', '#21c7c7', '#3ccf8e', '#ffb22e'
 function cleanName(s) { return s.trim().replace(/\s+/g, '_').replace(/[^A-Za-z0-9_؀-ۿ]/g, '').slice(0, 18); }
 function channelForm(isNew, after) {
   const ch = SAVE.channel || { name: '', emoji: '😎', color: '#ff3d7f', bio: '' };
-  let emo = ch.emoji, col = ch.color;
+  let emo = ch.emoji, col = ch.color, ctype = ch.ctype || 'comedy';
   modal(`<h3>${isNew ? 'Make your channel!' : 'Edit channel'}</h3>
    <label>Channel name</label><input id="fName" maxlength="18" placeholder="super_funny_videos" value="${esc(ch.name)}" autocomplete="off">
    <div class="err" id="fErr"></div>
    <label>Channel picture</label><div class="picks" id="fEmo">${CH_EMO.map(e => `<button data-e="${e}" class="${e === emo ? 'on' : ''}">${e}</button>`).join('')}</div>
    <label>Channel color</label><div class="picks" id="fCol">${CH_COL.map(cl => `<button class="sw ${cl === col ? 'on' : ''}" data-c="${cl}" style="background:${cl}"></button>`).join('')}</div>
+   <label>My channel is about</label><div class="picks" id="fType">${ST.types.map(([id, ic, nm]) => `<button data-t="${id}" class="${id === (ch.ctype || 'comedy') ? 'on' : ''}" title="${nm}">${ic}</button>`).join('')}</div><div id="fTypeName" style="font-weight:800;font-size:13px;margin-top:4px">${(ST.types.find(x => x[0] === (ch.ctype || 'comedy')) || [])[2]}</div>
    <label>About my channel <small>(optional)</small></label><input id="fBio" maxlength="50" placeholder="funny videos every day!" value="${esc(ch.bio || '')}" autocomplete="off">
    <div class="row"><button class="btn light" id="fCancel">Cancel</button><button class="btn pri" id="fOk">${isNew ? 'Create channel 🎉' : 'Save'}</button></div>`, m => {
     m.querySelectorAll('#fEmo button').forEach(b => b.onclick = () => { emo = b.dataset.e; m.querySelectorAll('#fEmo button').forEach(x => x.classList.toggle('on', x === b)); play('ui'); });
     m.querySelectorAll('#fCol button').forEach(b => b.onclick = () => { col = b.dataset.c; m.querySelectorAll('#fCol button').forEach(x => x.classList.toggle('on', x === b)); play('ui'); });
+    m.querySelectorAll('#fType button').forEach(b => b.onclick = () => { ctype = b.dataset.t; m.querySelectorAll('#fType button').forEach(x => x.classList.toggle('on', x === b)); m.querySelector('#fTypeName').textContent = ST.types.find(x => x[0] === ctype)[2]; play('ui'); });
     m.querySelector('#fCancel').onclick = () => m.remove();
     m.querySelector('#fOk').onclick = () => {
       const name = cleanName(m.querySelector('#fName').value);
       if (name.length < 3) { m.querySelector('#fErr').textContent = 'Name needs at least 3 letters or numbers'; return; }
       if (BADW.test(name.replace(/_/g, ' '))) { m.querySelector('#fErr').textContent = 'Pick a friendly name 😊'; return; }
       const bio = clean(m.querySelector('#fBio').value.trim());
-      SAVE.channel = Object.assign(SAVE.channel || { created: Date.now() }, { name, emoji: emo, color: col, bio });
+      SAVE.channel = Object.assign(SAVE.channel || { created: Date.now() }, { name, emoji: emo, color: col, bio, ctype });
       saveNow(); m.remove(); play('win');
       if (isNew) toast('🎉 Channel created!');
       bindUI();
@@ -2517,11 +2521,18 @@ function saveCodeModal() {
   modal(`<h3>💾 Save code</h3>
    <p style="font-weight:700;margin:0 0 6px">Your channel saves by itself on this device. This code is a backup: copy it to move your channel to another iPad or to the arcade website.</p>
    <label>Your save code</label><textarea id="sc1" readonly>${code}</textarea>
-   <div class="row"><button class="btn pri" id="scCopy">Copy code</button></div>
+   <div class="row"><button class="btn pri" id="scCopy">Copy code</button><button class="btn pri" id="scFile" style="background:#21c7c7">⬇️ Save as file</button></div>
+   <div class="row"><button class="btn light" id="scOpen">📂 Open a save file</button><input type="file" id="scIn" accept=".json,.txt,application/json,text/plain" hidden></div>
    <label>Load a save code</label><textarea id="sc2" placeholder="paste a save code here"></textarea>
    <div class="err" id="scErr"></div>
    <div class="row"><button class="btn light" id="scClose">Close</button><button class="btn pri" id="scLoad" style="background:#7b3cff">Load it</button></div>`, m => {
     m.querySelector('#scCopy').onclick = () => { const ta = m.querySelector('#sc1'); ta.select(); let ok = false; try { if (navigator.clipboard) { navigator.clipboard.writeText(code); ok = true; } } catch (e) { } try { ok = document.execCommand('copy') || ok; } catch (e) { } toast(ok ? 'Copied! 📋' : 'Select the code and copy it'); };
+    m.querySelector('#scFile').onclick = async () => {
+      let dl = null; try { if (window.claude && window.claude.use) dl = await Promise.race([window.claude.use('downloads'), new Promise(r => setTimeout(() => r(null), 3000))]); } catch (e) { }
+      if (dl) { try { await dl.save({ filename: 'giggle-scroll-save.txt', data: code }); toast('⬇️ Save file made!'); } catch (e) { if (e && e.code !== 'declined') toast('Could not make a file here, use Copy code'); } return; }
+      try { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([code], { type: 'text/plain' })); a.download = 'giggle-scroll-save.txt'; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000); toast('⬇️ Save file made!'); } catch (e) { toast('Could not make a file here'); } };
+    m.querySelector('#scOpen').onclick = () => m.querySelector('#scIn').click();
+    m.querySelector('#scIn').onchange = e => { const f = e.target.files[0]; if (!f) return; f.text().then(tx => { m.querySelector('#sc2').value = tx.trim(); m.querySelector('#scLoad').click(); }); };
     m.querySelector('#scClose').onclick = () => m.remove();
     m.querySelector('#scLoad').onclick = () => {
       try { const o = JSON.parse(decodeURIComponent(escape(atob(m.querySelector('#sc2').value.trim())))); if (!o || o.v !== 1) throw 0;
@@ -2545,7 +2556,7 @@ function renderChannel() {
   const shorts = vids.filter(v => v.published && v.kind === 'short'), longs = vids.filter(v => v.published && v.kind === 'video'), drafts = vids.filter(v => !v.published);
   const list = (chTab === 'short' ? shorts : chTab === 'video' ? longs : drafts).slice().sort((a, b) => b.created - a.created);
   $('channel').innerHTML = `<div class="chTop" style="background:linear-gradient(160deg,${ch.color},${shade(ch.color, -60)})">
-    <div class="chAv">${ch.emoji}</div><div class="chName">@${esc(ch.name)}</div><div class="chBio">${esc(ch.bio || '')}</div>
+    <div class="chAv">${ch.emoji}</div><div class="chName">@${esc(ch.name)}</div><div class="chBio">${(() => { const ty = ST.types.find(x => x[0] === (ch.ctype || 'comedy')); return ty ? ty[1] + ' ' + ty[2] + ' channel' : ''; })()}${ch.bio ? ' · ' + esc(ch.bio) : ''}</div>
     <div class="chStats"><div><b>${fmt(followers())}</b>Followers</div><div><b>${followed.size}</b>Following</div><div><b>${fmt(totalLikes())}</b>Likes</div><div><b>${fmt(totalViews())}</b>Views</div></div>
     <div class="chBtns"><button class="btn" data-a="edit">✏️ Edit channel</button><button class="btn" data-a="code">💾 Save code</button></div>
     <div class="saved">${saveLine()}</div></div>
@@ -2587,13 +2598,20 @@ function watchVideo(v) {
 const ED = { v: null, i: 0, playAll: false, t: 0, lastT: 0, editing: null };
 function openEditor(existing, kind) {
   closeSheet();
-  if (existing) { ED.v = JSON.parse(JSON.stringify({ kind: existing.kind, title: existing.title, caption: existing.caption, scenes: existing.scenes })); ED.editing = existing; }
+  if (existing) { ED.v = existing; ED.isNew = false; existing.vtype = existing.vtype || 'comedy'; }
   else {
-    const s1 = randomScene(); ED.v = { kind: kind || 'short', title: '', caption: '', scenes: [s1] }; ED.editing = null;
-    if (ED.v.kind === 'video') { ED.v.scenes.push(randomScene(s1)); }
+    const v = { id: 'v' + Date.now().toString(36) + Math.floor(Math.random() * 1e4), kind: kind || 'short', vtype: (SAVE.channel && SAVE.channel.ctype) || 'comedy', title: '', caption: '', scenes: [], created: Date.now(), published: false, views: 0, likes: 0, shares: 0, comments: [], liked: false, pot: 300 + Math.floor(Math.random() * 2200), likeRate: .08 + Math.random() * .1, rev: 0, touched: false };
+    ED.v = v; ED.isNew = true;
+    const s1 = randomScene(null, v.vtype); v.scenes.push(s1); if (v.kind === 'video') v.scenes.push(randomScene(s1, v.vtype));
+    SAVE.videos.push(v); saveNow();
   }
   ED.i = 0; ED.playAll = false; ED.t = 0; ED.lastT = -.001;
   $('editor').hidden = false; buildEditor(); setPaused(true);
+}
+function edChanged() {
+  const v = ED.v; v.touched = true; if (v.published) v.rev = (v.rev || 0) + 1;
+  saveNow();
+  const el = $('edSaved'); if (el) { el.textContent = '✓ Saved'; el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
 }
 function randomScene(like) {
   const s = newScene(), r = a => a[Math.floor(Math.random() * a.length)][0];
@@ -2604,35 +2622,37 @@ function randomScene(like) {
 }
 function chipsHTML(k, list, cur) { return `<div class="chips" data-k="${k}">${list.map(([id, ic, nm]) => `<button class="chip${id === cur ? ' on' : ''}" data-v="${id}"><i>${ic}</i>${nm}</button>`).join('')}</div>`; }
 function swHTML(k, list, cur) { return `<div class="picks" data-k="${k}">${list.map(cl => `<button class="sw${cl === cur ? ' on' : ''}" data-v="${cl}" style="background:${cl}"></button>`).join('')}</div>`; }
+function sortedActions(type) { const pref = (TYPE_SET[type] || TYPE_SET.comedy).actions; return pref.map(id => ST.actions.find(a => a[0] === id)).filter(Boolean).concat(ST.actions.filter(a => !pref.includes(a[0]))); }
+function sortedBgs(type) { const pref = (TYPE_SET[type] || TYPE_SET.comedy).bgs; return pref.map(id => ST.bgs.find(a => a[0] === id)).filter(Boolean).concat(ST.bgs.filter(a => !pref.includes(a[0]))); }
 function buildEditor() {
   const v = ED.v, s = v.scenes[ED.i];
-  $('editor').innerHTML = `<header class="edh"><button class="btn" id="edCancel">✕</button><b>${ED.editing ? 'Edit' : 'New'} ${v.kind === 'short' ? 'Short' : 'Video'}</b><button class="btn" id="edDraft">Save draft</button></header>
+  $('editor').innerHTML = `<header class="edh"><button class="btn" id="edCancel">✕ Close</button><b>${ED.isNew ? 'New' : 'Edit'} ${v.kind === 'short' ? 'Short' : 'Video'}</b><span class="saved" id="edSaved" style="margin:0;font-size:13px">✓ Auto-save</span></header>
    <div class="edprev"><canvas id="edCv" width="270" height="480"></canvas><div class="edctl">${v.kind === 'video' ? `<button class="btn" id="edPlay" style="background:#2c2840">${ED.playAll ? '⏹ Stop' : '▶ Play whole video'}</button>` : ''}<button class="btn" id="edRand" style="background:#2c2840">🎲 Surprise me</button></div></div>
    ${v.kind === 'video' ? `<div id="edScenes">${v.scenes.map((x, i) => `<button data-s="${i}" class="${i === ED.i ? 'on' : ''}">Scene ${i + 1}</button>`).join('')}${v.scenes.length < 4 ? '<button data-s="add">＋ Add scene</button>' : ''}${v.scenes.length > 2 ? '<button data-s="del">🗑️</button>' : ''}</div>` : ''}
    <div class="edbody" id="edBody">
-    <div class="edsec"><h4>Type</h4><div class="chips" data-k="kind"><button class="chip${v.kind === 'short' ? ' on' : ''}" data-v="short"><i>📱</i>Short</button><button class="chip${v.kind === 'video' ? ' on' : ''}" data-v="video"><i>🎬</i>Video</button></div></div>
-    <div class="edsec"><h4>Place</h4>${chipsHTML('bg', ST.bgs, s.bg)}</div>
+    <div class="edsec"><h4>Kind of video</h4>${chipsHTML('vtype', ST.types, v.vtype)}</div>
+    <div class="edsec"><h4>Length</h4><div class="chips" data-k="kind"><button class="chip${v.kind === 'short' ? ' on' : ''}" data-v="short"><i>📱</i>Short</button><button class="chip${v.kind === 'video' ? ' on' : ''}" data-v="video"><i>🎬</i>Video</button></div></div>
+    <div class="edsec"><h4>What happens ${v.vtype !== 'comedy' ? '<small style="font-weight:800;opacity:.7">' + (ST.types.find(x => x[0] === v.vtype) || [])[2] + ' first</small>' : ''}</h4>${chipsHTML('action', sortedActions(v.vtype), s.action)}</div>
+    <div class="edsec"><h4>Place</h4>${chipsHTML('bg', sortedBgs(v.vtype), s.bg)}</div>
     <div class="edsec"><h4>Star</h4>${chipsHTML('actor', ST.actors, s.actor)}<div style="height:6px"></div>${swHTML('col', ST.colors, s.col)}${s.actor === 'kid' ? '<div style="height:6px"></div>' + swHTML('skin', ST.skins, s.skin) : ''}</div>
-    <div class="edsec"><h4>What happens</h4>${chipsHTML('action', ST.actions, s.action)}</div>
-    <div class="edsec"><h4>Big text</h4><input id="edText" maxlength="28" placeholder="type something funny..." value="${esc(s.text)}" autocomplete="off"><div style="height:6px"></div>${swHTML('tcol', ST.tcolors, s.tcol)}<div style="height:6px"></div>${chipsHTML('tpos', [['top', '⬆️', 'Top'], ['middle', '⏺️', 'Middle'], ['bottom', '⬇️', 'Bottom']], s.tpos)}</div>
+    <div class="edsec"><h4>Big text</h4><input id="edText" maxlength="28" placeholder="type something..." value="${esc(s.text)}" autocomplete="off"><div style="height:6px"></div>${swHTML('tcol', ST.tcolors, s.tcol)}<div style="height:6px"></div>${chipsHTML('tpos', [['top', '⬆️', 'Top'], ['middle', '⏺️', 'Middle'], ['bottom', '⬇️', 'Bottom']], s.tpos)}</div>
     <div class="edsec"><h4>Speech bubble</h4><input id="edSay" maxlength="36" placeholder="what does your star say?" value="${esc(s.say)}" autocomplete="off"></div>
     <div class="edsec"><h4>Sound effect</h4>${chipsHTML('sfx', ST.sfx, s.sfx)}</div>
     <div class="edsec"><h4>Effect</h4>${chipsHTML('fx', ST.fx, s.fx)}</div>
     <div class="edsec"><h4>Music</h4>${chipsHTML('music', ST.music, s.music)}</div>
-    <div class="edsec"><h4>Title</h4><input id="edTitle" maxlength="40" placeholder="My funny ${v.kind === 'short' ? 'short' : 'video'}" value="${esc(v.title)}" autocomplete="off"></div>
-    <div class="edsec"><h4>Hashtags</h4><input id="edCap" maxlength="50" placeholder="#funny #lol" value="${esc(v.caption)}" autocomplete="off"></div>
+    <div class="edsec"><h4>Title</h4><input id="edTitle" maxlength="40" placeholder="My ${v.kind === 'short' ? 'short' : 'video'}" value="${esc(v.title)}" autocomplete="off"></div>
+    <div class="edsec"><h4>Hashtags</h4><input id="edCap" maxlength="50" placeholder="#${v.vtype} #fun" value="${esc(v.caption)}" autocomplete="off"></div>
    </div>
-   <div class="edfoot"><button class="btn pri" id="edPub">${ED.editing && ED.editing.published ? 'Save changes ✅' : 'Publish 🚀'}</button></div>`;
+   <div class="edfoot"><button class="btn pri" id="edPub">${v.published ? 'Done ✅' : 'Publish 🚀'}</button></div>`;
   const E = $('editor');
-  E.querySelector('#edCancel').onclick = () => { if (confirm('Leave the studio? Changes that are not saved will be lost.')) closeEditor(); };
-  E.querySelector('#edDraft').onclick = () => finishEditor(false);
-  E.querySelector('#edPub').onclick = () => finishEditor(true);
-  E.querySelector('#edRand').onclick = () => { const keep = v.scenes[ED.i]; const r = randomScene(); r.text = keep.text; r.say = keep.say; v.scenes[ED.i] = r; ED.t = 0; ED.lastT = -.001; play('sparkle'); rebuild(); };
-  const pb = E.querySelector('#edPlay'); if (pb) pb.onclick = () => { ED.playAll = !ED.playAll; ED.t = ED.playAll ? 0 : 0; ED.lastT = -.001; if (!ED.playAll) ED.i = Math.min(ED.i, v.scenes.length - 1); rebuild(); };
+  E.querySelector('#edCancel').onclick = () => closeEditor();
+  E.querySelector('#edPub').onclick = () => { const was = v.published; closeEditor(true); if (!was) publishVideo(v, true); };
+  E.querySelector('#edRand').onclick = () => { const keep = v.scenes[ED.i]; const r = randomScene(null, v.vtype); r.text = keep.text; r.say = keep.say; v.scenes[ED.i] = r; ED.t = 0; ED.lastT = -.001; play('sparkle'); edChanged(); rebuild(); };
+  const pb = E.querySelector('#edPlay'); if (pb) pb.onclick = () => { ED.playAll = !ED.playAll; ED.t = 0; ED.lastT = -.001; rebuild(); };
   E.querySelectorAll('#edScenes button').forEach(b => b.onclick = () => {
     const k = b.dataset.s; play('ui'); ED.playAll = false;
-    if (k === 'add') { v.scenes.push(randomScene(v.scenes[v.scenes.length - 1])); ED.i = v.scenes.length - 1; }
-    else if (k === 'del') { if (confirm('Delete Scene ' + (ED.i + 1) + '?')) { v.scenes.splice(ED.i, 1); ED.i = Math.max(0, ED.i - 1); } }
+    if (k === 'add') { v.scenes.push(randomScene(v.scenes[v.scenes.length - 1], v.vtype)); ED.i = v.scenes.length - 1; edChanged(); }
+    else if (k === 'del') { if (confirm('Delete Scene ' + (ED.i + 1) + '?')) { v.scenes.splice(ED.i, 1); ED.i = Math.max(0, ED.i - 1); edChanged(); } }
     else ED.i = +k;
     ED.t = 0; ED.lastT = -.001; rebuild();
   });
@@ -2640,37 +2660,45 @@ function buildEditor() {
     const b = e.target.closest('[data-v]'); if (!b) return; const k = row.dataset.k, val = b.dataset.v;
     if (k === 'kind') {
       if (val === v.kind) return; v.kind = val;
-      if (val === 'short') v.scenes = v.scenes.slice(ED.i, ED.i + 1); else if (v.scenes.length < 2) v.scenes.push(randomScene(v.scenes[0]));
-      ED.i = 0; ED.playAll = false; play('ui'); rebuild(); return;
+      if (val === 'short') v.scenes = v.scenes.slice(ED.i, ED.i + 1); else if (v.scenes.length < 2) v.scenes.push(randomScene(v.scenes[0], v.vtype));
+      ED.i = 0; ED.playAll = false; play('ui'); edChanged(); rebuild(); return;
+    }
+    if (k === 'vtype') {
+      if (val === v.vtype) return; v.vtype = val;
+      const set = TYPE_SET[val] || TYPE_SET.comedy; const sc = v.scenes[ED.i];
+      if (!set.actions.includes(sc.action)) sc.action = set.actions[Math.floor(Math.random() * set.actions.length)];
+      if (!set.bgs.includes(sc.bg)) sc.bg = set.bgs[Math.floor(Math.random() * set.bgs.length)];
+      ED.t = 0; ED.lastT = -.001; play('ui'); edChanged(); rebuild(); return;
     }
     const sc = v.scenes[ED.i]; sc[k] = val;
     if (k === 'sfx' && val !== 'none') play(val); else play('ui');
     if (k === 'action' || k === 'actor') { ED.t = 0; ED.lastT = -.001; }
+    edChanged();
     if (k === 'actor') { rebuild(); return; }
     row.querySelectorAll('[data-v]').forEach(x => x.classList.toggle('on', x === b));
   }));
-  E.querySelector('#edText').oninput = e => { v.scenes[ED.i].text = clean(e.target.value); };
-  E.querySelector('#edSay').oninput = e => { v.scenes[ED.i].say = clean(e.target.value); };
-  E.querySelector('#edTitle').oninput = e => { v.title = e.target.value; };
-  E.querySelector('#edCap').oninput = e => { v.caption = e.target.value; };
+  E.querySelector('#edText').oninput = e => { v.scenes[ED.i].text = clean(e.target.value); edChanged(); };
+  E.querySelector('#edSay').oninput = e => { v.scenes[ED.i].say = clean(e.target.value); edChanged(); };
+  E.querySelector('#edTitle').oninput = e => { v.title = e.target.value; edChanged(); };
+  E.querySelector('#edCap').oninput = e => { v.caption = e.target.value; edChanged(); };
 }
 function rebuild() { const sc = $('edBody') ? $('edBody').scrollTop : 0; buildEditor(); $('edBody').scrollTop = sc; }
-function closeEditor() { $('editor').hidden = true; $('editor').innerHTML = ''; setPaused(false); if (!$('channel').hidden) renderChannel(); }
-function finishEditor(publish) {
+function closeEditor(quiet) {
   const v = ED.v;
-  v.title = clean((v.title || '').trim()) || (v.kind === 'short' ? 'My funny short' : 'My funny video');
-  v.caption = clean((v.caption || '').trim());
-  let target = ED.editing;
-  if (target) { target.kind = v.kind; target.title = v.title; target.caption = v.caption; target.scenes = v.scenes; target.rev = (target.rev || 0) + 1; }
-  else { target = { id: 'v' + Date.now().toString(36) + Math.floor(Math.random() * 1e4), kind: v.kind, title: v.title, caption: v.caption, scenes: v.scenes, created: Date.now(), published: false, views: 0, likes: 0, shares: 0, comments: [], liked: false, pot: 300 + Math.floor(Math.random() * 2200), likeRate: .08 + Math.random() * .1, rev: 0 }; SAVE.videos.push(target); }
-  closeEditor();
-  if (publish) publishVideo(target, !target.published);
-  else { saveNow(); toast('💾 Saved to Drafts'); chTab = 'draft'; showMe(); }
+  if (v) {
+    v.title = clean((v.title || '').trim()) || (v.kind === 'short' ? 'My short' : 'My video');
+    v.caption = clean((v.caption || '').trim());
+    if (ED.isNew && !v.touched && !quiet) { SAVE.videos = SAVE.videos.filter(x => x !== v); }
+    else if (!quiet) { toast(v.published ? '✓ Saved' : '✓ Saved in Drafts'); if (!v.published) chTab = 'draft'; }
+    saveNow();
+  }
+  $('editor').hidden = true; $('editor').innerHTML = ''; setPaused(false);
+  if (v && !quiet && v.touched && SAVE.channel) showMe(); else if (!$('channel').hidden) renderChannel();
 }
 function publishVideo(v, isNew) {
   if (isNew) { v.published = true; v.created = Date.now(); v.views = 10 + Math.floor(Math.random() * 30); }
   saveNow(); play('win');
-  toast(isNew ? '🚀 Published! People are watching...' : '✅ Changes saved');
+  toast(isNew ? '🚀 Published! People are watching...' : '✅ Saved');
   chTab = v.kind === 'short' ? 'short' : 'video'; showMe();
   if (isNew) setTimeout(() => checkNews(false), 6000);
 }
@@ -2695,6 +2723,282 @@ function studioTick(dt) {
 // first-run news
 if (SAVE.channel) checkNews(true);
 bindUI();
+// ================= SKILLS & OTHER VIDEO TYPES (v4) =================
+ST.types = [['comedy', '😂', 'Comedy'], ['skills', '⚽', 'Skills'], ['gaming', '🎮', 'Gaming'], ['howto', '🧑‍🍳', 'How-to'], ['music', '🎸', 'Music'], ['art', '🎨', 'Art'], ['science', '🧪', 'Science'], ['vlog', '📹', 'Vlog']];
+ST.bgs.push(['field', '🏟️', 'Stadium'], ['court', '🏀', 'Court'], ['skatepark', '🛹', 'Skate park'], ['stage', '🎭', 'Stage'], ['lab', '🔬', 'Lab'], ['gameroom', '🕹️', 'Game room']);
+ST.actions.push(['soccer', '⚽', 'Soccer tricks'], ['basketball', '🏀', 'Dunk'], ['skate', '🛹', 'Kickflip'], ['karate', '🥋', 'Karate chop'], ['guitar', '🎸', 'Guitar solo'], ['paint', '🎨', 'Paint'], ['cook', '🥞', 'Pancake flip'], ['magic', '🎩', 'Magic trick'], ['science', '🧪', 'Experiment'], ['gaming', '🎮', 'Gaming'], ['coding', '💻', 'Coding']);
+Object.assign(HIT, { soccer: 3.0, basketball: 2.6, skate: 2.8, karate: 1.5, guitar: 3.5, paint: 3.6, cook: 2.4, magic: 2.3, science: 1.8, gaming: 3.0, coding: 3.2 });
+const TYPE_SET = {
+  comedy: { actions: ['slip', 'sneeze', 'poof', 'grow', 'wobble', 'spin', 'fly', 'dance', 'jump', 'sleep'], bgs: ['park', 'kitchen', 'city', 'beach', 'snow', 'space'] },
+  skills: { actions: ['soccer', 'basketball', 'skate', 'karate', 'jump', 'run'], bgs: ['field', 'court', 'skatepark', 'park'] },
+  gaming: { actions: ['gaming', 'coding', 'dance'], bgs: ['gameroom', 'castle', 'space'] },
+  howto: { actions: ['cook', 'paint', 'magic', 'science', 'coding'], bgs: ['kitchen', 'school', 'lab', 'stage'] },
+  music: { actions: ['guitar', 'sing', 'dance'], bgs: ['stage', 'disco', 'beach'] },
+  art: { actions: ['paint', 'magic'], bgs: ['school', 'park', 'beach'] },
+  science: { actions: ['science', 'coding', 'fly'], bgs: ['lab', 'space', 'school'] },
+  vlog: { actions: ['run', 'jump', 'dance', 'sing', 'sleep', 'cook'], bgs: ['park', 'city', 'beach', 'kitchen', 'snow'] },
+};
+Object.assign(ACT_VERB, { soccer: 'doing soccer tricks', basketball: 'dunking', skate: 'kickflipping', karate: 'doing karate', guitar: 'shredding guitar', paint: 'painting', cook: 'flipping pancakes', magic: 'doing magic', science: 'doing science', gaming: 'gaming', coding: 'coding' });
+
+const _drawBg = drawBg;
+drawBg = function (bg, t) {
+  switch (bg) {
+    case 'field':
+      bgGrad(0, 330, '#5fc8ff', '#c6f0ff');
+      rr(-100, 230, 560, 110, 0, '#5a5a6e', 0); for (let r = 0; r < 4; r++) for (let i = 0; i < 26; i++) circ(-10 + i * 16 + (r % 2) * 8, 250 + r * 22 + Math.sin(t * 6 + i + r) * (r === 1 ? 2 : 0), 6, ['#ff5f7e', '#ffd23f', '#4aa3ff', '#3ccf8e', '#fff'][(i + r * 3) % 5], 0);
+      floorAt(340, '#4cbf4c'); for (let i = 0; i < 6; i++) { c.fillStyle = i % 2 ? '#45b045' : '#52c852'; c.fillRect(-100, 340 + i * 50, 560, 50); } line(-100, 470, 460, 470, '#fff', 4); break;
+    case 'court':
+      bgFill('#3d6fd9'); rr(120, 70, 120, 50, 6, '#1d1a2b'); txt('HOME 99', 180, 95, 16, '#ff3d3d', { lw: 2 });
+      floorAt(400, '#e0a060'); for (let i = 0; i < 8; i++) line(-60 + i * 60, 400, -100 + i * 70, 700, 'rgba(0,0,0,.1)', 3); c.beginPath(); c.ellipse(180, 520, 120, 40, 0, 0, TAU); c.strokeStyle = '#fff'; c.lineWidth = 4; c.stroke(); break;
+    case 'skatepark':
+      bgGrad(0, 400, '#8fd8ff', '#e0f6ff');
+      [['#ff5fa2', 40, 300], ['#3dd8ff', 140, 320], ['#ffd23f', 250, 300]].forEach(([col, x, y]) => { rr(x, y, 90, 60, 20, col, 0); });
+      rr(-100, 330, 560, 140, 0, '#bfc4cc', 0);
+      c.beginPath(); c.moveTo(-60, 470); c.quadraticCurveTo(40, 470, 40, 360); c.lineTo(-60, 360); c.closePath(); c.fillStyle = '#9aa0aa'; c.fill(); c.strokeStyle = OUT; c.lineWidth = 4; c.stroke();
+      c.beginPath(); c.moveTo(420, 470); c.quadraticCurveTo(320, 470, 320, 360); c.lineTo(420, 360); c.closePath(); c.fill(); c.stroke();
+      floorAt(470, '#a8adb6'); break;
+    case 'stage':
+      bgGrad(0, 470, '#7a1030', '#3a0818'); for (let i = -3; i < 10; i++) { c.fillStyle = i % 2 ? 'rgba(0,0,0,.15)' : 'rgba(255,255,255,.05)'; c.fillRect(i * 40, -100, 40, 600); }
+      c.save(); c.globalAlpha = .28; poly([150, -50, 210, -50, 330, 480, 30, 480], '#fff7c0', 0); c.restore();
+      floorAt(470, '#8a5a32'); for (let i = 0; i < 8; i++) line(-60 + i * 60, 470, -60 + i * 60, 700, 'rgba(0,0,0,.15)', 3); break;
+    case 'lab':
+      bgFill('#e6f4ff'); for (let s = 0; s < 2; s++) { rr(20, 110 + s * 90, 320, 10, 3, '#8a9ab0', 3); for (let i = 0; i < 6; i++) { const x = 40 + i * 52; rr(x, 70 + s * 90, 20, 40, 6, ['#ff5f7e', '#3dff9b', '#ffd23f', '#9b6bff', '#3dd8ff', '#ff9f1c'][(i + s * 2) % 6], 3); } }
+      floorAt(470, '#cfd8e4'); for (let i = 0; i < 9; i++) line(-60 + i * 50, 470, -60 + i * 50, 700, 'rgba(0,0,0,.08)', 3); break;
+    case 'gameroom':
+      bgGrad(0, 470, '#1a1030', '#2a1550'); const hue = (t * 60) % 360; c.fillStyle = `hsl(${hue},90%,60%)`; c.fillRect(-100, 60, 560, 6); c.fillStyle = `hsl(${(hue + 120) % 360},90%,60%)`; c.fillRect(-100, 466, 560, 6);
+      rr(30, 120, 70, 90, 4, '#3dd8ff', 3); rr(270, 130, 60, 80, 4, '#ff5fa2', 3); px(48, 150, 30, 30, '#1d1a2b'); px(284, 150, 30, 30, '#1d1a2b');
+      floorAt(472, '#2a2340'); break;
+    default: _drawBg(bg, t);
+  }
+};
+
+const _actionState = actionState;
+actionState = function (a, t) {
+  const S = { x: 0, y: 0, rot: 0, sx: 1, sy: 1, mood: 'happy', hide: false, shear: 0, run: false, dance: false, fly: false, center: false, skill: true };
+  const bob = () => { S.y = -Math.abs(Math.sin(t * 4)) * 5; };
+  switch (a) {
+    case 'soccer': S.x = -70; if (t < 3) { S.y = -Math.abs(Math.sin(t * Math.PI * 2)) * 8; S.mood = 'happy'; } else if (t < 3.6) { S.rot = .15; S.mood = 'squint'; } else { const k = (t - 3.6) % .8 / .8; S.y = hop(k, 70); S.mood = 'shock'; S.dance = true; } return S;
+    case 'basketball': if (t < 2) { S.x = -80; S.run = true; S.y = -Math.abs(Math.sin(t * 8)) * 4; } else if (t < 2.7) { const k = seg(t, 2, 2.7); S.x = lerp(-80, 70, k); S.y = hop(k, 150); S.mood = 'shock'; S.fly = true; } else { S.x = 70; S.mood = 'happy'; const k = seg(t, 2.7, 3.0); S.sy = 1 - .15 * Math.sin(k * Math.PI); S.sx = 2 - S.sy; } return S;
+    case 'skate': S.x = lerp(-220, 220, t / 5); S.y = -14; if (t > 2 && t < 2.8) { S.y = -14 + hop(seg(t, 2, 2.8), 110); S.mood = 'shock'; } else S.mood = 'happy'; return S;
+    case 'karate': S.x = -60; if (t < 1.4) { S.mood = 'squint'; S.sy = 1 - seg(t, .6, 1.4) * .08; S.sx = 2 - S.sy; } else if (t < 1.7) { S.center = true; S.rot = seg(t, 1.4, 1.55) * .35; S.mood = 'choo'; } else { S.mood = 'happy'; S.rot = .35 * (1 - seg(t, 1.7, 2.1)); S.center = true; } return S;
+    case 'guitar': S.x = -10; S.rot = Math.sin(t * Math.PI * 2) * .08; S.y = -Math.abs(Math.sin(t * Math.PI * 2)) * 10; S.mood = t > 3.5 ? 'shock' : 'sing'; return S;
+    case 'paint': S.x = -80; bob(); S.mood = t > 3.6 ? 'shock' : 'happy'; return S;
+    case 'cook': S.x = -40; bob(); S.mood = t > 1 && t < 2.4 ? 'shock' : 'happy'; return S;
+    case 'magic': S.x = -80; bob(); S.mood = t > 2.3 ? 'shock' : 'squint'; return S;
+    case 'science': S.x = -80; bob(); S.mood = t > 1.8 ? 'shock' : 'happy'; return S;
+    case 'gaming': S.x = -90; S.y = -Math.abs(Math.sin(t * 12)) * 3; S.mood = t > 3 ? 'shock' : 'squint'; return S;
+    case 'coding': S.x = -80; bob(); S.mood = t > 3.2 ? 'shock' : 'happy'; return S;
+  }
+  return _actionState(a, t);
+};
+
+function actionBack(a, t, S, h) {
+  const X = 180 + S.x;
+  switch (a) {
+    case 'soccer': { // goal on the right
+      rr(280, 370, 4, 100, 0, '#fff', 3); line(280, 370, 380, 370, '#fff', 6); for (let i = 0; i < 6; i++) line(284 + i * 16, 372, 284 + i * 16, 470, 'rgba(255,255,255,.6)', 2); for (let j = 0; j < 5; j++) line(284, 380 + j * 20, 380, 380 + j * 20, 'rgba(255,255,255,.6)', 2);
+      break;
+    }
+    case 'basketball': { const wig = t > 2.9 && t < 3.4 ? Math.sin(t * 40) * 4 : 0; rr(300, 190, 60, 80, 4, '#fff', 4); rr(318, 220, 26, 24, 2, null, 3); line(330, 270, 330, 480, '#666', 8); ell(290, 282, 34, 8, null, 0); c.beginPath(); c.ellipse(290, 282, 34, 8, 0, 0, TAU); c.strokeStyle = '#ff5a1c'; c.lineWidth = 5; c.stroke(); for (let i = 0; i < 5; i++) line(260 + i * 15, 284, 266 + i * 12 + wig, 320, 'rgba(255,255,255,.9)', 2); break; }
+    case 'karate': { rr(230, 440, 30, 30, 4, '#b5652a'); rr(310, 440, 30, 30, 4, '#b5652a'); break; }
+    case 'paint': { line(240, 470, 260, 300, '#7a4a2a', 6); line(340, 470, 320, 300, '#7a4a2a', 6); rr(230, 300, 120, 120, 4, '#fff', 4); break; }
+    case 'magic': { rr(230, 430, 110, 12, 4, '#7a4a2a', 3); line(250, 442, 250, 470, OUT, 5); line(320, 442, 320, 470, OUT, 5); break; }
+    case 'science': case 'coding': { rr(220, 410, 140, 14, 4, '#9aa3b5', 3); line(236, 424, 236, 470, OUT, 5); line(344, 424, 344, 470, OUT, 5); break; }
+    case 'gaming': { rr(200, 200, 150, 100, 10, '#222'); rr(268, 300, 14, 30, 2, '#333', 3); break; }
+  }
+}
+function ball(x, y, r, col, rot = 0, kind = 'soccer') {
+  c.save(); c.translate(x, y); c.rotate(rot); circ(0, 0, r, col);
+  if (kind === 'soccer') { poly([0, -r * .45, r * .43, -r * .14, r * .27, r * .36, -r * .27, r * .36, -r * .43, -r * .14], OUT, 0); }
+  else { line(-r, 0, r, 0, OUT, 2.5); line(0, -r, 0, r, OUT, 2.5); c.beginPath(); c.arc(-r * 1.2, 0, r * .9, -.8, .8); c.stroke(); c.beginPath(); c.arc(r * 1.2, 0, r * .9, Math.PI - .8, Math.PI + .8); c.stroke(); }
+  c.restore();
+}
+function sparkleBurst(x, y, t, t0, n = 8) { const k = seg(t, t0, t0 + .8); if (k <= 0 || k >= 1) return; for (let i = 0; i < n; i++) { const a = i / n * TAU; star(x + Math.cos(a) * 70 * k, y + Math.sin(a) * 70 * k, 10 * (1 - k), '#ffd23f', t * 4, 2); } }
+function skillFront(a, t, S, h) {
+  const X = 180 + S.x, top = 470 + S.y - h * S.sy, hand = [X + 40, 470 + S.y - h * .45];
+  switch (a) {
+    case 'soccer': {
+      let bx, by;
+      if (t < 3) { const k = (t % .5) / .5; bx = X + 34; by = 455 + hop(k, 90); }
+      else if (t < 3.6) { const k = seg(t, 3, 3.6); bx = lerp(X + 40, 335, k); by = 450 + hop(k, 60) - k * 20; }
+      else { bx = 335 + Math.sin(t * 30) * 2 * (1 - seg(t, 3.6, 4)); by = 440; }
+      ball(bx, by, 16, '#fff', t * 8);
+      if (t > 3.6) { txt('GOAL!', 180, 200, 70, '#ffd23f', { sc: popIn(t, 3.6) }); sparkleBurst(335, 420, t, 3.6, 10); }
+      else if (t > .5) txt('x' + Math.min(6, Math.floor(t / .5)), X, top - 40, 32, '#fff', { sc: popIn(t, Math.floor(t / .5) * .5, .15) });
+      break;
+    }
+    case 'basketball': {
+      let bx, by;
+      if (t < 2) { bx = X + 40; by = 470 - 14 - Math.abs(Math.sin(t * 6)) * 70; }
+      else if (t < 2.6) { bx = X + 20; by = top - 10; }
+      else if (t < 3.0) { const k = seg(t, 2.6, 3.0); bx = lerp(X + 20, 290, k); by = lerp(top - 10, 300, k) + hop(k, 30); }
+      else { const k = seg(t, 3.0, 3.6); bx = 290; by = lerp(300, 456, bounce(k)); }
+      ball(bx, by, 15, '#ff8a1c', t * 6, 'b');
+      if (t > 2.9) { txt('SWISH!', 180, 170, 62, '#ff8a1c', { sc: popIn(t, 2.9) }); sparkleBurst(290, 282, t, 2.9); }
+      break;
+    }
+    case 'skate': {
+      const k = t > 2 && t < 2.8 ? seg(t, 2, 2.8) : 0; const flip = Math.cos(k * TAU);
+      c.save(); c.translate(X, 470 + S.y + 14 + (k ? -8 : 0)); c.scale(1, flip); rr(-46, -6, 92, 10, 5, '#ff5fa2', 3); c.restore();
+      if (Math.abs(flip) > .3) { circ(X - 30, 470 + S.y + 22, 6, '#ffd23f', 2.5); circ(X + 30, 470 + S.y + 22, 6, '#ffd23f', 2.5); }
+      motion(X - 110, 450 + S.y, 50, 2, 18);
+      if (t > 2.8) txt('KICKFLIP!', 180, 190, 56, '#3dd8ff', { sc: popIn(t, 2.8), rot: -.06 });
+      break;
+    }
+    case 'karate': {
+      const broke = t > 1.5, k = seg(t, 1.5, 2.2);
+      for (let i = 0; i < 3; i++) { const y = 432 - i * 14; if (!broke) rr(226, y, 118, 12, 2, '#e8c08a', 3); else { c.save(); c.translate(256 - k * 40, y + k * 30); c.rotate(-k * .8); rr(-30, -6, 60, 12, 2, '#e8c08a', 3); c.restore(); c.save(); c.translate(314 + k * 40, y + k * 30); c.rotate(k * .8); rr(-30, -6, 60, 12, 2, '#e8c08a', 3); c.restore(); } }
+      rr(X - h * .3, top + h * .35, h * .6, 8, 3, '#1d1a2b', 0);
+      if (t < 1.4 && t > .3) txt('focus...', 180, 220, 28, '#fff', { a: seg(t, .3, .5) });
+      if (broke && t < 3.2) { txt('HI-YA!', 180, 200, 66, '#ff5f5f', { sc: popIn(t, 1.5), rot: .06 }); sparkleBurst(285, 420, t, 1.5); }
+      if (t > 3.2) txt('BLACK BELT!', 180, 200, 44, '#ffd23f', { sc: popIn(t, 3.2) });
+      break;
+    }
+    case 'guitar': {
+      c.save(); c.translate(X + 6, 470 + S.y - h * .38); c.rotate(-.5 + Math.sin(t * Math.PI * 2) * .05);
+      rr(0, -6, 90, 12, 3, '#7a4a2a', 3); rr(86, -10, 18, 20, 4, '#3a2a20', 3); ell(-10, 0, 30, 26, '#ff3d3d'); ell(-30, 0, 22, 22, '#ff3d3d', 0); circ(-12, 0, 8, OUT, 0);
+      c.restore();
+      for (let i = 0; i < 3; i++) { const k = (t * 1.2 + i / 3) % 1; txt('♪', X + 70 + i * 30, top - k * 120, 34, '#ffd23f', { a: 1 - k, lw: 4 }); }
+      if (t > 3.5) { txt('ROCK ON!', 180, 180, 60, '#ff5fa2', { sc: popIn(t, 3.5) }); for (let i = 0; i < 4; i++) { const k = seg(t, 3.5, 4.5); line(X, top, X + Math.cos(i * 1.6) * 200 * k, top + Math.sin(i * 1.6) * 200 * k, 'rgba(255,240,120,.8)', 5); } }
+      break;
+    }
+    case 'paint': {
+      const p = seg(t, .5, 3.5);
+      c.save(); c.beginPath(); c.rect(236, 306, 108 * p, 108); c.clip();
+      c.fillStyle = '#bfe9ff'; c.fillRect(236, 306, 108, 108); circ(320, 330, 14, '#ffd23f', 2); ['#ff3d3d', '#ffd23f', '#3ccf8e', '#3d8bff'].forEach((col, i) => { c.beginPath(); c.arc(290, 410, 60 - i * 9, Math.PI, 0); c.strokeStyle = col; c.lineWidth = 8; c.stroke(); });
+      c.fillStyle = '#3ccf8e'; c.fillRect(236, 396, 108, 18); rr(250, 368, 30, 28, 2, '#ff9f5a', 2); poly([246, 370, 265, 350, 284, 370], '#d9402a', 2);
+      c.restore();
+      const bx = 236 + 108 * p, by = 330 + Math.sin(t * 9) * 40;
+      if (t < 3.5) { line(hand[0], hand[1], bx, by, '#7a4a2a', 5); circ(bx, by, 6, ['#ff3d3d', '#3d8bff', '#ffd23f'][Math.floor(t * 2) % 3], 2); }
+      if (t > 3.6) { txt('MASTERPIECE!', 180, 200, 44, '#ffd23f', { sc: popIn(t, 3.6) }); sparkleBurst(290, 360, t, 3.6, 10); }
+      break;
+    }
+    case 'cook': {
+      const px2 = X + 70, py2 = 470 + S.y - h * .45;
+      line(px2 - 20, py2, px2 - 60, py2 + 10, '#333', 6); ell(px2 + 10, py2, 40, 9, '#3a3a48');
+      let cy = py2 - 8, rot = 0;
+      const flip = (a, b, H) => { if (t > a && t < b) { const k = seg(t, a, b); cy = py2 - 8 + hop(k, H); rot = k * TAU; } };
+      flip(1.0, 2.4, 220); flip(3.0, 3.9, 120);
+      c.save(); c.translate(px2 + 10, cy); c.scale(1, Math.cos(rot) * .9 + .1 * Math.sign(Math.cos(rot) || 1)); ell(0, 0, 30, 8, '#f2c46a', 3); ell(0, -2, 18, 4, '#e0a040', 0); c.restore();
+      if (t < 1) for (let i = 0; i < 3; i++) { const k = (t * 2 + i / 3) % 1; circ(px2 - 10 + i * 14, py2 - 20 - k * 40, 6 * (1 - k), 'rgba(255,255,255,.7)', 0); }
+      if (t > 2.4 && t < 3) txt('PERFECT FLIP!', 180, 200, 44, '#ffd23f', { sc: popIn(t, 2.4) });
+      if (t > 3.9) txt('STEP 2: EAT IT', 180, 200, 40, '#fff', { sc: popIn(t, 3.9) });
+      break;
+    }
+    case 'magic': {
+      // hat on table
+      const hx = 285, hy = 430;
+      rr(hx - 28, hy - 50, 56, 50, 4, '#1d1a2b'); ell(hx, hy, 40, 8, '#1d1a2b'); rr(hx - 28, hy - 18, 56, 8, 0, '#ff3d3d', 0);
+      const wv = t < 2 ? Math.sin(t * 10) * .5 : 0;
+      const wx = hand[0] + Math.cos(-.6 + wv) * 50, wy = hand[1] + Math.sin(-.6 + wv) * 50;
+      line(hand[0], hand[1], wx, wy, OUT, 6); star(wx, wy, 9, '#ffd23f', t * 3, 2);
+      if (t < 2.2) for (let i = 0; i < 4; i++) { const k = (t * 2 + i / 4) % 1; star(lerp(wx, hx, k), lerp(wy, hy - 50, k), 6, '#fff', 0, 0); }
+      if (t > 2 && t < 2.6) { const k = seg(t, 2, 2.6); for (let i = 0; i < 6; i++) circ(hx + Math.cos(i) * 30 * k, hy - 60 - k * 30 + Math.sin(i * 2) * 14, 20 * (1 - k * .5), 'rgba(240,240,255,.85)', 0); }
+      if (t > 2.3) { const k = back(seg(t, 2.3, 2.7)); c.save(); c.translate(hx, hy - 50 - 40 * k); ell(-10, -40, 8, 22, '#fff', 3, -.2); ell(10, -40, 8, 22, '#fff', 3, .2); circ(0, -6, 24, '#fff'); eye(-8, -10, 5, 0, 0, blinkAt(t)); eye(8, -10, 5, 0, 0, blinkAt(t)); circ(0, 0, 3, '#ff7a9a', 0); c.restore(); txt('TA-DA!', 180, 190, 64, '#ffd23f', { sc: popIn(t, 2.4) }); }
+      break;
+    }
+    case 'science': {
+      const fx = 290, fy = 410; const col = mix('#3dd8ff', '#3dff9b', seg(t, .8, 1.6));
+      poly([fx - 10, fy - 70, fx + 10, fy - 70, fx + 10, fy - 50, fx + 34, fy, fx - 34, fy, fx - 10, fy - 50], 'rgba(220,240,255,.7)', 3);
+      poly([fx - 22, fy - 24, fx + 22, fy - 24, fx + 34, fy - 2, fx - 34, fy - 2], col, 0);
+      if (t > .3 && t < 1.6) { const k = (t * 3) % 1; circ(fx, fy - 140 + k * 100, 5, '#ff5fa2', 2); rr(hand[0], hand[1] - 30, 16, 30, 4, '#ff5fa2', 3); }
+      if (t > 1.8) { const k = eo(seg(t, 1.8, 2.6)); for (let i = 0; i < 7; i++) circ(fx + Math.sin(i * 1.7 + t * 3) * 26 * k, fy - 70 - i * 26 * k, 24 - i * 1.5, '#3dff9b', 3); txt('SCIENCE!', 180, 160, 58, '#3dff9b', { sc: popIn(t, 1.9) }); }
+      break;
+    }
+    case 'gaming': {
+      const sx = 208, sy = 208; c.save(); c.beginPath(); c.rect(sx, sy, 134, 84); c.clip(); c.fillStyle = '#5cc6ff'; c.fillRect(sx, sy, 134, 84); px(sx, sy + 66, 134, 18, '#4fb848');
+      const won = t > 3;
+      const hx = sx + 10 + ((t * 40) % 100), hj = Math.abs(Math.sin(t * 5)) * 22; px(hx, sy + 48 - hj, 12, 18, '#ff5f5f');
+      if (!won) px(sx + 100 - ((t * 25) % 60), sy + 54, 14, 12, '#9b2fd9');
+      if (won) { c.fillStyle = 'rgba(0,0,0,.5)'; c.fillRect(sx, sy, 134, 84); txt('WINNER!', sx + 67, sy + 42, 22, '#ffd23f', { lw: 3 }); }
+      c.restore();
+      rr(hand[0] - 26, hand[1] - 10, 52, 20, 10, '#333'); circ(hand[0] - 12, hand[1], 3, '#3dd8ff', 0); circ(hand[0] + 12, hand[1], 3, '#ff3d7f', 0);
+      if (won) { txt('GG!', 180, 160, 70, '#3dff9b', { sc: popIn(t, 3) }); for (let i = 0; i < 16; i++) px(R40[i] * 360, ((t - 3) * 200 * (.5 + R40[i + 16]) + R40[i + 8] * 100) % 470, 6, 6, ['#ff3dff', '#3dffd8', '#ffff3d'][i % 3]); }
+      break;
+    }
+    case 'coding': {
+      const lx = 290, ly = 410; rr(lx - 54, ly - 70, 108, 66, 6, '#2b2b3a'); rr(lx - 64, ly - 6, 128, 8, 3, '#9aa3b5', 3);
+      const n = Math.min(7, Math.floor(t * 2.2));
+      for (let i = 0; i < n; i++) { c.fillStyle = ['#3dd8ff', '#ff5fa2', '#3dff9b', '#ffd23f'][i % 4]; c.fillRect(lx - 46 + (i % 3) * 6, ly - 62 + i * 8, 24 + R40[i] * 50, 4); }
+      if (t > 3.2) { c.fillStyle = 'rgba(61,255,155,.35)'; c.fillRect(lx - 54, ly - 70, 108, 66); txt('IT WORKS!', 180, 180, 54, '#3dff9b', { sc: popIn(t, 3.2) }); sparkleBurst(lx, ly - 40, t, 3.2); }
+      else txt('typing...', lx, ly - 90, 18, '#fff', {});
+      break;
+    }
+  }
+}
+const _actionExtras = actionExtras;
+actionExtras = function (a, t, S, h, sc) { if (S.skill) skillFront(a, t, S, h); else _actionExtras(a, t, S, h, sc); };
+
+const _sceneEvents = sceneEvents;
+sceneEvents = function (sc, off) {
+  const ev = _sceneEvents(sc, off);
+  const add = { soccer: [[0, 'kick'], [.5, 'kick'], [1, 'kick'], [1.5, 'kick'], [2, 'kick'], [2.5, 'kick'], [3, 'boing', 1.5], [3.6, 'cheer'], [3.6, 'win']], basketball: [[0, 'bonk'], [.5, 'bonk'], [1, 'bonk'], [1.5, 'bonk'], [2, 'whoosh'], [2.9, 'swish'], [3.0, 'cheer']], skate: [[0, 'roll'], [2, 'slip8'], [2.8, 'thud'], [2.8, 'cheer']], karate: [[1.5, 'bonk'], [1.52, 'crack'], [3.2, 'win']], guitar: [[0, 'guitar', 82], [.5, 'guitar', 82], [1, 'guitar', 110], [1.5, 'guitar', 98], [2, 'guitar', 82], [2.5, 'guitar', 82], [3, 'guitar', 123], [3.5, 'guitar', 165], [3.5, 'cheer']], paint: [[.5, 'whoosh'], [3.6, 'sparkle']], cook: [[0, 'sizzle'], [1.0, 'whoosh'], [2.4, 'thud'], [2.4, 'ding'], [3.0, 'whoosh'], [3.9, 'nom']], magic: [[.5, 'sparkle'], [2, 'pop'], [2.4, 'win']], science: [[.4, 'blorp'], [1.8, 'fire'], [1.9, 'blorp']], gaming: [[.2, 'click'], [.6, 'click'], [1, 'click'], [1.4, 'click'], [1.8, 'click'], [2.2, 'click'], [3, 'win8']], coding: [[0, 'typing'], [1.4, 'typing'], [3.2, 'ding']] }[sc.action] || [];
+  add.forEach(e => ev.push([off + e[0], e[1], e[2]]));
+  return ev;
+};
+Object.assign(SFX, {
+  swish() { nz(.3, .4, 'highpass', 3000, 6000, { q: .8 }); },
+  roll() { nz(4.5, .12, 'lowpass', 300, 200, { a: .2 }); },
+  crack() { nz(.2, .8, 'bandpass', 1800, 600, { q: 1 }); osc('square', 200, 60, .15, .2); },
+  guitar(f = 82) { [1, 1.5, 2].forEach(m => osc('sawtooth', f * m, 0, .45, .09, { f: 1800, a: .005 })); nz(.05, .1, 'highpass', 3000, 0); },
+  sizzle() { nz(1.2, .18, 'highpass', 4000, 6000, { a: .05 }); },
+  typing() { for (let i = 0; i < 10; i++) osc('square', 1500 + Math.random() * 800, 0, .02, .05, { delay: i * .11, f: 5000 }); },
+});
+
+// type-aware random scenes
+const _randomScene = randomScene;
+randomScene = function (like, type) {
+  type = type || (ED.v && ED.v.vtype) || 'comedy';
+  const s = _randomScene(like);
+  const set = TYPE_SET[type] || TYPE_SET.comedy;
+  const acts = set.actions.filter(a => !like || a !== like.action);
+  s.action = acts[Math.floor(Math.random() * acts.length)] || s.action;
+  if (!like) s.bg = set.bgs[Math.floor(Math.random() * set.bgs.length)];
+  if (type !== 'comedy' && Math.random() < .5) s.fx = 'none';
+  if (type !== 'comedy' && !like && Math.random() < .5) s.actor = 'kid';
+  return s;
+};
+
+// ---------- other creators' videos in the feed (all kinds, not only comedy) ----------
+const TYPE_TITLES = {
+  skills: [['insane {a} trick shot 😱', '#skills #trickshot'], ['{a} has SKILLS', '#talent #wow'], ['can you do this? 🔥', '#challenge'], ['practice makes perfect', '#training']],
+  gaming: [['{a} wins again 🎮', '#gaming #gg'], ['pro gamer moves', '#gamer'], ['first try!!', '#gaming #win']],
+  howto: [['how to be a chef in 5 seconds', '#howto #cooking'], ['easy tutorial for beginners', '#tutorial'], ['life hack you NEED', '#lifehack'], ['learn this trick!', '#howto']],
+  music: [['{a} rocks out 🎸', '#music #rock'], ['new song coming soon 🎵', '#music'], ['band practice', '#guitar']],
+  art: [['painting with {a} 🎨', '#art #painting'], ['rate my art 1-10', '#art'], ['art challenge accepted', '#drawing']],
+  science: [['science experiment 🧪', '#science #stem'], ['{a} the scientist', '#science'], ['how volcanoes work (kind of)', '#experiment']],
+  vlog: [['a day in my life', '#vlog #dayinmylife'], ['morning routine 😴', '#vlog'], ['come with me!', '#vlog #fun']],
+};
+const TYPE_COMS = {
+  skills: ['how is this so clean 😱', 'teach me!!', 'GOAT 🐐', 'I tried and fell 😂', 'skills 100'], gaming: ['GG 🎮', 'what game is this', 'pro player', 'my controller could never'],
+  howto: ['this actually helped', 'trying this tomorrow', 'step 2 is my favorite 😂', 'so easy!'], music: ['this song is stuck in my head 🎵', 'ROCK ON 🤘', 'drop the full song!!'],
+  art: ['10/10 art', 'so pretty 🎨', 'teach me to paint', 'masterpiece fr'], science: ['SCIENCE 🧪', 'I want to do this experiment', 'my teacher needs to see this'],
+  vlog: ['love your vlogs', 'do a part 2!!', 'your life looks fun'],
+};
+const STUDIO_CREATORS = [['trickshot_tim', '⚽'], ['art_by_amira', '🎨'], ['chef_kiddo', '🥞'], ['rock_raccoon', '🎸'], ['lab_rat_leo', '🧪'], ['gg_gecko', '🎮'], ['skate_sam', '🛹'], ['magic_maya', '🎩'], ['code_cat', '💻'], ['vlog_with_vic', '📹'], ['karate_kai', '🥋'], ['hoops_hana', '🏀']];
+var STUDIO_READY;
+function studioFeedPick(n) {
+  if (!STUDIO_READY || n < 1 || n % 3 !== 1) return null;
+  const R = mulberry(seedBase + n * 131);
+  const types = Object.keys(TYPE_TITLES); const type = types[Math.floor(R() * types.length)];
+  const set = TYPE_SET[type];
+  const sc = newScene(); sc.bg = set.bgs[Math.floor(R() * set.bgs.length)]; sc.action = set.actions[Math.floor(R() * set.actions.length)];
+  sc.actor = ST.actors[Math.floor(R() * ST.actors.length)][0]; sc.col = ST.colors[Math.floor(R() * ST.colors.length)]; sc.skin = SKINS[Math.floor(R() * SKINS.length)];
+  sc.music = ['beat', 'chill', 'disco', 'bit'][Math.floor(R() * 4)]; sc.sfx = 'none'; sc.fx = R() < .4 ? ['stars', 'confetti', 'hearts'][Math.floor(R() * 3)] : 'none';
+  let match = STUDIO_CREATORS.filter(x => (x[1] === (ST.actions.find(a => a[0] === sc.action) || [])[1]));
+  const [cr, emo] = match.length ? match[0] : STUDIO_CREATORS[Math.floor(R() * STUDIO_CREATORS.length)];
+  const [title, tags] = TYPE_TITLES[type][Math.floor(R() * TYPE_TITLES[type].length)];
+  const v = { id: 'sf' + n + '_' + seedBase, kind: 'short', vtype: type, title: title.replace('{a}', lbl('actors', sc.actor)), caption: tags, scenes: [sc], rev: 0 };
+  const likes = Math.floor(Math.pow(10, 3 + R() * 3));
+  const coms = [];
+  const texts = TYPE_COMS[type].concat(GENERIC.slice(0, 6)).sort(() => R() - .5).slice(0, 7);
+  texts.forEach(tx => { const nm = PEOPLE[Math.floor(R() * PEOPLE.length)]; coms.push({ who: nm, face: FACES[PEOPLE.indexOf(nm)], col: pick(BGCOL, R()), text: tx, likes: Math.floor(Math.pow(10, 1 + R() * 3)), liked: false }); });
+  coms.sort((a, b) => b.likes - a.likes);
+  const tpl = userTpl(v, false); tpl.id = 'studio_' + sc.action;
+  return { tpl, v: {}, creator: cr, emo, avCol: pick(BGCOL, R()), cap: esc(v.title) + ' <em>' + esc(tags) + '</em>', likes, liked: false, comN: Math.floor(likes * .02), shares: Math.floor(likes * .01), coms };
+}
+
+STUDIO_READY = true;
 </script>
 </body>
 </html>
